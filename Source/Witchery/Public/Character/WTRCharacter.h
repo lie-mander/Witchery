@@ -13,6 +13,7 @@ class WITCHERY_API AWTRCharacter : public ACharacter
 
 public:
     AWTRCharacter();
+    void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -33,4 +34,13 @@ private:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     class UWidgetComponent* OverheadWidget;
+
+    UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
+    class AWTRWeapon* OverlappingWeapon;
+
+    UFUNCTION()
+    void OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon);
+
+public:
+    void SetOverlappingWeapon(AWTRWeapon* Weapon);
 };

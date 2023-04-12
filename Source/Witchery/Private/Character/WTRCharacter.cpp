@@ -1,6 +1,8 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "Character/WTRCharacter.h"
+#include "Net/UnrealNetwork.h"
+#include "Weapons/WTRWeapon.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
@@ -26,6 +28,13 @@ AWTRCharacter::AWTRCharacter()
     OverheadWidget->SetupAttachment(RootComponent);
 }
 
+void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME_CONDITION(AWTRCharacter, OverlappingWeapon, COND_OwnerOnly);
+}
+
 void AWTRCharacter::BeginPlay()
 {
     Super::BeginPlay();
@@ -48,7 +57,7 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAxis(FName("LookUp"), this, &ThisClass::LookUp);
 }
 
-void AWTRCharacter::MoveForward(float Amount) 
+void AWTRCharacter::MoveForward(float Amount)
 {
     if (Controller && Amount != 0.f)
     {
@@ -58,7 +67,7 @@ void AWTRCharacter::MoveForward(float Amount)
     }
 }
 
-void AWTRCharacter::MoveRight(float Amount) 
+void AWTRCharacter::MoveRight(float Amount)
 {
     if (Controller && Amount != 0.f)
     {
@@ -68,12 +77,40 @@ void AWTRCharacter::MoveRight(float Amount)
     }
 }
 
-void AWTRCharacter::Turn(float Amount) 
+void AWTRCharacter::Turn(float Amount)
 {
     AddControllerYawInput(Amount);
 }
 
-void AWTRCharacter::LookUp(float Amount) 
+void AWTRCharacter::LookUp(float Amount)
 {
     AddControllerPitchInput(Amount);
+}
+
+void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
+{
+    if (OverlappingWeapon)
+    {
+        OverlappingWeapon->SetShowWidget(false);
+    }
+    OverlappingWeapon = Weapon;
+    if (IsLocallyControlled())
+    {
+        if (OverlappingWeapon)
+        {
+            OverlappingWeapon->SetShowWidget(true);
+        }
+    }
+}
+
+void AWTRCharacter::OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon)
+{
+    if (OverlappingWeapon)
+    {
+        OverlappingWeapon->SetShowWidget(true);
+    }
+    if (LastWeapon)
+    {
+        LastWeapon->SetShowWidget(false);
+    }
 }

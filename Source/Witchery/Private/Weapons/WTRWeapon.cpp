@@ -1,6 +1,7 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "Weapons/WTRWeapon.h"
+#include "Character/WTRCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 
@@ -38,20 +39,40 @@ void AWTRWeapon::BeginPlay()
     {
         AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
         AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-        AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnSphereOverlap);
-    }
-}
-
-void AWTRWeapon::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-    if (PickupWidget)
-    {
-        PickupWidget->SetVisibility(true);
+        AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnSphereBeginOverlap);
+        AreaSphere->OnComponentEndOverlap.AddDynamic(this, &ThisClass::OnSphereEndOverlap);
     }
 }
 
 void AWTRWeapon::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+}
+
+void AWTRWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(OtherActor);
+    if (WTRCharacter)
+    {
+        WTRCharacter->SetOverlappingWeapon(this);
+    }
+}
+
+void AWTRWeapon::OnSphereEndOverlap(
+    UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(OtherActor);
+    if (WTRCharacter)
+    {
+        WTRCharacter->SetOverlappingWeapon(nullptr);
+    }
+}
+
+void AWTRWeapon::SetShowWidget(bool bShowWidget) 
+{
+    if (PickupWidget)
+    {
+        PickupWidget->SetVisibility(bShowWidget);
+    }
 }
