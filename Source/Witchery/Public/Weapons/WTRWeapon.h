@@ -16,6 +16,10 @@ enum class EWeaponState : uint8
     EWS_MAX UMETA(DisplayName = "MAX")
 };
 
+class USphereComponent;
+class USkeletalMeshComponent;
+class UWidgetComponent;
+
 UCLASS()
 class WITCHERY_API AWTRWeapon : public AActor
 {
@@ -23,28 +27,32 @@ class WITCHERY_API AWTRWeapon : public AActor
 
 public:
     AWTRWeapon();
+    void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+    virtual void Tick(float DeltaTime) override;
 
     void SetShowWidget(bool bShowWidget);
+    void SetWeaponState(EWeaponState NewState);
 
-    FORCEINLINE void SetWeaponState(EWeaponState NewState) { WeaponState = NewState; }
-
-    virtual void Tick(float DeltaTime) override;
+    FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
 
 protected:
     virtual void BeginPlay() override;
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Weapon properties")
-    class USkeletalMeshComponent* WeaponMesh;
+    USkeletalMeshComponent* WeaponMesh;
 
     UPROPERTY(VisibleAnywhere, Category = "Weapon properties")
-    class USphereComponent* AreaSphere;
+    USphereComponent* AreaSphere;
 
     UPROPERTY(VisibleAnywhere, Category = "Weapon properties")
-    class UWidgetComponent* PickupWidget;
+    UWidgetComponent* PickupWidget;
 
-    UPROPERTY(VisibleAnywhere, Category = "Weapon properties")
+    UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon properties")
     EWeaponState WeaponState;
+
+    UFUNCTION()
+    void OnRep_WeaponState();
 
     UFUNCTION()
     void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

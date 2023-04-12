@@ -13,4 +13,8 @@ class WITCHERY_API ALobbyGameMode : public AGameMode
 
 public:
     virtual void PostLogin(APlayerController* NewPlayer) override;
+
+protected:
+    UPROPERTY(EditAnywhere, Category = "Lobby Config")
+    int32 PlayersToStart = 3;
 };

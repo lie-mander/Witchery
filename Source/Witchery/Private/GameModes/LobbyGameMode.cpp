@@ -8,7 +8,7 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
     Super::PostLogin(NewPlayer);
 
     int32 NumOfPlayers = GameState.Get()->PlayerArray.Num();
-    if (NumOfPlayers == 3) // TODO break magic int
+    if (NumOfPlayers == PlayersToStart)
     {
         const auto World = GetWorld();
         if (World)

@@ -104,7 +104,22 @@ void AWTRCharacter::LookUp(float Amount)
 
 void AWTRCharacter::OnEquipButtonPressed() 
 {
-    if (CombatComponent && OverlappingWeapon)
+    if (CombatComponent)
+    {
+        if (HasAuthority())
+        {
+            CombatComponent->EquipWeapon(OverlappingWeapon);
+        }
+        else
+        {
+            Server_OnEquippedButtonPressed();
+        }
+    }
+}
+
+void AWTRCharacter::Server_OnEquippedButtonPressed_Implementation() 
+{
+    if (CombatComponent)
     {
         CombatComponent->EquipWeapon(OverlappingWeapon);
     }

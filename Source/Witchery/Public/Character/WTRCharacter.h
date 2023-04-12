@@ -47,6 +47,9 @@ private:
     UFUNCTION()
     void OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon);
 
+    UFUNCTION(Server, Reliable)
+    void Server_OnEquippedButtonPressed();
+
 public:
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
 };

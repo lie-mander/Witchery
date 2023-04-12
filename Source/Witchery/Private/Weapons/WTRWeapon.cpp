@@ -1,6 +1,7 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "Weapons/WTRWeapon.h"
+#include "Net/UnrealNetwork.h"
 #include "Character/WTRCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
@@ -26,6 +27,13 @@ AWTRWeapon::AWTRWeapon()
     PickupWidget->SetupAttachment(RootComponent);
 }
 
+void AWTRWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(AWTRWeapon, WeaponState);
+}
+
 void AWTRWeapon::BeginPlay()
 {
     Super::BeginPlay();
@@ -49,6 +57,35 @@ void AWTRWeapon::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
+void AWTRWeapon::SetWeaponState(EWeaponState NewState)
+{
+    WeaponState = NewState;
+
+    switch (WeaponState)
+    {
+        case EWeaponState::EWS_Initial: break;
+        case EWeaponState::EWS_Equipped:
+            AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            SetShowWidget(false);
+            break;
+        case EWeaponState::EWS_Dropped: break;
+        case EWeaponState::EWS_MAX: break;
+    }
+}
+
+void AWTRWeapon::OnRep_WeaponState()
+{
+    switch (WeaponState)
+    {
+        case EWeaponState::EWS_Initial: break;
+        case EWeaponState::EWS_Equipped:  //
+            SetShowWidget(false);
+            break;
+        case EWeaponState::EWS_Dropped: break;
+        case EWeaponState::EWS_MAX: break;
+    }
+}
+
 void AWTRWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
     int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -69,7 +106,7 @@ void AWTRWeapon::OnSphereEndOverlap(
     }
 }
 
-void AWTRWeapon::SetShowWidget(bool bShowWidget) 
+void AWTRWeapon::SetShowWidget(bool bShowWidget)
 {
     if (PickupWidget)
     {
