@@ -42,4 +42,7 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
     // Set is the character has weapon
     IsEquippedWeapon = Character->IsWeaponEquipped();
+
+    // Set is the character is crouched
+    IsCrouched = Character->bIsCrouched;
 }

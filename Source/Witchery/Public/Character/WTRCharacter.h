@@ -25,6 +25,7 @@ protected:
     void LookUp(float Amount);
 
     void OnEquipButtonPressed();
+    void OnCrouchButtonPressed();
 
     virtual void BeginPlay() override;
 

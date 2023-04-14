@@ -31,5 +31,8 @@ private:
     UPROPERTY(BlueprintReadOnly, Category = "Equip", meta = (AllowPrivateAccess = true))
     bool IsEquippedWeapon = false;
 
+    UPROPERTY(BlueprintReadOnly, Category = "Crouch", meta = (AllowPrivateAccess = true))
+    bool IsCrouched = false;
+
     class UCharacterMovementComponent* Movement = nullptr;
 };

@@ -30,6 +30,8 @@ AWTRCharacter::AWTRCharacter()
 
     CombatComponent = CreateDefaultSubobject<UWTRCombatComponent>("CombatComponent");
     CombatComponent->SetIsReplicated(true);
+
+    GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 }
 
 void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -55,6 +57,7 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
     PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
     PlayerInputComponent->BindAction("Equip", EInputEvent::IE_Pressed, this, &ThisClass::OnEquipButtonPressed);
+    PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &ThisClass::OnCrouchButtonPressed);
 
     PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ThisClass::MoveForward);
     PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ThisClass::MoveRight);
@@ -122,6 +125,18 @@ void AWTRCharacter::Server_OnEquippedButtonPressed_Implementation()
     if (CombatComponent)
     {
         CombatComponent->EquipWeapon(OverlappingWeapon);
+    }
+}
+
+void AWTRCharacter::OnCrouchButtonPressed() 
+{
+    if (bIsCrouched)
+    {
+        UnCrouch();
+    }
+    else
+    {
+        Crouch();
     }
 }
 
