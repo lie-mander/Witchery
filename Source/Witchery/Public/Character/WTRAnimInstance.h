@@ -23,6 +23,12 @@ private:
     float Speed = 0.f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
+    float YawOffset = 0.f;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
+    float Lean = 0.f;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
     bool bIsInAir = false;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
@@ -36,6 +42,10 @@ private:
 
     UPROPERTY(BlueprintReadOnly, Category = "Aiming", meta = (AllowPrivateAccess = true))
     bool bIsAiming = false;
+
+    FRotator CharacterRotationLastFrame;
+    FRotator CharacterRotation;
+    FRotator DeltaRotation;
 
     class UCharacterMovementComponent* Movement = nullptr;
 };

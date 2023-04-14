@@ -28,13 +28,16 @@ protected:
 
     void SetAiming(bool bAiming);
 
+    UFUNCTION()
+    void OnRep_EquippedWeapon();
+
     UFUNCTION(Server, Reliable)
     void ServerSetAiming(bool bAiming);
 
 private:
     AWTRCharacter* Character;
 
-    UPROPERTY(Replicated)
+    UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
     AWTRWeapon* EquippedWeapon;
 
     UPROPERTY(Replicated)

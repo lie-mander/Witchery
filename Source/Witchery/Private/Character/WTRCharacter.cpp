@@ -71,7 +71,7 @@ void AWTRCharacter::PostInitializeComponents()
 {
     Super::PostInitializeComponents();
 
-    if (CombatComponent && HasAuthority())
+    if (CombatComponent)
     {
         CombatComponent->Character = this;
     }
