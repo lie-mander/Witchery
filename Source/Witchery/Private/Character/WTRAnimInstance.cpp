@@ -35,14 +35,17 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     Speed = Velocity.Size();
 
     // Set is the character in the air
-    IsInAir = Movement->IsFalling();
+    bIsInAir = Movement->IsFalling();
 
     // Set does the character accelerate
-    IsAccelerating = Movement->GetCurrentAcceleration().Size() ? true : false;
+    bIsAccelerating = Movement->GetCurrentAcceleration().Size() ? true : false;
 
     // Set is the character has weapon
-    IsEquippedWeapon = Character->IsWeaponEquipped();
+    bIsEquippedWeapon = Character->IsWeaponEquipped();
 
     // Set is the character is crouched
-    IsCrouched = Character->bIsCrouched;
+    bIsCrouched = Character->bIsCrouched;
+
+    // Set is the character is aiming
+    bIsAiming = Character->IsAiming();
 }

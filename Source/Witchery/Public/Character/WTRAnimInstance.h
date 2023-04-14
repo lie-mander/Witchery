@@ -23,16 +23,19 @@ private:
     float Speed = 0.f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
-    bool IsInAir = false;
+    bool bIsInAir = false;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
-    bool IsAccelerating = false;
+    bool bIsAccelerating = false;
 
     UPROPERTY(BlueprintReadOnly, Category = "Equip", meta = (AllowPrivateAccess = true))
-    bool IsEquippedWeapon = false;
+    bool bIsEquippedWeapon = false;
 
     UPROPERTY(BlueprintReadOnly, Category = "Crouch", meta = (AllowPrivateAccess = true))
-    bool IsCrouched = false;
+    bool bIsCrouched = false;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Aiming", meta = (AllowPrivateAccess = true))
+    bool bIsAiming = false;
 
     class UCharacterMovementComponent* Movement = nullptr;
 };

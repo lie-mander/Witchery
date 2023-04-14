@@ -58,6 +58,8 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
     PlayerInputComponent->BindAction("Equip", EInputEvent::IE_Pressed, this, &ThisClass::OnEquipButtonPressed);
     PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &ThisClass::OnCrouchButtonPressed);
+    PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &ThisClass::OnAimButtonPressed);
+    PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &ThisClass::OnAimButtonReleased);
 
     PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ThisClass::MoveForward);
     PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ThisClass::MoveRight);
@@ -140,6 +142,22 @@ void AWTRCharacter::OnCrouchButtonPressed()
     }
 }
 
+void AWTRCharacter::OnAimButtonPressed() 
+{
+    if (CombatComponent)
+    {
+        CombatComponent->SetAiming(true);
+    }
+}
+
+void AWTRCharacter::OnAimButtonReleased() 
+{
+    if (CombatComponent)
+    {
+        CombatComponent->SetAiming(false);
+    }
+}
+
 void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
 {
     if (OverlappingWeapon)
@@ -171,4 +189,9 @@ void AWTRCharacter::OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon)
 bool AWTRCharacter::IsWeaponEquipped() const
 {
     return CombatComponent && CombatComponent->EquippedWeapon;
+}
+
+bool AWTRCharacter::IsAiming() const
+{
+    return CombatComponent && CombatComponent->bIsAiming;
 }

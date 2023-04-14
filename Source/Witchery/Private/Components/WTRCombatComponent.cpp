@@ -15,6 +15,7 @@ UWTRCombatComponent::UWTRCombatComponent()
 void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const 
 {
     DOREPLIFETIME(UWTRCombatComponent, EquippedWeapon);
+    DOREPLIFETIME(UWTRCombatComponent, bIsAiming);
 }
 
 void UWTRCombatComponent::BeginPlay()
@@ -40,4 +41,15 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
     {
         HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
     }
+}
+
+void UWTRCombatComponent::SetAiming(bool bAiming) 
+{
+    bIsAiming = bAiming;
+    ServerSetAiming(bAiming);
+}
+
+void UWTRCombatComponent::ServerSetAiming_Implementation(bool bAiming) 
+{
+    bIsAiming = bAiming;
 }

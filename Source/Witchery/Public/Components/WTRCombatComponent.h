@@ -26,9 +26,17 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    void SetAiming(bool bAiming);
+
+    UFUNCTION(Server, Reliable)
+    void ServerSetAiming(bool bAiming);
+
 private:
     AWTRCharacter* Character;
 
     UPROPERTY(Replicated)
     AWTRWeapon* EquippedWeapon;
+
+    UPROPERTY(Replicated)
+    bool bIsAiming = false;
 };

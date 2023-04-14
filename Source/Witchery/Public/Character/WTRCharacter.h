@@ -26,6 +26,8 @@ protected:
 
     void OnEquipButtonPressed();
     void OnCrouchButtonPressed();
+    void OnAimButtonPressed();
+    void OnAimButtonReleased();
 
     virtual void BeginPlay() override;
 
@@ -54,4 +56,5 @@ private:
 public:
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
     bool IsWeaponEquipped() const;
+    bool IsAiming() const;
 };
