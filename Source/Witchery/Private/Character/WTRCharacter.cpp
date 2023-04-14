@@ -152,3 +152,8 @@ void AWTRCharacter::OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon)
         LastWeapon->SetShowWidget(false);
     }
 }
+
+bool AWTRCharacter::IsWeaponEquipped() const
+{
+    return CombatComponent && CombatComponent->EquippedWeapon;
+}

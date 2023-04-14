@@ -39,4 +39,7 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
     // Set does the character accelerate
     IsAccelerating = Movement->GetCurrentAcceleration().Size() ? true : false;
+
+    // Set is the character has weapon
+    IsEquippedWeapon = Character->IsWeaponEquipped();
 }

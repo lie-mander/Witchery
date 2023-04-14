@@ -28,5 +28,8 @@ private:
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
     bool IsAccelerating = false;
 
+    UPROPERTY(BlueprintReadOnly, Category = "Equip", meta = (AllowPrivateAccess = true))
+    bool IsEquippedWeapon = false;
+
     class UCharacterMovementComponent* Movement = nullptr;
 };

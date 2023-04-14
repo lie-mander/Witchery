@@ -18,6 +18,7 @@ public:
     friend class AWTRCharacter;
 
     UWTRCombatComponent();
+    void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     void EquipWeapon(AWTRWeapon* WeaponToEquip);
@@ -27,5 +28,7 @@ protected:
 
 private:
     AWTRCharacter* Character;
+
+    UPROPERTY(Replicated)
     AWTRWeapon* EquippedWeapon;
 };

@@ -1,6 +1,7 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "Components/WTRCombatComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Components/SphereComponent.h"
 #include "Weapons/WTRWeapon.h"
 #include "Character/WTRCharacter.h"
@@ -9,6 +10,11 @@
 UWTRCombatComponent::UWTRCombatComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
+}
+
+void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const 
+{
+    DOREPLIFETIME(UWTRCombatComponent, EquippedWeapon);
 }
 
 void UWTRCombatComponent::BeginPlay()
