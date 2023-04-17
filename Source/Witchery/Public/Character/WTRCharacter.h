@@ -39,7 +39,7 @@ private:
     class UCameraComponent* CameraComponent;
 
     UPROPERTY(VisibleAnywhere, Category = "Combat")
-    class UWTRCombatComponent* CombatComponent;
+    class UWTRCombatComponent* Combat;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     class UWidgetComponent* OverheadWidget;

@@ -13,7 +13,7 @@ UWTRCombatComponent::UWTRCombatComponent()
     PrimaryComponentTick.bCanEverTick = false;
 }
 
-void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const 
+void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
@@ -49,7 +49,7 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
     }
 }
 
-void UWTRCombatComponent::OnRep_EquippedWeapon() 
+void UWTRCombatComponent::OnRep_EquippedWeapon()
 {
     if (Character && EquippedWeapon)
     {
@@ -58,13 +58,24 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
     }
 }
 
-void UWTRCombatComponent::SetAiming(bool bAiming) 
+void UWTRCombatComponent::SetAiming(bool bAiming)
 {
     bIsAiming = bAiming;
+
+    if (Character)
+    {
+        Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+    }
+
     ServerSetAiming(bAiming);
 }
 
-void UWTRCombatComponent::ServerSetAiming_Implementation(bool bAiming) 
+void UWTRCombatComponent::ServerSetAiming_Implementation(bool bAiming)
 {
     bIsAiming = bAiming;
+
+    if (Character)
+    {
+        Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+    }
 }

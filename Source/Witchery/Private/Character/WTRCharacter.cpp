@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/WTRCombatComponent.h"
+#include "Components/CapsuleComponent.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -28,10 +29,13 @@ AWTRCharacter::AWTRCharacter()
     OverheadWidget = CreateDefaultSubobject<UWidgetComponent>("OverheadWidget");
     OverheadWidget->SetupAttachment(RootComponent);
 
-    CombatComponent = CreateDefaultSubobject<UWTRCombatComponent>("CombatComponent");
-    CombatComponent->SetIsReplicated(true);
+    Combat = CreateDefaultSubobject<UWTRCombatComponent>("Combat");
+    Combat->SetIsReplicated(true);
 
     GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
+    GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -67,13 +71,13 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAxis(FName("LookUp"), this, &ThisClass::LookUp);
 }
 
-void AWTRCharacter::PostInitializeComponents() 
+void AWTRCharacter::PostInitializeComponents()
 {
     Super::PostInitializeComponents();
 
-    if (CombatComponent)
+    if (Combat)
     {
-        CombatComponent->Character = this;
+        Combat->Character = this;
     }
 }
 
@@ -109,11 +113,11 @@ void AWTRCharacter::LookUp(float Amount)
 
 void AWTRCharacter::OnEquipButtonPressed() 
 {
-    if (CombatComponent)
+    if (Combat)
     {
         if (HasAuthority())
         {
-            CombatComponent->EquipWeapon(OverlappingWeapon);
+            Combat->EquipWeapon(OverlappingWeapon);
         }
         else
         {
@@ -124,9 +128,9 @@ void AWTRCharacter::OnEquipButtonPressed()
 
 void AWTRCharacter::Server_OnEquippedButtonPressed_Implementation() 
 {
-    if (CombatComponent)
+    if (Combat)
     {
-        CombatComponent->EquipWeapon(OverlappingWeapon);
+        Combat->EquipWeapon(OverlappingWeapon);
     }
 }
 
@@ -144,17 +148,17 @@ void AWTRCharacter::OnCrouchButtonPressed()
 
 void AWTRCharacter::OnAimButtonPressed() 
 {
-    if (CombatComponent)
+    if (Combat)
     {
-        CombatComponent->SetAiming(true);
+        Combat->SetAiming(true);
     }
 }
 
 void AWTRCharacter::OnAimButtonReleased() 
 {
-    if (CombatComponent)
+    if (Combat)
     {
-        CombatComponent->SetAiming(false);
+        Combat->SetAiming(false);
     }
 }
 
@@ -188,10 +192,10 @@ void AWTRCharacter::OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon)
 
 bool AWTRCharacter::IsWeaponEquipped() const
 {
-    return CombatComponent && CombatComponent->EquippedWeapon;
+    return Combat && Combat->EquippedWeapon;
 }
 
 bool AWTRCharacter::IsAiming() const
 {
-    return CombatComponent && CombatComponent->bIsAiming;
+    return Combat && Combat->bIsAiming;
 }
