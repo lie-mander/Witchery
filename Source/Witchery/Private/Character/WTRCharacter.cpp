@@ -119,6 +119,16 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
     // We can update pitch every frame
     AO_Pitch = GetBaseAimRotation().Pitch;
 
+    // Fix for sending pitch to the simulated proxy if it greater then 90 degrees
+    // Because when we sent it = negative float convert to signed number in [270; 360) area
+    // We must convert it back to [-90; 0)
+    if (AO_Pitch > 90.f && !IsLocallyControlled())
+    {
+        FVector2D InRange(270.f, 360.f);
+        FVector2D OutRange(-90.f, 0.f);
+        AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+    }
+
     // If character without weapon - he`s using unequipped walk animations and we must to update StartAimRotation
     // Because can be glitching situations
     if (!IsWeaponEquipped())
