@@ -9,6 +9,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/WTRCombatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -53,6 +54,8 @@ void AWTRCharacter::BeginPlay()
 void AWTRCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    UpdateAimOffset(DeltaTime);
 }
 
 void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -111,7 +114,52 @@ void AWTRCharacter::LookUp(float Amount)
     AddControllerPitchInput(Amount);
 }
 
-void AWTRCharacter::OnEquipButtonPressed() 
+void AWTRCharacter::UpdateAimOffset(float DeltaTime)
+{
+    // We can update pitch every frame
+    AO_Pitch = GetBaseAimRotation().Pitch;
+
+    // If character without weapon - he`s using unequipped walk animations and we must to update StartAimRotation
+    // Because can be glitching situations
+    if (!IsWeaponEquipped())
+    {
+        StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+        AO_Yaw = 0.f;
+
+        return;
+    }
+
+    FVector Velocity = GetVelocity();
+    Velocity.Z = 0.f;
+    const float Speed = Velocity.Size();
+    const bool bIsInAir = GetMovementComponent()->IsFalling();
+
+    // Character is moving and we want to 'use control yaw rotation'
+    // We need to save every frame StartAimRotation, and when we will stop, we can use it for calcucation delta rotation
+    // And also we want to set yaw to 0.f for currect start using aim offset without glitching
+    if (Speed > 0.f || bIsInAir)
+    {
+        StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+        AO_Yaw = 0.f;
+
+        bUseControllerRotationYaw = true;
+        return;
+    }
+
+    // Character stands and does not jump
+    // So we can update yaw and pitch for aiming offsets
+    // We must turn off 'use control yaw rotation', cause we want that character stay an same pose (legs) and move only hands
+    if (FMath::IsNearlyZero(Speed) && !bIsInAir)
+    {
+        const FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+        const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartAimRotation);
+        AO_Yaw = DeltaAimRotation.Yaw;
+
+        bUseControllerRotationYaw = false;
+    }
+}
+
+void AWTRCharacter::OnEquipButtonPressed()
 {
     if (Combat)
     {
@@ -126,7 +174,7 @@ void AWTRCharacter::OnEquipButtonPressed()
     }
 }
 
-void AWTRCharacter::Server_OnEquippedButtonPressed_Implementation() 
+void AWTRCharacter::Server_OnEquippedButtonPressed_Implementation()
 {
     if (Combat)
     {
@@ -134,7 +182,7 @@ void AWTRCharacter::Server_OnEquippedButtonPressed_Implementation()
     }
 }
 
-void AWTRCharacter::OnCrouchButtonPressed() 
+void AWTRCharacter::OnCrouchButtonPressed()
 {
     if (bIsCrouched)
     {
@@ -146,7 +194,7 @@ void AWTRCharacter::OnCrouchButtonPressed()
     }
 }
 
-void AWTRCharacter::OnAimButtonPressed() 
+void AWTRCharacter::OnAimButtonPressed()
 {
     if (Combat)
     {
@@ -154,7 +202,7 @@ void AWTRCharacter::OnAimButtonPressed()
     }
 }
 
-void AWTRCharacter::OnAimButtonReleased() 
+void AWTRCharacter::OnAimButtonReleased()
 {
     if (Combat)
     {
