@@ -18,19 +18,20 @@ public:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void PostInitializeComponents() override;
 
-    void SetOverlappingWeapon(AWTRWeapon* Weapon);
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
 
+    void SetOverlappingWeapon(AWTRWeapon* Weapon);
+
     FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
     FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
+    AWTRWeapon* GetEquippedWeapon() const;
 
 protected:
     void MoveForward(float Amount);
     void MoveRight(float Amount);
     void Turn(float Amount);
     void LookUp(float Amount);
-
     void UpdateAimOffset(float DeltaTime);
 
     void OnEquipButtonPressed();

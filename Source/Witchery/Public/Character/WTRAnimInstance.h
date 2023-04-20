@@ -49,9 +49,13 @@ private:
     UPROPERTY(BlueprintReadOnly, Category = "Aiming", meta = (AllowPrivateAccess = true))
     float AO_Pitch = 0.0f;
 
+    UPROPERTY(BlueprintReadOnly, Category = "FABRIK", meta = (AllowPrivateAccess = true))
+    FTransform LeftHandTransform;
+
     FRotator CharacterRotationLastFrame;
     FRotator CharacterRotation;
     FRotator DeltaRotation;
 
     class UCharacterMovementComponent* Movement = nullptr;
+    class AWTRWeapon* EquippedWeapon = nullptr;
 };

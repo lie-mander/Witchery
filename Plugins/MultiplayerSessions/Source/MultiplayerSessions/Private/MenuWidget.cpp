@@ -2,6 +2,7 @@
 
 #include "MenuWidget.h"
 #include "Components/Button.h"
+#include "Components/EditableTextBox.h"
 #include "MultiplayerSessionsSubsystem.h"
 #include "OnlineSubsystem.h"
 
@@ -95,6 +96,8 @@ void UMenuWidget::OnCreateSession(bool bWasSuccessful)
         }
         HostButton->SetIsEnabled(true);
         JoinButton->SetIsEnabled(true);
+
+        OnMenuButtonsClicked.Broadcast(false);
     }
 }
 
@@ -129,6 +132,8 @@ void UMenuWidget::OnFindSessions(const TArray<FOnlineSessionSearchResult>& Resul
 
     HostButton->SetIsEnabled(true);
     JoinButton->SetIsEnabled(true);
+
+    OnMenuButtonsClicked.Broadcast(false);
 }
 
 void UMenuWidget::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
@@ -175,6 +180,8 @@ void UMenuWidget::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
         }
         HostButton->SetIsEnabled(true);
         JoinButton->SetIsEnabled(true);
+
+        OnMenuButtonsClicked.Broadcast(false);
     }
 }
 
@@ -187,6 +194,8 @@ void UMenuWidget::HostButtonClicked()
     HostButton->SetIsEnabled(false);
     JoinButton->SetIsEnabled(false);
 
+    OnMenuButtonsClicked.Broadcast(true);
+
     if (MultiplayerSessionsSubsystem)
     {
         MultiplayerSessionsSubsystem->CreateSession(NumberPublicConnection, MatchType, NeedDebug);
@@ -197,6 +206,8 @@ void UMenuWidget::JoinButtonClicked()
 {
     HostButton->SetIsEnabled(false);
     JoinButton->SetIsEnabled(false);
+
+    OnMenuButtonsClicked.Broadcast(true);
 
     if (MultiplayerSessionsSubsystem)
     {

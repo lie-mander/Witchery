@@ -2,8 +2,27 @@
 
 #include "GameModes/LobbyGameMode.h"
 #include "GameFramework/GameStateBase.h"
+#include "WTRGameInstance.h"
 
-void ALobbyGameMode::PostLogin(APlayerController* NewPlayer) 
+DEFINE_LOG_CATEGORY_STATIC(WTRLobbyGameModeLog, All, All);
+
+void ALobbyGameMode::StartPlay() 
+{
+    Super::StartPlay();
+
+    const auto WTRGameInstance = Cast<UWTRGameInstance>(GetGameInstance());
+    if (WTRGameInstance)
+    {
+        PlayersToStart = WTRGameInstance->LobbyPlayersToStart;
+        UE_LOG(WTRLobbyGameModeLog, Display, TEXT("Players to start: %i"), PlayersToStart);
+    }
+    else
+    {
+        UE_LOG(WTRLobbyGameModeLog, Error, TEXT("Incorrect Game Instance"));
+    }
+}
+
+void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);
 

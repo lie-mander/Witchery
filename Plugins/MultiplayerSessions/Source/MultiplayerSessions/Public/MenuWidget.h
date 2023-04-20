@@ -8,6 +8,8 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "MenuWidget.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMenuButtonsClicked, bool, bIsClicked);
+
 UCLASS()
 class MULTIPLAYERSESSIONS_API UMenuWidget : public UUserWidget
 {
@@ -17,6 +19,9 @@ public:
     UFUNCTION(BlueprintCallable)
     void SetupMenu(int32 NumberPublicConnection_ = 4, const FString& MatchType_ = FString(TEXT("DIR")),
         const FString& LobbyPath_ = FString(TEXT("/Game/ThirdPerson/Maps/Lobby")), bool NeedDebug_ = false);
+
+    UPROPERTY(BlueprintAssignable)
+    FOnMenuButtonsClicked OnMenuButtonsClicked;
 
 protected:
     virtual bool Initialize() override;
@@ -44,6 +49,15 @@ private:
     FString MatchType = FString(TEXT("DIR"));
     FString LobbyPath = FString(TEXT(""));
     bool NeedDebug = false;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Menu", meta = (AllowPrivateAccess = "true"))
+    int32 NumberPlayersToStart = 3;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Menu", meta = (AllowPrivateAccess = "true"))
+    int32 DefaultNumberPlayersToStart = 3;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Menu", meta = (AllowPrivateAccess = "true"))
+    int32 MaxNumberPlayersToStart = 50;
 
     UPROPERTY(meta = (BindWidget))
     class UButton* HostButton;

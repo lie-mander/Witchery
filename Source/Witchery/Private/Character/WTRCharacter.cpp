@@ -248,6 +248,12 @@ void AWTRCharacter::OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon)
     }
 }
 
+AWTRWeapon* AWTRCharacter::GetEquippedWeapon() const
+{
+    if (!Combat) return nullptr;
+    return Combat->EquippedWeapon;
+}
+
 bool AWTRCharacter::IsWeaponEquipped() const
 {
     return Combat && Combat->EquippedWeapon;

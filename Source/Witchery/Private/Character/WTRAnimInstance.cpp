@@ -4,6 +4,7 @@
 #include "Character/WTRCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Weapons/WTRWeapon.h"
 
 void UWTRAnimInstance::NativeInitializeAnimation()
 {
@@ -50,6 +51,9 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     // Set is the character is aiming
     bIsAiming = Character->IsAiming();
 
+    // Set character`s current weapon
+    EquippedWeapon = Character->GetEquippedWeapon();
+
     // Set offset yaw for strafing
     FRotator AimRotation = Character->GetBaseAimRotation();
     FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());
@@ -68,4 +72,23 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     // Set yaw and pitch for aim offsets
     AO_Yaw = Character->GetAO_Yaw();
     AO_Pitch = Character->GetAO_Pitch();
+
+    // For FABRIK
+    if (bIsEquippedWeapon && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && Character->GetMesh())
+    {
+        // Set world transform of LeftHandSocket on equipped weapon (all weapons must be have this socket)
+        LeftHandTransform =
+            EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+
+        FVector OutPosition;
+        FRotator OutRotation;
+
+        // Transform world location and rotation to bone (local) space and save it in OutPosition and OutRotation
+        Character->GetMesh()->TransformToBoneSpace(
+            FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
+
+        // Set completed variables to LeftHandTransform for using in blueprints
+        LeftHandTransform.SetLocation(OutPosition);
+        LeftHandTransform.SetRotation(FQuat4d(OutRotation));
+    }
 }

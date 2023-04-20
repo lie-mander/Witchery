@@ -12,9 +12,9 @@ class WITCHERY_API ALobbyGameMode : public AGameMode
     GENERATED_BODY()
 
 public:
+    virtual void StartPlay() override;
     virtual void PostLogin(APlayerController* NewPlayer) override;
 
 protected:
-    UPROPERTY(EditAnywhere, Category = "Lobby Config")
-    int32 PlayersToStart = 3;
+    int32 PlayersToStart = 2;
 };
