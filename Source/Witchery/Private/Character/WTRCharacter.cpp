@@ -5,11 +5,14 @@
 #include "Weapons/WTRWeapon.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerState.h"
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/WTRCombatComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/TextRenderComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "HUD/OverheadWidget.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -30,6 +33,10 @@ AWTRCharacter::AWTRCharacter()
     OverheadWidget = CreateDefaultSubobject<UWidgetComponent>("OverheadWidget");
     OverheadWidget->SetupAttachment(RootComponent);
 
+    OverheadText = CreateDefaultSubobject<UTextRenderComponent>("OverheadText");
+    OverheadText->SetupAttachment(RootComponent);
+    OverheadText->bOwnerNoSee = true;
+
     Combat = CreateDefaultSubobject<UWTRCombatComponent>("Combat");
     Combat->SetIsReplicated(true);
 
@@ -39,6 +46,9 @@ AWTRCharacter::AWTRCharacter()
     GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
 
     TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+
+    NetUpdateFrequency = 66.f;
+    MinNetUpdateFrequency = 33.f;
 }
 
 void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -46,11 +56,7 @@ void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME_CONDITION(AWTRCharacter, OverlappingWeapon, COND_OwnerOnly);
-}
-
-void AWTRCharacter::BeginPlay()
-{
-    Super::BeginPlay();
+    DOREPLIFETIME(AWTRCharacter, Username);
 }
 
 void AWTRCharacter::Tick(float DeltaTime)
@@ -58,6 +64,31 @@ void AWTRCharacter::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     UpdateAimOffset(DeltaTime);
+}
+
+void AWTRCharacter::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (IsLocallyControlled() && GetPlayerState() && HasAuthority())
+    {
+        Username = GetPlayerState()->GetPlayerName();
+    }
+    else if (IsLocallyControlled() && !HasAuthority())
+    {
+        Server_SetUsername();
+    }
+}
+
+void AWTRCharacter::Server_SetUsername_Implementation()
+{
+    if (GetPlayerState() && OverheadText)
+    {
+        Username = GetPlayerState()->GetPlayerName();
+
+        OverheadText->SetText(FText::FromString(Username));
+        OverheadText->SetTextRenderColor(FColor::MakeRandomColor());
+    }
 }
 
 void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -175,7 +206,7 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
     }
 }
 
-void AWTRCharacter::SetTurningInPlace(float DeltaTime) 
+void AWTRCharacter::SetTurningInPlace(float DeltaTime)
 {
     if (AO_Yaw > 90.f)
     {
@@ -198,7 +229,7 @@ void AWTRCharacter::SetTurningInPlace(float DeltaTime)
     }
 }
 
-void AWTRCharacter::UpdateIfIsNotStanding() 
+void AWTRCharacter::UpdateIfIsNotStanding()
 {
     StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
     AO_Yaw = 0.f;
@@ -269,6 +300,15 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
         {
             OverlappingWeapon->SetShowWidget(true);
         }
+    }
+}
+
+void AWTRCharacter::OnRep_Username()
+{
+    if (OverheadText)
+    {
+        OverheadText->SetText(FText::FromString(Username));
+        OverheadText->SetTextRenderColor(FColor::MakeRandomColor());
     }
 }
 

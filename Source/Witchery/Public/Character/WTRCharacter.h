@@ -53,17 +53,29 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "Combat")
     class UWTRCombatComponent* Combat;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "OverheadText")
     class UWidgetComponent* OverheadWidget;
+
+    UPROPERTY(VisibleAnywhere, Category = "OverheadText")
+    class UTextRenderComponent* OverheadText;
 
     UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
     class AWTRWeapon* OverlappingWeapon;
+
+    UPROPERTY(ReplicatedUsing = OnRep_Username)
+    FString Username;
+
+    UFUNCTION()
+    void OnRep_Username();
 
     UFUNCTION()
     void OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon);
 
     UFUNCTION(Server, Reliable)
     void Server_OnEquippedButtonPressed();
+
+    UFUNCTION(Server, Reliable)
+    void Server_SetUsername();
 
     ETurningInPlace TurningInPlace;
 

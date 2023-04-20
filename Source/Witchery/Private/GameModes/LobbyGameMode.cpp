@@ -2,6 +2,7 @@
 
 #include "GameModes/LobbyGameMode.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "WTRGameInstance.h"
 
 DEFINE_LOG_CATEGORY_STATIC(WTRLobbyGameModeLog, All, All);
