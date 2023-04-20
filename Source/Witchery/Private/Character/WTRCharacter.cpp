@@ -164,9 +164,14 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
         const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartAimRotation);
         AO_Yaw = DeltaAimRotation.Yaw;
 
+        if (TurningInPlace == ETurningInPlace::ETIP_NotTurning)
+        {
+            InterpAO_Yaw = AO_Yaw;
+        }
+
         SetTurningInPlace(DeltaTime);
 
-        bUseControllerRotationYaw = false;
+        bUseControllerRotationYaw = true;
     }
 }
 
@@ -179,6 +184,17 @@ void AWTRCharacter::SetTurningInPlace(float DeltaTime)
     else if (AO_Yaw < -90.f)
     {
         TurningInPlace = ETurningInPlace::ETIP_Left;
+    }
+
+    if (TurningInPlace != ETurningInPlace::ETIP_NotTurning)
+    {
+        InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
+        AO_Yaw = InterpAO_Yaw;
+        if (FMath::Abs(AO_Yaw) < 15.f)
+        {
+            StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+            TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+        }
     }
 }
 
