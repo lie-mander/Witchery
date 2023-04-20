@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "WTRTypes.h"
 #include "WTRAnimInstance.generated.h"
 
 UCLASS()
@@ -33,6 +34,9 @@ private:
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
     bool bIsAccelerating = false;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
+    ETurningInPlace TurningInPlace;
 
     UPROPERTY(BlueprintReadOnly, Category = "Equip", meta = (AllowPrivateAccess = true))
     bool bIsEquippedWeapon = false;

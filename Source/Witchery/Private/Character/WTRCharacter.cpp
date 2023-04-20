@@ -37,6 +37,8 @@ AWTRCharacter::AWTRCharacter()
 
     GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
     GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+    TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
 void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -133,9 +135,7 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
     // Because can be glitching situations
     if (!IsWeaponEquipped())
     {
-        StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-        AO_Yaw = 0.f;
-
+        UpdateIfIsNotStanding();
         return;
     }
 
@@ -149,8 +149,7 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
     // And also we want to set yaw to 0.f for currect start using aim offset without glitching
     if (Speed > 0.f || bIsInAir)
     {
-        StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-        AO_Yaw = 0.f;
+        UpdateIfIsNotStanding();
 
         bUseControllerRotationYaw = true;
         return;
@@ -165,8 +164,29 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
         const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartAimRotation);
         AO_Yaw = DeltaAimRotation.Yaw;
 
+        SetTurningInPlace(DeltaTime);
+
         bUseControllerRotationYaw = false;
     }
+}
+
+void AWTRCharacter::SetTurningInPlace(float DeltaTime) 
+{
+    if (AO_Yaw > 90.f)
+    {
+        TurningInPlace = ETurningInPlace::ETIP_Right;
+    }
+    else if (AO_Yaw < -90.f)
+    {
+        TurningInPlace = ETurningInPlace::ETIP_Left;
+    }
+}
+
+void AWTRCharacter::UpdateIfIsNotStanding() 
+{
+    StartAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+    AO_Yaw = 0.f;
+    TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
 void AWTRCharacter::OnEquipButtonPressed()

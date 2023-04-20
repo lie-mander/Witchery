@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "WTRTypes.h"
 #include "WTRCharacter.generated.h"
 
 UCLASS()
@@ -25,6 +26,7 @@ public:
 
     FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
     FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
+    FORCEINLINE ETurningInPlace GetTurningState() const { return TurningInPlace; }
     AWTRWeapon* GetEquippedWeapon() const;
 
 protected:
@@ -63,7 +65,12 @@ private:
     UFUNCTION(Server, Reliable)
     void Server_OnEquippedButtonPressed();
 
+    ETurningInPlace TurningInPlace;
+
     float AO_Yaw = 0.0f;
     float AO_Pitch = 0.0f;
     FRotator StartAimRotation;
+
+    void SetTurningInPlace(float DeltaTime);
+    void UpdateIfIsNotStanding();
 };

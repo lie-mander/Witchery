@@ -54,6 +54,9 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     // Set character`s current weapon
     EquippedWeapon = Character->GetEquippedWeapon();
 
+    // Set if character need to turn right or left while standing
+    TurningInPlace = Character->GetTurningState();
+
     // Set offset yaw for strafing
     FRotator AimRotation = Character->GetBaseAimRotation();
     FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());

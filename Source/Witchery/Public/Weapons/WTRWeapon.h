@@ -4,17 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "WTRTypes.h"
 #include "WTRWeapon.generated.h"
-
-UENUM(BlueprintType)
-enum class EWeaponState : uint8
-{
-    EWS_Initial UMETA(DisplayName = "Initial"),
-    EWS_Equipped UMETA(DisplayName = "Equipped"),
-    EWS_Dropped UMETA(DisplayName = "Dropped"),
-
-    EWS_MAX UMETA(DisplayName = "MAX")
-};
 
 class USphereComponent;
 class USkeletalMeshComponent;
