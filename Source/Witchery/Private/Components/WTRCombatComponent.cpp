@@ -57,6 +57,7 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
     {
         Character->GetCharacterMovement()->bOrientRotationToMovement = false;
         Character->bUseControllerRotationYaw = true;
+        Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), FVector3d(-160.f, 0.f, 180.f)));
     }
 }
 
