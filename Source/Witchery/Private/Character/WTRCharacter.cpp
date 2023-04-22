@@ -21,6 +21,7 @@ AWTRCharacter::AWTRCharacter()
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
     SpringArmComponent->SetupAttachment(GetMesh());
     SpringArmComponent->TargetArmLength = 600.f;
+    SpringArmComponent->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), FVector3d(0.f, 0.f, 180.f)));
     SpringArmComponent->bUsePawnControlRotation = true;
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
@@ -41,6 +42,11 @@ AWTRCharacter::AWTRCharacter()
     Combat->SetIsReplicated(true);
 
     GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+    GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 800.f);
+    GetCharacterMovement()->MaxWalkSpeedCrouched = 250.f;
+    GetCharacterMovement()->JumpZVelocity = 800.f;
+    GetCharacterMovement()->AirControl = 0.3f;
+    GetCharacterMovement()->bApplyGravityWhileJumping = false;
 
     GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
     GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
@@ -95,7 +101,7 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-    PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
+    PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ThisClass::Jump);
     PlayerInputComponent->BindAction("Equip", EInputEvent::IE_Pressed, this, &ThisClass::OnEquipButtonPressed);
     PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &ThisClass::OnCrouchButtonPressed);
     PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &ThisClass::OnAimButtonPressed);
@@ -236,6 +242,18 @@ void AWTRCharacter::UpdateIfIsNotStanding()
     TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
+void AWTRCharacter::Jump() 
+{
+    if (bIsCrouched)
+    {
+        UnCrouch();
+    }
+    else if (!GetMovementComponent()->IsFalling())
+    {
+        Super::Jump();
+    }
+}
+
 void AWTRCharacter::OnEquipButtonPressed()
 {
     if (Combat)
@@ -273,7 +291,7 @@ void AWTRCharacter::OnCrouchButtonPressed()
 
 void AWTRCharacter::OnAimButtonPressed()
 {
-    if (Combat)
+    if (Combat && Combat->EquippedWeapon)
     {
         Combat->SetAiming(true);
     }
@@ -281,7 +299,7 @@ void AWTRCharacter::OnAimButtonPressed()
 
 void AWTRCharacter::OnAimButtonReleased()
 {
-    if (Combat)
+    if (Combat && Combat->EquippedWeapon)
     {
         Combat->SetAiming(false);
     }

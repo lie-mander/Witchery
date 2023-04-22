@@ -4,6 +4,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Weapons/WTRWeapon.h"
 #include "Character/WTRCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
@@ -41,6 +42,7 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
 
     Character->GetCharacterMovement()->bOrientRotationToMovement = false;
     Character->bUseControllerRotationYaw = true;
+    Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), FVector3d(-160.f, 0.f, 180.f)));
 
     const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
     if (HandSocket)

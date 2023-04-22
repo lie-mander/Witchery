@@ -7,6 +7,8 @@
 #include "WTRTypes.h"
 #include "WTRCharacter.generated.h"
 
+class USpringArmComponent;
+
 UCLASS()
 class WITCHERY_API AWTRCharacter : public ACharacter
 {
@@ -18,6 +20,7 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void PostInitializeComponents() override;
+    virtual void Jump() override;
 
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
@@ -27,6 +30,7 @@ public:
     FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
     FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
     FORCEINLINE ETurningInPlace GetTurningState() const { return TurningInPlace; }
+    FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArmComponent; }
     AWTRWeapon* GetEquippedWeapon() const;
 
 protected:
@@ -45,7 +49,7 @@ protected:
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Camera")
-    class USpringArmComponent* SpringArmComponent;
+    USpringArmComponent* SpringArmComponent;
 
     UPROPERTY(VisibleAnywhere, Category = "Camera")
     class UCameraComponent* CameraComponent;
