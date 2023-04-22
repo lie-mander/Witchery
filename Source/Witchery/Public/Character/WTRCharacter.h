@@ -44,6 +44,7 @@ protected:
     void OnCrouchButtonPressed();
     void OnAimButtonPressed();
     void OnAimButtonReleased();
+    void OnPauseButtonPressed();
 
     virtual void BeginPlay() override;
 
