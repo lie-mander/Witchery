@@ -64,8 +64,20 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
 void UWTRCombatComponent::OnFireButtonPressed(bool bPressed) 
 {
     bFireButtonPressed = bPressed;
+    if (bFireButtonPressed)
+    {
+        ServerFire();
+    }
+}
 
-    if (Character && bFireButtonPressed && EquippedWeapon)
+void UWTRCombatComponent::ServerFire_Implementation() 
+{
+    MulticastFire();
+}
+
+void UWTRCombatComponent::MulticastFire_Implementation() 
+{
+    if (Character && EquippedWeapon)
     {
         Character->PlayFireMontage(bIsAiming);
         EquippedWeapon->Fire();

@@ -34,6 +34,12 @@ protected:
     UFUNCTION(Server, Reliable)
     void ServerSetAiming(bool bAiming);
 
+    UFUNCTION(Server, Reliable)
+    void ServerFire();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void MulticastFire();
+
     void OnFireButtonPressed(bool bPressed);
 
 private:
