@@ -1,6 +1,7 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "Character/WTRCharacter.h"
+#include "Character/WTRAnimInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapons/WTRWeapon.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -108,6 +109,8 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &ThisClass::OnCrouchButtonPressed);
     PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &ThisClass::OnAimButtonPressed);
     PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &ThisClass::OnAimButtonReleased);
+    PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ThisClass::OnFireButtonPressed);
+    PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ThisClass::OnFireButtonReleased);
     PlayerInputComponent->BindAction("Pause", EInputEvent::IE_Pressed, this, &ThisClass::OnPauseButtonPressed);
 
     PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ThisClass::MoveForward);
@@ -245,7 +248,7 @@ void AWTRCharacter::UpdateIfIsNotStanding()
     TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
-void AWTRCharacter::Jump() 
+void AWTRCharacter::Jump()
 {
     if (bIsCrouched)
     {
@@ -255,6 +258,18 @@ void AWTRCharacter::Jump()
     {
         Super::Jump();
     }
+}
+
+void AWTRCharacter::PlayFireMontage(bool bAiming)
+{
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !FireWeaponMontage) return;
+
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance) return;
+
+    AnimInstance->Montage_Play(FireWeaponMontage);
+    const FName SectionName = bAiming ? FName("RifleHip") : FName("RifleAim");
+    AnimInstance->Montage_JumpToSection(SectionName);
 }
 
 void AWTRCharacter::OnEquipButtonPressed()
@@ -308,7 +323,23 @@ void AWTRCharacter::OnAimButtonReleased()
     }
 }
 
-void AWTRCharacter::OnPauseButtonPressed() 
+void AWTRCharacter::OnFireButtonPressed()
+{
+    if (Combat)
+    {
+        Combat->OnFireButtonPressed(true);
+    }
+}
+
+void AWTRCharacter::OnFireButtonReleased()
+{
+    if (Combat)
+    {
+        Combat->OnFireButtonPressed(false);
+    }
+}
+
+void AWTRCharacter::OnPauseButtonPressed()
 {
     const auto PlayerController = Cast<APlayerController>(Controller);
     UKismetSystemLibrary::QuitGame(GetWorld(), PlayerController, EQuitPreference::Quit, true);

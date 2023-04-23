@@ -22,6 +22,8 @@ public:
     virtual void PostInitializeComponents() override;
     virtual void Jump() override;
 
+    void PlayFireMontage(bool bAiming);
+
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
 
@@ -45,6 +47,8 @@ protected:
     void OnAimButtonPressed();
     void OnAimButtonReleased();
     void OnPauseButtonPressed();
+    void OnFireButtonPressed();
+    void OnFireButtonReleased();
 
     virtual void BeginPlay() override;
 
@@ -57,6 +61,9 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category = "Combat")
     class UWTRCombatComponent* Combat;
+
+    UPROPERTY(EditAnywhere, Category = "Combat")
+    class UAnimMontage* FireWeaponMontage;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "OverheadText")
     class UWidgetComponent* OverheadWidget;

@@ -34,6 +34,8 @@ protected:
     UFUNCTION(Server, Reliable)
     void ServerSetAiming(bool bAiming);
 
+    void OnFireButtonPressed(bool bPressed);
+
 private:
     AWTRCharacter* Character;
 
@@ -48,4 +50,6 @@ private:
 
     UPROPERTY(EditAnywhere)
     float AimWalkSpeed = 300.f;
+
+    bool bFireButtonPressed = false;
 };

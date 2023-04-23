@@ -61,6 +61,16 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
     }
 }
 
+void UWTRCombatComponent::OnFireButtonPressed(bool bPressed) 
+{
+    bFireButtonPressed = bPressed;
+
+    if (Character && bFireButtonPressed)
+    {
+        Character->PlayFireMontage(bIsAiming);
+    }
+}
+
 void UWTRCombatComponent::SetAiming(bool bAiming)
 {
     bIsAiming = bAiming;
