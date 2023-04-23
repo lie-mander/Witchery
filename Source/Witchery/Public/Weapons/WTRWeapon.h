@@ -20,6 +20,7 @@ public:
     AWTRWeapon();
     void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void Tick(float DeltaTime) override;
+    void Fire();
 
     void SetShowWidget(bool bShowWidget);
     void SetWeaponState(EWeaponState NewState);
@@ -31,7 +32,7 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    UPROPERTY(VisibleAnywhere, Category = "Weapon properties")
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon properties")
     USkeletalMeshComponent* WeaponMesh;
 
     UPROPERTY(VisibleAnywhere, Category = "Weapon properties")
@@ -39,6 +40,9 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category = "Weapon properties")
     UWidgetComponent* PickupWidget;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon properties")
+    UAnimSequence* FireAnimation;
 
     UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon properties")
     EWeaponState WeaponState;

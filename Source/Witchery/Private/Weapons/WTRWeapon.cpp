@@ -5,6 +5,7 @@
 #include "Character/WTRCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Animation/AnimSequence.h"
 
 AWTRWeapon::AWTRWeapon()
 {
@@ -21,9 +22,12 @@ AWTRWeapon::AWTRWeapon()
     AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
     AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
     AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    AreaSphere->SetSphereRadius(60.f);
     AreaSphere->SetupAttachment(RootComponent);
 
     PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
+    PickupWidget->SetWidgetSpace(EWidgetSpace::Screen);
+    PickupWidget->SetDrawAtDesiredSize(true);
     PickupWidget->SetupAttachment(RootComponent);
 }
 
@@ -37,6 +41,11 @@ void AWTRWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 void AWTRWeapon::BeginPlay()
 {
     Super::BeginPlay();
+
+    check(WeaponMesh);
+    check(AreaSphere);
+    check(PickupWidget);
+    check(FireAnimation);
 
     if (PickupWidget)
     {
@@ -55,6 +64,13 @@ void AWTRWeapon::BeginPlay()
 void AWTRWeapon::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+}
+
+void AWTRWeapon::Fire() 
+{
+    if (!WeaponMesh || !FireAnimation) return;
+
+    WeaponMesh->PlayAnimation(FireAnimation, false);
 }
 
 void AWTRWeapon::SetWeaponState(EWeaponState NewState)

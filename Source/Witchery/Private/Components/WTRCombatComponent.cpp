@@ -65,9 +65,10 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
 {
     bFireButtonPressed = bPressed;
 
-    if (Character && bFireButtonPressed)
+    if (Character && bFireButtonPressed && EquippedWeapon)
     {
         Character->PlayFireMontage(bIsAiming);
+        EquippedWeapon->Fire();
     }
 }
 
