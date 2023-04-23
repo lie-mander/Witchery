@@ -51,11 +51,16 @@ private:
     UPROPERTY(Replicated)
     bool bIsAiming = false;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float BaseWalkSpeed = 600.f;
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float AimWalkSpeed = 300.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Shoot")
+    float TraceRange = 300.f;
+
     bool bFireButtonPressed = false;
+
+    void TraceFromScreen(FHitResult TraceHitResult);
 };
