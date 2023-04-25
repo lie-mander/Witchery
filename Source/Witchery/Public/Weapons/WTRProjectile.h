@@ -9,19 +9,24 @@
 UCLASS()
 class WITCHERY_API AWTRProjectile : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	AWTRProjectile();
-	virtual void Tick(float DeltaTime) override;
+    GENERATED_BODY()
+
+public:
+    AWTRProjectile();
+    virtual void Tick(float DeltaTime) override;
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-private:	
-	UPROPERTY(VisibleAnywhere)
+private:
+    UPROPERTY(VisibleAnywhere, Category = "Components")
     class UBoxComponent* BoxCollision;
 
-	UPROPERTY(VisibleAnywhere)
+    UPROPERTY(VisibleAnywhere, Category = "Components")
     class UProjectileMovementComponent* ProjectileMovementComponent;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+    class UParticleSystem* Tracer;
+
+    class UParticleSystemComponent* ParticleSystemComponent;
 };

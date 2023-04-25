@@ -8,6 +8,8 @@ void AWTRProjectileWeapon::Fire(const FVector& HitTarget)
 {
     Super::Fire(HitTarget);
 
+    if (!HasAuthority()) return;
+
     const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName(FName(MuzzleSocketName));
     if (MuzzleSocket)
     {

@@ -3,12 +3,16 @@
 #include "Weapons/WTRProjectile.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AWTRProjectile::AWTRProjectile()
 {
-	PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = true;
+    bReplicates = true;
 
-	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+    BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
     SetRootComponent(BoxCollision);
     BoxCollision->SetCollisionObjectType(ECC_WorldDynamic);
     BoxCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -22,11 +26,23 @@ AWTRProjectile::AWTRProjectile()
 
 void AWTRProjectile::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
+
+    if (Tracer)
+    {
+        // Spawn projectile tracer
+        ParticleSystemComponent = UGameplayStatics::SpawnEmitterAttached(  //
+            Tracer,                                                        //
+            BoxCollision,                                                  //
+            FName(),                                                       //
+            GetActorLocation(),                                            //
+            GetActorRotation(),                                            //
+            EAttachLocation::KeepWorldPosition                             //
+        );
+    }
 }
 
 void AWTRProjectile::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 }
-
