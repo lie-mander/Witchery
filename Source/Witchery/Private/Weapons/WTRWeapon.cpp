@@ -66,7 +66,7 @@ void AWTRWeapon::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
-void AWTRWeapon::Fire() 
+void AWTRWeapon::Fire(const FVector& HitTarget)
 {
     if (!WeaponMesh || !FireAnimation) return;
 

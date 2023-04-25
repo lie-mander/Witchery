@@ -85,7 +85,7 @@ void UWTRCombatComponent::MulticastFire_Implementation()
     if (Character && EquippedWeapon)
     {
         Character->PlayFireMontage(bIsAiming);
-        EquippedWeapon->Fire();
+        EquippedWeapon->Fire(HitTarget);
     }
 }
 
@@ -122,9 +122,12 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult TraceHitResult)
         if (!TraceHitResult.bBlockingHit)
         {
             TraceHitResult.ImpactPoint = End;
+            HitTarget = End;
         }
         else
         {
+            HitTarget = TraceHitResult.ImpactPoint;
+
             UKismetSystemLibrary::DrawDebugSphere(  //
                 this,                               //
                 TraceHitResult.ImpactPoint,         //

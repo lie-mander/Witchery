@@ -20,7 +20,7 @@ public:
     AWTRWeapon();
     void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void Tick(float DeltaTime) override;
-    void Fire();
+    virtual void Fire(const FVector& HitTarget);
 
     void SetShowWidget(bool bShowWidget);
     void SetWeaponState(EWeaponState NewState);

@@ -9,6 +9,15 @@
 UCLASS()
 class WITCHERY_API AWTRProjectileWeapon : public AWTRWeapon
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
+public:
+    virtual void Fire(const FVector& HitTarget) override;
+
+private:
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon properties")
+    TSubclassOf<class AWTRProjectile> ProjectileClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon properties")
+    FName MuzzleSocketName = "MuzzleFlash";
 };

@@ -62,5 +62,7 @@ private:
 
     bool bFireButtonPressed = false;
 
+    FVector HitTarget;
+
     void TraceFromScreen(FHitResult TraceHitResult);
 };
