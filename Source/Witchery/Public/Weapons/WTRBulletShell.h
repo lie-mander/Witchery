@@ -15,8 +15,21 @@ public:
     AWTRBulletShell();
 
 protected:
+    virtual void BeginPlay() override;
+
+    UFUNCTION()
+    virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+        const FHitResult& Hit);
+
+private:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     class UStaticMeshComponent* BulletMesh;
 
-    virtual void BeginPlay() override;
+    UPROPERTY(EditDefaultsOnly, Category = "Sounds")
+    class USoundCue* GroundHitSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Speed", meta = (ClampMin = "0.0"))
+    float EjectImpulse = 10.f;
+
+    bool bSingleSound = true;
 };

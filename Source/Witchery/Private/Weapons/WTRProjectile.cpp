@@ -14,12 +14,13 @@ AWTRProjectile::AWTRProjectile()
     bReplicates = true;
 
     BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
-    SetRootComponent(BoxCollision);
     BoxCollision->SetCollisionObjectType(ECC_WorldDynamic);
     BoxCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     BoxCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
     BoxCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     BoxCollision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+
+    SetRootComponent(BoxCollision);
 
     ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
     ProjectileMovementComponent->bRotationFollowsVelocity = true;
