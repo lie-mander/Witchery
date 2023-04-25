@@ -41,7 +41,7 @@ private:
     UPROPERTY(BlueprintReadOnly, Category = "Equip", meta = (AllowPrivateAccess = true))
     bool bIsEquippedWeapon = false;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Crouch", meta = (AllowPrivateAccess = true))
+    UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
     bool bIsCrouched = false;
 
     UPROPERTY(BlueprintReadOnly, Category = "Aiming", meta = (AllowPrivateAccess = true))

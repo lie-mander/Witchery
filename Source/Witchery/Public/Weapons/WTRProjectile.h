@@ -19,13 +19,13 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UPROPERTY(VisibleAnywhere, Category = "Collision")
     class UBoxComponent* BoxCollision;
 
-    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UPROPERTY(VisibleAnywhere, Category = "Movement")
     class UProjectileMovementComponent* ProjectileMovementComponent;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
     class UParticleSystem* Tracer;
 
     class UParticleSystemComponent* ParticleSystemComponent;

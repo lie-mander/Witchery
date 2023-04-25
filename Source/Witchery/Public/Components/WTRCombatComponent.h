@@ -27,20 +27,19 @@ protected:
     virtual void BeginPlay() override;
 
     void SetAiming(bool bAiming);
+    void OnFireButtonPressed(bool bPressed);
 
     UFUNCTION()
     void OnRep_EquippedWeapon();
 
     UFUNCTION(Server, Reliable)
     void ServerSetAiming(bool bAiming);
-
+    
     UFUNCTION(Server, Reliable)
-    void ServerFire();
+    void ServerFire(const FVector_NetQuantize& TraceHitTarget);
 
     UFUNCTION(NetMulticast, Reliable)
-    void MulticastFire();
-
-    void OnFireButtonPressed(bool bPressed);
+    void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
 
 private:
     AWTRCharacter* Character;
@@ -62,7 +61,5 @@ private:
 
     bool bFireButtonPressed = false;
 
-    FVector HitTarget;
-
-    void TraceFromScreen(FHitResult TraceHitResult);
+    void TraceFromScreen(FHitResult& TraceHitResult);
 };

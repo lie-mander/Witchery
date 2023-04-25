@@ -62,10 +62,10 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "Combat")
     class UWTRCombatComponent* Combat;
 
-    UPROPERTY(EditAnywhere, Category = "Combat")
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
     class UAnimMontage* FireWeaponMontage;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "OverheadText")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "OverheadWidget")
     class UWidgetComponent* OverheadWidget;
 
     UPROPERTY(VisibleAnywhere, Category = "OverheadText")
@@ -83,18 +83,18 @@ private:
     UFUNCTION()
     void OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon);
 
+    ETurningInPlace TurningInPlace;
+    FRotator StartAimRotation;
+
+    float AO_Yaw = 0.f;
+    float AO_Pitch = 0.f;
+    float InterpAO_Yaw = 0.f;
+
     UFUNCTION(Server, Reliable)
     void Server_OnEquippedButtonPressed();
 
     UFUNCTION(Server, Reliable)
     void Server_SetUsername();
-
-    ETurningInPlace TurningInPlace;
-
-    float AO_Yaw = 0.f;
-    float AO_Pitch = 0.f;
-    float InterpAO_Yaw = 0.f;
-    FRotator StartAimRotation;
 
     void SetTurningInPlace(float DeltaTime);
     void UpdateIfIsNotStanding();

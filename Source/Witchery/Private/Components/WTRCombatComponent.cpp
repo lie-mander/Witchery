@@ -32,9 +32,6 @@ void UWTRCombatComponent::BeginPlay()
 void UWTRCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-    FHitResult HitResult;
-    TraceFromScreen(HitResult);
 }
 
 void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
@@ -71,25 +68,28 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
     bFireButtonPressed = bPressed;
     if (bFireButtonPressed)
     {
-        ServerFire();
+        FHitResult HitResult;
+        TraceFromScreen(HitResult);
+
+        ServerFire(HitResult.ImpactPoint);
     }
 }
 
-void UWTRCombatComponent::ServerFire_Implementation()
+void UWTRCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-    MulticastFire();
+    MulticastFire(TraceHitTarget);
 }
 
-void UWTRCombatComponent::MulticastFire_Implementation()
+void UWTRCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
     if (Character && EquippedWeapon)
     {
         Character->PlayFireMontage(bIsAiming);
-        EquippedWeapon->Fire(HitTarget);
+        EquippedWeapon->Fire(TraceHitTarget);
     }
 }
 
-void UWTRCombatComponent::TraceFromScreen(FHitResult TraceHitResult)
+void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceHitResult)
 {
     FVector2D ViewportSize;
     if (GEngine && GEngine->GameViewport)
@@ -122,19 +122,6 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult TraceHitResult)
         if (!TraceHitResult.bBlockingHit)
         {
             TraceHitResult.ImpactPoint = End;
-            HitTarget = End;
-        }
-        else
-        {
-            HitTarget = TraceHitResult.ImpactPoint;
-
-            UKismetSystemLibrary::DrawDebugSphere(  //
-                this,                               //
-                TraceHitResult.ImpactPoint,         //
-                12.f,                               //
-                12,                                 //
-                FLinearColor::Red                   //
-            );
         }
     }
 }
