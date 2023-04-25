@@ -2,6 +2,7 @@
 
 #include "Weapons/WTRProjectile.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 AWTRProjectile::AWTRProjectile()
 {
@@ -14,6 +15,9 @@ AWTRProjectile::AWTRProjectile()
     BoxCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
     BoxCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     BoxCollision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+
+    ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+    ProjectileMovementComponent->bRotationFollowsVelocity = true;
 }
 
 void AWTRProjectile::BeginPlay()
