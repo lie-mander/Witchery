@@ -6,10 +6,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Sound/SoundCue.h"
 
 AWTRProjectile::AWTRProjectile()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
     bReplicates = true;
 
     BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
@@ -22,6 +23,11 @@ AWTRProjectile::AWTRProjectile()
 
     ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
     ProjectileMovementComponent->bRotationFollowsVelocity = true;
+}
+
+void AWTRProjectile::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
 }
 
 void AWTRProjectile::BeginPlay()
@@ -40,9 +46,37 @@ void AWTRProjectile::BeginPlay()
             EAttachLocation::KeepWorldPosition                             //
         );
     }
+
+    if (HasAuthority())
+    {
+        BoxCollision->OnComponentHit.AddDynamic(this, &ThisClass::OnHit);
+    }
 }
 
-void AWTRProjectile::Tick(float DeltaTime)
+void AWTRProjectile::OnHit(
+    UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    Super::Tick(DeltaTime);
+    MulticastOnDestroyed();
+    Destroy();
+}
+
+void AWTRProjectile::MulticastOnDestroyed_Implementation()
+{
+    if (ImpactParticles)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(  //
+            GetWorld(),                            //
+            ImpactParticles,                       //
+            GetActorTransform()                    //
+        );
+    }
+
+    if (ImpactSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(  //
+            this,                               //
+            ImpactSound,                        //
+            GetActorLocation()                  //
+        );
+    }
 }

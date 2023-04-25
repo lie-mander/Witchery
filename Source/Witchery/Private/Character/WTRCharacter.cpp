@@ -220,11 +220,11 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
 
 void AWTRCharacter::SetTurningInPlace(float DeltaTime)
 {
-    if (AO_Yaw > 90.f)
+    if (AO_Yaw > AngleToTurn)
     {
         TurningInPlace = ETurningInPlace::ETIP_Right;
     }
-    else if (AO_Yaw < -90.f)
+    else if (AO_Yaw < -AngleToTurn)
     {
         TurningInPlace = ETurningInPlace::ETIP_Left;
     }

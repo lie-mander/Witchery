@@ -71,6 +71,9 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "OverheadText")
     class UTextRenderComponent* OverheadText;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Aim")
+    float AngleToTurn = 80.f;
+
     UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
     class AWTRWeapon* OverlappingWeapon;
 
