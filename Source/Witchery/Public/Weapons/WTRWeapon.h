@@ -31,18 +31,27 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+    FName MuzzleSocketName = "MuzzleFlash";
+
+    UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+    FName AmmoEjectSocketName = "AmmoEject";
+
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon properties")
+    UPROPERTY(EditDefaultsOnly, Category = "Components")
     USkeletalMeshComponent* WeaponMesh;
 
-    UPROPERTY(VisibleAnywhere, Category = "Weapon properties")
+    UPROPERTY(VisibleAnywhere, Category = "Components")
     USphereComponent* AreaSphere;
 
-    UPROPERTY(VisibleAnywhere, Category = "Weapon properties")
+    UPROPERTY(VisibleAnywhere, Category = "Components")
     UWidgetComponent* PickupWidget;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon properties")
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
     UAnimSequence* FireAnimation;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
+    TSubclassOf<class AWTRBulletShell> BulletShellClass;
 
     UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon properties")
     EWeaponState WeaponState;

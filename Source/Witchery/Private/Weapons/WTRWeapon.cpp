@@ -1,11 +1,14 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "Weapons/WTRWeapon.h"
+#include "Weapons/WTRBulletShell.h"
 #include "Net/UnrealNetwork.h"
 #include "Character/WTRCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSequence.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 AWTRWeapon::AWTRWeapon()
 {
@@ -46,6 +49,7 @@ void AWTRWeapon::BeginPlay()
     check(AreaSphere);
     check(PickupWidget);
     check(FireAnimation);
+    check(BulletShellClass);
 
     if (PickupWidget)
     {
@@ -68,9 +72,21 @@ void AWTRWeapon::Tick(float DeltaTime)
 
 void AWTRWeapon::Fire(const FVector& HitTarget)
 {
-    if (!WeaponMesh || !FireAnimation) return;
+    if (!WeaponMesh || !FireAnimation || !BulletShellClass) return;
 
     WeaponMesh->PlayAnimation(FireAnimation, false);
+
+    const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh->GetSocketByName(FName(AmmoEjectSocketName));
+    if (AmmoEjectSocket && GetWorld())
+    {
+        FTransform AmmoEjectSocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh);
+
+        GetWorld()->SpawnActor<AWTRBulletShell>(              //
+            BulletShellClass,                                 //
+            AmmoEjectSocketTransform.GetLocation(),           //
+            AmmoEjectSocketTransform.GetRotation().Rotator()  //
+        );
+    }
 }
 
 void AWTRWeapon::SetWeaponState(EWeaponState NewState)
