@@ -20,7 +20,10 @@ public:
     FORCEINLINE void SetCrosshairHUDPackage(const FCrosshairHUDPackage& Package) { CrosshairHUDPackage = Package; }
 
 private:
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    float CrosshairSpreadMultiplier = 16.f;
+
     FCrosshairHUDPackage CrosshairHUDPackage;
 
-    void DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter);
+    void DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& Spread);
 };

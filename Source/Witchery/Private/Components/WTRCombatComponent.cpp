@@ -51,6 +51,28 @@ void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
         HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsTop;
         HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
     }
+
+    if (Character->GetCharacterMovement())
+    {
+        FVector2D CharacterVelocityRange(0.f, Character->GetCharacterMovement()->MaxWalkSpeed);
+        FVector2D OutputVelocityRange(0.f, 1.f);
+        FVector CurrentVelocity = Character->GetVelocity();
+        //CurrentVelocity.Z = 0.f;
+
+        CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(CharacterVelocityRange, OutputVelocityRange, CurrentVelocity.Size());
+    }
+
+    if (Character->GetCharacterMovement()->IsFalling())
+    {
+        CrosshairAirFactor = FMath::FInterpTo(CrosshairVelocityFactor, 2.25f, DeltaTime, 2.25f);
+    }
+    else
+    {
+        CrosshairAirFactor = FMath::FInterpTo(CrosshairVelocityFactor, 0.f, DeltaTime, 30.f);
+    }
+
+    HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairAirFactor;
+
     HUD->SetCrosshairHUDPackage(HUDPackage);
 }
 

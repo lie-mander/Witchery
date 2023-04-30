@@ -36,4 +36,5 @@ struct FCrosshairHUDPackage
     UTexture2D* CrosshairsRight = nullptr;
     UTexture2D* CrosshairsTop = nullptr;
     UTexture2D* CrosshairsBottom = nullptr;
+    float CrosshairSpread = 0.0f;
 };

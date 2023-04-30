@@ -63,6 +63,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Shoot")
     float TraceRange = 300.f;
 
+    float CrosshairVelocityFactor = 0.f;
+    float CrosshairAirFactor = 0.f;
+
     bool bFireButtonPressed = false;
 
     void TraceFromScreen(FHitResult& TraceHitResult);
