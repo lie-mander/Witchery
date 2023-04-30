@@ -1,8 +1,8 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "Components/WTRCombatComponent.h"
-#include "Net/UnrealNetwork.h"
 #include "Components/SphereComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Weapons/WTRWeapon.h"
@@ -10,6 +10,8 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Character/WTRPlayerController.h"
+#include "HUD/WTR_HUD.h"
 
 UWTRCombatComponent::UWTRCombatComponent()
 {
@@ -32,6 +34,24 @@ void UWTRCombatComponent::BeginPlay()
 void UWTRCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    DrawCrosshair(DeltaTime);
+}
+
+void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
+{
+    if (!Character || !Controller || !HUD) return;
+
+    FCrosshairHUDPackage HUDPackage;
+    if (EquippedWeapon)
+    {
+        HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
+        HUDPackage.CrosshairsLeft = EquippedWeapon->CrosshairsLeft;
+        HUDPackage.CrosshairsRight = EquippedWeapon->CrosshairsRight;
+        HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsTop;
+        HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
+    }
+    HUD->SetCrosshairHUDPackage(HUDPackage);
 }
 
 void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)

@@ -10,6 +10,8 @@
 class USphereComponent;
 class USkeletalMeshComponent;
 class UWidgetComponent;
+class UTexture2D;
+class AWTRBulletShell;
 
 UCLASS()
 class WITCHERY_API AWTRWeapon : public AActor
@@ -27,6 +29,21 @@ public:
 
     FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
     FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UTexture2D* CrosshairsCenter = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UTexture2D* CrosshairsLeft = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UTexture2D* CrosshairsRight = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UTexture2D* CrosshairsTop = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UTexture2D* CrosshairsBottom = nullptr;
 
 protected:
     virtual void BeginPlay() override;
@@ -50,8 +67,14 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
     UAnimSequence* FireAnimation;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
-    TSubclassOf<class AWTRBulletShell> BulletShellClass;
+    UPROPERTY(EditDefaultsOnly, Category = "Bullet Shells")
+    TSubclassOf<AWTRBulletShell> BulletShellClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Bullet Shells", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    float RandRollForShellsSpawn = 30.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Bullet Shells", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    float RandPitchForShellsSpawn = 30.f;
 
     UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon properties")
     EWeaponState WeaponState;

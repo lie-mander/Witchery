@@ -1,6 +1,7 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "Character/WTRCharacter.h"
+#include "Character/WTRPlayerController.h"
 #include "Character/WTRAnimInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapons/WTRWeapon.h"
@@ -16,6 +17,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "HUD/OverheadWidget.h"
+#include "HUD/WTR_HUD.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -79,6 +81,22 @@ void AWTRCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    // Send controller and HUD to Combat component
+    AWTRPlayerController* WTRController = Cast<AWTRPlayerController>(Controller);
+    if (Combat && WTRController)
+    {
+        Combat->Controller = WTRController;
+        if (WTRController)
+        {
+            AWTR_HUD* WTR_HUD = Cast<AWTR_HUD>(WTRController->GetHUD());
+            if (WTR_HUD)
+            {
+                Combat->HUD = WTR_HUD;
+            }
+        }
+    }
+
+    // Set user name
     if (IsLocallyControlled() && GetPlayerState() && HasAuthority())
     {
         Username = GetPlayerState()->GetPlayerName();

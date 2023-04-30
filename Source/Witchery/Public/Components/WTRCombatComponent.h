@@ -8,6 +8,8 @@
 
 class AWTRCharacter;
 class AWTRWeapon;
+class AWTRPlayerController;
+class AWTR_HUD;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class WITCHERY_API UWTRCombatComponent : public UActorComponent
@@ -43,6 +45,8 @@ protected:
 
 private:
     AWTRCharacter* Character;
+    AWTRPlayerController* Controller;
+    AWTR_HUD* HUD;
 
     UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
     AWTRWeapon* EquippedWeapon;
@@ -62,4 +66,5 @@ private:
     bool bFireButtonPressed = false;
 
     void TraceFromScreen(FHitResult& TraceHitResult);
+    void DrawCrosshair(float DeltaTime);
 };

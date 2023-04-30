@@ -1,5 +1,7 @@
 #pragma once
 
+#include "WTRTypes.generated.h"
+
 // Animation
 
 UENUM(BlueprintType)
@@ -22,4 +24,16 @@ enum class EWeaponState : uint8
     EWS_Dropped UMETA(DisplayName = "Dropped"),
 
     EWS_MAX UMETA(DisplayName = "MAX")
+};
+
+USTRUCT(BlueprintType)
+struct FCrosshairHUDPackage
+{
+    GENERATED_USTRUCT_BODY()
+
+    class UTexture2D* CrosshairsCenter = nullptr;
+    UTexture2D* CrosshairsLeft = nullptr;
+    UTexture2D* CrosshairsRight = nullptr;
+    UTexture2D* CrosshairsTop = nullptr;
+    UTexture2D* CrosshairsBottom = nullptr;
 };

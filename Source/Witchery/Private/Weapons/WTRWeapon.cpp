@@ -81,10 +81,18 @@ void AWTRWeapon::Fire(const FVector& HitTarget)
     {
         FTransform AmmoEjectSocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh);
 
-        GetWorld()->SpawnActor<AWTRBulletShell>(              //
-            BulletShellClass,                                 //
-            AmmoEjectSocketTransform.GetLocation(),           //
-            AmmoEjectSocketTransform.GetRotation().Rotator()  //
+        float RandRoll = FMath::RandRange(-RandRollForShellsSpawn, RandRollForShellsSpawn);
+        float RandPitch = FMath::RandRange(-RandPitchForShellsSpawn, RandPitchForShellsSpawn);
+        FRotator3d RandRotator = FRotator3d(                                     //
+            AmmoEjectSocketTransform.GetRotation().Rotator().Pitch + RandPitch,  //
+            AmmoEjectSocketTransform.GetRotation().Rotator().Yaw,                //
+            AmmoEjectSocketTransform.GetRotation().Rotator().Roll + RandRoll     //
+        );
+
+        GetWorld()->SpawnActor<AWTRBulletShell>(     //
+            BulletShellClass,                        //
+            AmmoEjectSocketTransform.GetLocation(),  //
+            RandRotator                              //
         );
     }
 }
