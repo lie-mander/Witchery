@@ -7,6 +7,8 @@
 #include "GameFramework/HUD.h"
 #include "WTR_HUD.generated.h"
 
+class UTexture2D;
+
 UCLASS()
 class WITCHERY_API AWTR_HUD : public AHUD
 {
@@ -19,4 +21,6 @@ public:
 
 private:
     FCrosshairHUDPackage CrosshairHUDPackage;
+
+    void DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter);
 };
