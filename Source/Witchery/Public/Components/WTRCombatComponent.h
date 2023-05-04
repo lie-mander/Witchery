@@ -63,10 +63,15 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Shoot")
     float TraceRange = 300.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Shoot")
+    FVector3d SpringArmOffsetWhileEquipped = FVector3d(-160.f, 0.f, 180.f);
+
     float CrosshairVelocityFactor = 0.f;
     float CrosshairAirFactor = 0.f;
 
     bool bFireButtonPressed = false;
+
+    FVector HitTarget;
 
     void TraceFromScreen(FHitResult& TraceHitResult);
     void DrawCrosshair(float DeltaTime);

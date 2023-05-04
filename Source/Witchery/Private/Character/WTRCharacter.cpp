@@ -406,6 +406,12 @@ AWTRWeapon* AWTRCharacter::GetEquippedWeapon() const
     return Combat->EquippedWeapon;
 }
 
+FVector AWTRCharacter::GetHitTarget() const
+{
+    if(!Combat) return FVector();
+    return Combat->HitTarget;
+}
+
 bool AWTRCharacter::IsWeaponEquipped() const
 {
     return Combat && Combat->EquippedWeapon;

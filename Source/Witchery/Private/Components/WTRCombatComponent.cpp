@@ -36,6 +36,13 @@ void UWTRCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     DrawCrosshair(DeltaTime);
+
+    if (Character && Character->IsLocallyControlled())
+    {
+        FHitResult HitResult;
+        TraceFromScreen(HitResult);
+        HitTarget = HitResult.ImpactPoint;
+    }
 }
 
 void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
@@ -57,18 +64,18 @@ void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
         FVector2D CharacterVelocityRange(0.f, Character->GetCharacterMovement()->MaxWalkSpeed);
         FVector2D OutputVelocityRange(0.f, 1.f);
         FVector CurrentVelocity = Character->GetVelocity();
-        //CurrentVelocity.Z = 0.f;
+        CurrentVelocity.Z = 0.f;
 
         CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(CharacterVelocityRange, OutputVelocityRange, CurrentVelocity.Size());
     }
 
     if (Character->GetCharacterMovement()->IsFalling())
     {
-        CrosshairAirFactor = FMath::FInterpTo(CrosshairVelocityFactor, 2.25f, DeltaTime, 2.25f);
+        CrosshairAirFactor = FMath::FInterpTo(CrosshairAirFactor, 2.25f, DeltaTime, 2.25f);
     }
     else
     {
-        CrosshairAirFactor = FMath::FInterpTo(CrosshairVelocityFactor, 0.f, DeltaTime, 30.f);
+        CrosshairAirFactor = FMath::FInterpTo(CrosshairAirFactor, 0.f, DeltaTime, 30.f);
     }
 
     HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairAirFactor;
@@ -86,7 +93,7 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
 
     Character->GetCharacterMovement()->bOrientRotationToMovement = false;
     Character->bUseControllerRotationYaw = true;
-    Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), FVector3d(-160.f, 0.f, 180.f)));
+    Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
 
     const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
     if (HandSocket)
@@ -101,7 +108,7 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
     {
         Character->GetCharacterMovement()->bOrientRotationToMovement = false;
         Character->bUseControllerRotationYaw = true;
-        Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), FVector3d(-160.f, 0.f, 180.f)));
+        Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
     }
 }
 

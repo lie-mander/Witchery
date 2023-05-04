@@ -34,6 +34,7 @@ public:
     FORCEINLINE ETurningInPlace GetTurningState() const { return TurningInPlace; }
     FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArmComponent; }
     AWTRWeapon* GetEquippedWeapon() const;
+    FVector GetHitTarget() const;
 
 protected:
     void MoveForward(float Amount);

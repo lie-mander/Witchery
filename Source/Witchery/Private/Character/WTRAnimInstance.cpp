@@ -93,5 +93,16 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         // Set completed variables to LeftHandTransform for using in blueprints
         LeftHandTransform.SetLocation(OutPosition);
         LeftHandTransform.SetRotation(FQuat4d(OutRotation));
+
+        if (Character->IsLocallyControlled())
+        {
+            bIsLocallyControlled = true;
+            FTransform RightHandTransform = Character->GetMesh()->GetSocketTransform(FName("hand_r"), ERelativeTransformSpace::RTS_World);
+
+            // Rotate right hand to hit target so that weapon will rotate to hit target
+            // Hand_R has opposite location for hit target, so we must find look at rotation in opposite direction
+            RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(),
+                RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - Character->GetHitTarget()));
+        }
     }
 }

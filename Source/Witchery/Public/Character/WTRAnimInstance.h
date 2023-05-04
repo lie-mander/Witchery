@@ -20,6 +20,9 @@ private:
     UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = true))
     class AWTRCharacter* Character = nullptr;
 
+    UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = true))
+    bool bIsLocallyControlled = false;
+
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
     float Speed = 0.f;
 
@@ -52,6 +55,9 @@ private:
 
     UPROPERTY(BlueprintReadOnly, Category = "Aiming", meta = (AllowPrivateAccess = true))
     float AO_Pitch = 0.0f;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Aiming", meta = (AllowPrivateAccess = true))
+    FRotator RightHandRotation;
 
     UPROPERTY(BlueprintReadOnly, Category = "FABRIK", meta = (AllowPrivateAccess = true))
     FTransform LeftHandTransform;
