@@ -8,6 +8,12 @@
 #include "WTRCharacter.generated.h"
 
 class USpringArmComponent;
+class UCameraComponent;
+class UWTRCombatComponent;
+class UAnimMontage;
+class UWidgetComponent;
+class UTextRenderComponent;
+class AWTRWeapon;
 
 UCLASS()
 class WITCHERY_API AWTRCharacter : public ACharacter
@@ -33,10 +39,14 @@ public:
     FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
     FORCEINLINE ETurningInPlace GetTurningState() const { return TurningInPlace; }
     FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArmComponent; }
+    FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
     AWTRWeapon* GetEquippedWeapon() const;
     FVector GetHitTarget() const;
 
 protected:
+    //////////
+    // Input functions and callbacks
+    //
     void MoveForward(float Amount);
     void MoveRight(float Amount);
     void Turn(float Amount);
@@ -51,48 +61,66 @@ protected:
     void OnFireButtonPressed();
     void OnFireButtonReleased();
 
+    //////////
+    // Other functions
+    //
     virtual void BeginPlay() override;
 
 private:
+    //////////
+    // Components
+    //
     UPROPERTY(VisibleAnywhere, Category = "Camera")
     USpringArmComponent* SpringArmComponent;
 
     UPROPERTY(VisibleAnywhere, Category = "Camera")
-    class UCameraComponent* CameraComponent;
+    UCameraComponent* CameraComponent;
 
     UPROPERTY(VisibleAnywhere, Category = "Combat")
-    class UWTRCombatComponent* Combat;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Combat")
-    class UAnimMontage* FireWeaponMontage;
+    UWTRCombatComponent* Combat;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "OverheadWidget")
-    class UWidgetComponent* OverheadWidget;
+    UWidgetComponent* OverheadWidget;
 
     UPROPERTY(VisibleAnywhere, Category = "OverheadText")
-    class UTextRenderComponent* OverheadText;
+    UTextRenderComponent* OverheadText;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Aim")
-    float AngleToTurn = 80.f;
-
+    //////////
+    // Multiplayer variables
+    //
     UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
-    class AWTRWeapon* OverlappingWeapon;
+    AWTRWeapon* OverlappingWeapon;
 
     UPROPERTY(ReplicatedUsing = OnRep_Username)
     FString Username;
 
+    //////////
+    // Animation
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    UAnimMontage* FireWeaponMontage;
+
+    //////////
+    // Movement
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Aim")
+    float AngleToTurn = 80.f;
+
+    float AO_Yaw = 0.f;
+    float AO_Pitch = 0.f;
+    float InterpAO_Yaw = 0.f;
+
+    ETurningInPlace TurningInPlace;
+    FRotator StartAimRotation;
+
+    //////////
+    // Multiplayer functions
+    //
     UFUNCTION()
     void OnRep_Username();
 
     UFUNCTION()
     void OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon);
-
-    ETurningInPlace TurningInPlace;
-    FRotator StartAimRotation;
-
-    float AO_Yaw = 0.f;
-    float AO_Pitch = 0.f;
-    float InterpAO_Yaw = 0.f;
 
     UFUNCTION(Server, Reliable)
     void Server_OnEquippedButtonPressed();
@@ -100,6 +128,9 @@ private:
     UFUNCTION(Server, Reliable)
     void Server_SetUsername();
 
+    //////////
+    // Functions
+    //
     void SetTurningInPlace(float DeltaTime);
     void UpdateIfIsNotStanding();
 };

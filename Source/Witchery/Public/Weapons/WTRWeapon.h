@@ -29,7 +29,12 @@ public:
 
     FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
     FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+    FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
+    FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
 
+    //////////
+    // Crosshairs textures
+    //
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
     UTexture2D* CrosshairsCenter = nullptr;
 
@@ -48,6 +53,9 @@ public:
 protected:
     virtual void BeginPlay() override;
 
+    //////////
+    // Socket`s names
+    //
     UPROPERTY(EditDefaultsOnly, Category = "Sockets")
     FName MuzzleSocketName = "MuzzleFlash";
 
@@ -55,6 +63,9 @@ protected:
     FName AmmoEjectSocketName = "AmmoEject";
 
 private:
+    //////////
+    // Components
+    //
     UPROPERTY(EditDefaultsOnly, Category = "Components")
     USkeletalMeshComponent* WeaponMesh;
 
@@ -64,6 +75,9 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "Components")
     UWidgetComponent* PickupWidget;
 
+    //////////
+    // Weapon properties
+    //
     UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
     UAnimSequence* FireAnimation;
 
@@ -79,6 +93,18 @@ private:
     UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon properties")
     EWeaponState WeaponState;
 
+    //////////
+    // Zooming
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    float ZoomedFOV = 30.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    float ZoomInterpSpeed = 20.f;
+
+    //////////
+    // Callbacks
+    //
     UFUNCTION()
     void OnRep_WeaponState();
 

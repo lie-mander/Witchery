@@ -31,12 +31,15 @@ protected:
     void SetAiming(bool bAiming);
     void OnFireButtonPressed(bool bPressed);
 
+    //////////
+    // Multiplayer functions and callbacks
+    //
     UFUNCTION()
     void OnRep_EquippedWeapon();
 
     UFUNCTION(Server, Reliable)
     void ServerSetAiming(bool bAiming);
-    
+
     UFUNCTION(Server, Reliable)
     void ServerFire(const FVector_NetQuantize& TraceHitTarget);
 
@@ -44,22 +47,27 @@ protected:
     void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
 
 private:
-    AWTRCharacter* Character;
-    AWTRPlayerController* Controller;
-    AWTR_HUD* HUD;
-
+    //////////
+    // Multiplayer variables
+    //
     UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
     AWTRWeapon* EquippedWeapon;
 
     UPROPERTY(Replicated)
     bool bIsAiming = false;
 
+    //////////
+    // Movement variables
+    //
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float BaseWalkSpeed = 600.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float AimWalkSpeed = 300.f;
 
+    //////////
+    // Shooting variables
+    //
     UPROPERTY(EditDefaultsOnly, Category = "Shoot")
     float TraceRange = 300.f;
 
@@ -73,6 +81,28 @@ private:
 
     FVector HitTarget;
 
+    //////////
+    // Zooming
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    float DefaultZoomFOV = 30.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    float ZoomInterpSpeed = 20.f;
+
+    float CurrentZoomFOV = 0.f;
+
+    //////////
+    // Base variables
+    //
+    AWTRCharacter* Character;
+    AWTRPlayerController* Controller;
+    AWTR_HUD* HUD;
+
+    //////////
+    // Functions
+    //
     void TraceFromScreen(FHitResult& TraceHitResult);
     void DrawCrosshair(float DeltaTime);
+    void InterpFOV(float DeltaTime);
 };

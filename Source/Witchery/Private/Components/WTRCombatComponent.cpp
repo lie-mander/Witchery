@@ -12,6 +12,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Character/WTRPlayerController.h"
 #include "HUD/WTR_HUD.h"
+#include "Camera/CameraComponent.h"
 
 UWTRCombatComponent::UWTRCombatComponent()
 {
@@ -29,19 +30,26 @@ void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 void UWTRCombatComponent::BeginPlay()
 {
     Super::BeginPlay();
+
+    if (Character && Character->GetCameraComponent())
+    {
+        DefaultZoomFOV = Character->GetCameraComponent()->FieldOfView;
+        CurrentZoomFOV = DefaultZoomFOV;
+    }
 }
 
 void UWTRCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    DrawCrosshair(DeltaTime);
-
     if (Character && Character->IsLocallyControlled())
     {
         FHitResult HitResult;
         TraceFromScreen(HitResult);
         HitTarget = HitResult.ImpactPoint;
+
+        DrawCrosshair(DeltaTime);
+        InterpFOV(DeltaTime);
     }
 }
 
@@ -81,6 +89,25 @@ void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
     HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairAirFactor;
 
     HUD->SetCrosshairHUDPackage(HUDPackage);
+}
+
+void UWTRCombatComponent::InterpFOV(float DeltaTime)
+{
+    if (!EquippedWeapon || !Character->GetCameraComponent())
+    {
+        return;
+    }
+
+    if (bIsAiming)
+    {
+        CurrentZoomFOV = FMath::FInterpTo(CurrentZoomFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
+    }
+    else
+    {
+        CurrentZoomFOV = FMath::FInterpTo(CurrentZoomFOV, DefaultZoomFOV, DeltaTime, ZoomInterpSpeed);
+    }
+
+    Character->GetCameraComponent()->SetFieldOfView(CurrentZoomFOV);
 }
 
 void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
