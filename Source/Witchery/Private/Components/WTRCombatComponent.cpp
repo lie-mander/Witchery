@@ -79,14 +79,43 @@ void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
 
     if (Character->GetCharacterMovement()->IsFalling())
     {
-        CrosshairAirFactor = FMath::FInterpTo(CrosshairAirFactor, 2.25f, DeltaTime, 2.25f);
+        CrosshairAirFactor = FMath::FInterpTo(CrosshairAirFactor, AirFactorSpread, DeltaTime, AirFactorSpeedUp);
     }
     else
     {
-        CrosshairAirFactor = FMath::FInterpTo(CrosshairAirFactor, 0.f, DeltaTime, 30.f);
+        CrosshairAirFactor = FMath::FInterpTo(CrosshairAirFactor, 0.f, DeltaTime, AirFactorSpeedDown);
     }
 
-    HUDPackage.CrosshairSpread = CrosshairVelocityFactor + CrosshairAirFactor;
+    if (bIsAiming)
+    {
+        CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, AimFactorSpread, DeltaTime, AimFactorSpeedUp);
+    }
+    else
+    {
+        CrosshairAimFactor = FMath::FInterpTo(CrosshairAimFactor, 0.f, DeltaTime, AimFactorSpeedDown);
+    }
+
+    if (!FMath::IsNearlyZero(CrosshairShootingFactor))
+    {
+        CrosshairShootingFactor = FMath::FInterpTo(CrosshairShootingFactor, 0.f, DeltaTime, ShootingFactorSpeedDown);
+    }
+
+    if (Character->bIsCrouched)
+    {
+        CrosshairCrouchingFactor = FMath::FInterpTo(CrosshairCrouchingFactor, CrouchingFactorSpread, DeltaTime, CrouchingFactorSpeedUp);
+    }
+    else
+    {
+        CrosshairCrouchingFactor = FMath::FInterpTo(CrosshairCrouchingFactor, 0.f, DeltaTime, CrouchingFactorSpeedDown);
+    }
+
+    HUDPackage.CrosshairSpread =   //
+        CrosshairSpread +          //
+        CrosshairVelocityFactor +  //
+        CrosshairAirFactor +       //
+        CrosshairShootingFactor -  //
+        CrosshairAimFactor -       //
+        CrosshairCrouchingFactor;
 
     HUD->SetCrosshairHUDPackage(HUDPackage);
 }
@@ -148,6 +177,11 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
         TraceFromScreen(HitResult);
 
         ServerFire(HitResult.ImpactPoint);
+
+        if (EquippedWeapon)
+        {
+            CrosshairShootingFactor = ShootingFactorSpread;
+        }
     }
 }
 
