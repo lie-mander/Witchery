@@ -115,6 +115,12 @@ private:
     FRotator StartAimRotation;
 
     //////////
+    // Other variables
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Camera")
+    float DistanceForHidingCamera = 200.f;
+
+    //////////
     // Multiplayer functions
     //
     UFUNCTION()
@@ -134,4 +140,5 @@ private:
     //
     void SetTurningInPlace(float DeltaTime);
     void UpdateIfIsNotStanding();
+    void HideCharacterWithWeaponIfCameraClose();
 };

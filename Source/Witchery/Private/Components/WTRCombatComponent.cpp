@@ -219,8 +219,15 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceHitResult)
 
     if (bDeprojectScreen && GetWorld())
     {
-        const FVector Start = CrosshairWorldPosition;
-        const FVector End = CrosshairWorldPosition + CrosshairWorldDirection * TraceRange;
+        FVector Start = CrosshairWorldPosition;
+        if (Character)
+        {
+            const float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+            Start += CrosshairWorldDirection * (DistanceToCharacter + DistanceFromCamera);
+        }
+
+        FVector End = CrosshairWorldPosition + CrosshairWorldDirection * TraceRange;
+
         GetWorld()->LineTraceSingleByChannel(  //
             TraceHitResult,                    //
             Start,                             //

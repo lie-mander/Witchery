@@ -103,6 +103,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Aim")
     float AimFactorSpeedDown = 30.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Aim")
+    float DistanceFromCamera = 100.f;
+
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Shooting")
     float ShootingFactorSpread = 0.75f;
 

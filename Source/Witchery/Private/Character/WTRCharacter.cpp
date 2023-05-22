@@ -76,6 +76,7 @@ void AWTRCharacter::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     UpdateAimOffset(DeltaTime);
+    HideCharacterWithWeaponIfCameraClose();
 }
 
 void AWTRCharacter::BeginPlay()
@@ -421,4 +422,29 @@ bool AWTRCharacter::IsWeaponEquipped() const
 bool AWTRCharacter::IsAiming() const
 {
     return Combat && Combat->bIsAiming;
+}
+
+void AWTRCharacter::HideCharacterWithWeaponIfCameraClose() 
+{
+    if (!IsLocallyControlled())
+    {
+        return;
+    }
+
+    if (CameraComponent && (CameraComponent->GetComponentLocation() - GetActorLocation()).Size() < DistanceForHidingCamera)
+    {
+        GetMesh()->SetVisibility(false);
+        if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+        {
+            Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+        }
+    }
+    else
+    {
+        GetMesh()->SetVisibility(true);
+        if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
+        {
+            Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+        }
+    }
 }
