@@ -54,6 +54,7 @@ AWTRCharacter::AWTRCharacter()
     GetCharacterMovement()->bApplyGravityWhileJumping = false;
 
     GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
+    GetMesh()->SetCollisionObjectType(ECC_SkeletalMesh);
     GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
     GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECollisionResponse::ECR_Block);
 
@@ -82,6 +83,9 @@ void AWTRCharacter::Tick(float DeltaTime)
 void AWTRCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    check(FireWeaponMontage);
+    check(HitReactMontage);
 
     // Send controller and HUD to Combat component
     AWTRPlayerController* WTRController = Cast<AWTRPlayerController>(Controller);
@@ -280,6 +284,11 @@ void AWTRCharacter::Jump()
     }
 }
 
+void AWTRCharacter::MulticastOnHit_Implementation() 
+{
+    PlayHitReactMontage();
+}
+
 void AWTRCharacter::PlayFireMontage(bool bAiming)
 {
     if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !FireWeaponMontage) return;
@@ -289,6 +298,18 @@ void AWTRCharacter::PlayFireMontage(bool bAiming)
 
     AnimInstance->Montage_Play(FireWeaponMontage);
     const FName SectionName = bAiming ? FName("RifleHip") : FName("RifleAim");
+    AnimInstance->Montage_JumpToSection(SectionName);
+}
+
+void AWTRCharacter::PlayHitReactMontage() 
+{
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !HitReactMontage) return;
+
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance) return;
+
+    AnimInstance->Montage_Play(HitReactMontage);
+    const FName SectionName("FromFront");
     AnimInstance->Montage_JumpToSection(SectionName);
 }
 

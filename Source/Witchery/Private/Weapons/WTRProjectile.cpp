@@ -7,6 +7,8 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Sound/SoundCue.h"
+#include "Character/WTRCharacter.h"
+#include "WTRTypes.h"
 
 AWTRProjectile::AWTRProjectile()
 {
@@ -19,6 +21,7 @@ AWTRProjectile::AWTRProjectile()
     BoxCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
     BoxCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     BoxCollision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+    BoxCollision->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECR_Block);
 
     SetRootComponent(BoxCollision);
 
@@ -57,6 +60,12 @@ void AWTRProjectile::BeginPlay()
 void AWTRProjectile::OnHit(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+    const auto WTRCharacter = Cast<AWTRCharacter>(OtherActor);
+    if (WTRCharacter)
+    {
+        WTRCharacter->MulticastOnHit();
+    }
+
     MulticastOnDestroyed();
     Destroy();
 }

@@ -2,6 +2,10 @@
 
 #include "WTRTypes.generated.h"
 
+// Collision
+
+#define ECC_SkeletalMesh ECollisionChannel::ECC_GameTraceChannel1
+
 // Animation
 
 UENUM(BlueprintType)

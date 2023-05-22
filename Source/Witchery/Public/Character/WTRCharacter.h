@@ -29,6 +29,9 @@ public:
     virtual void PostInitializeComponents() override;
     virtual void Jump() override;
 
+    UFUNCTION(NetMulticast, Unreliable)
+    void MulticastOnHit();
+
     void PlayFireMontage(bool bAiming);
 
     bool IsWeaponEquipped() const;
@@ -100,6 +103,11 @@ private:
     //
     UPROPERTY(EditDefaultsOnly, Category = "Combat")
     UAnimMontage* FireWeaponMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    UAnimMontage* HitReactMontage;
+
+    void PlayHitReactMontage();
 
     //////////
     // Movement
