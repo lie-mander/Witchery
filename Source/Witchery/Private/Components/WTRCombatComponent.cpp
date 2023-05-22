@@ -57,7 +57,6 @@ void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
 {
     if (!Character || !Controller || !HUD) return;
 
-    FCrosshairHUDPackage HUDPackage;
     if (EquippedWeapon)
     {
         HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
@@ -232,6 +231,14 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceHitResult)
         if (!TraceHitResult.bBlockingHit)
         {
             TraceHitResult.ImpactPoint = End;
+        }
+        if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairInterface>())
+        {
+            HUDPackage.CrosshairColor = CrosshairColorWithTarget;
+        }
+        else
+        {
+            HUDPackage.CrosshairColor = CrosshairColorWithoutTarget;
         }
     }
 }

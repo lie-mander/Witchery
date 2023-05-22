@@ -37,4 +37,5 @@ struct FCrosshairHUDPackage
     UTexture2D* CrosshairsTop = nullptr;
     UTexture2D* CrosshairsBottom = nullptr;
     float CrosshairSpread = 0.0f;
+    FLinearColor CrosshairColor = FLinearColor::White;
 };

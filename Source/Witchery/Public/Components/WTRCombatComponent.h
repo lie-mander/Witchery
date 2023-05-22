@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "WTRTypes.h"
 #include "WTRCombatComponent.generated.h"
 
 class AWTRCharacter;
@@ -106,7 +107,7 @@ private:
     float ShootingFactorSpread = 0.75f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Shooting")
-    float ShootingFactorSpeedDown = 40.f;
+    float ShootingFactorSpeedDown = 10.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Crouching")
     float CrouchingFactorSpread = 0.3f;
@@ -117,11 +118,19 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Crouching")
     float CrouchingFactorSpeedDown = 30.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Color")
+    FLinearColor CrosshairColorWithTarget = FLinearColor::Red;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Color")
+    FLinearColor CrosshairColorWithoutTarget = FLinearColor::White;
+
     float CrosshairVelocityFactor = 0.f;
     float CrosshairAirFactor = 0.f;
     float CrosshairAimFactor = 0.f;
     float CrosshairShootingFactor = 0.f;
     float CrosshairCrouchingFactor = 0.f;
+
+    FCrosshairHUDPackage HUDPackage;
 
     //////////
     // Zooming

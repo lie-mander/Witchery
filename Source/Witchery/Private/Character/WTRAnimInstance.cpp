@@ -101,8 +101,10 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
             // Rotate right hand to hit target so that weapon will rotate to hit target
             // Hand_R has opposite location for hit target, so we must find look at rotation in opposite direction
-            RightHandRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(),
+            FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(RightHandTransform.GetLocation(),
                 RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - Character->GetHitTarget()));
+
+            RightHandRotation = FMath::RInterpTo(RightHandRotation, LookAtRotation, DeltaSeconds, 30.f);
         }
     }
 }

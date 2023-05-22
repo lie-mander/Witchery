@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "WTRTypes.h"
+#include "Interfaces/InteractWithCrosshairInterface.h"
 #include "WTRCharacter.generated.h"
 
 class USpringArmComponent;
@@ -16,7 +17,7 @@ class UTextRenderComponent;
 class AWTRWeapon;
 
 UCLASS()
-class WITCHERY_API AWTRCharacter : public ACharacter
+class WITCHERY_API AWTRCharacter : public ACharacter, public IInteractWithCrosshairInterface
 {
     GENERATED_BODY()
 

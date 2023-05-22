@@ -25,5 +25,5 @@ private:
 
     FCrosshairHUDPackage CrosshairHUDPackage;
 
-    void DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& Spread);
+    void DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& Spread, const FLinearColor& CrosshairColor);
 };

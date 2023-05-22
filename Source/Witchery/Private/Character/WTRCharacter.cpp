@@ -55,6 +55,7 @@ AWTRCharacter::AWTRCharacter()
 
     GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
     GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
+    GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECollisionResponse::ECR_Block);
 
     TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 
