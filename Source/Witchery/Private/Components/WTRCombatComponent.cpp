@@ -44,9 +44,8 @@ void UWTRCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
     if (Character && Character->IsLocallyControlled())
     {
-        FHitResult HitResult;
-        TraceFromScreen(HitResult);
-        HitTarget = HitResult.ImpactPoint;
+        TraceFromScreen(TraceHitResult);
+        HitTarget = TraceHitResult.ImpactPoint;
 
         DrawCrosshair(DeltaTime);
         InterpFOV(DeltaTime);
@@ -108,11 +107,23 @@ void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
         CrosshairCrouchingFactor = FMath::FInterpTo(CrosshairCrouchingFactor, 0.f, DeltaTime, CrouchingFactorSpeedDown);
     }
 
+    if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairInterface>())
+    {
+        HUDPackage.CrosshairColor = CrosshairColorWithTarget;
+        CrosshairHasEnemyFactor = FMath::FInterpTo(CrosshairHasEnemyFactor, HasEnemyFactorSpread, DeltaTime, HasEnemyFactorSpeedUp);
+    }
+    else
+    {
+        HUDPackage.CrosshairColor = CrosshairColorWithoutTarget;
+        CrosshairHasEnemyFactor = FMath::FInterpTo(CrosshairHasEnemyFactor, 0.f, DeltaTime, HasEnemyFactorSpeedDown);
+    }
+
     HUDPackage.CrosshairSpread =   //
         CrosshairSpread +          //
         CrosshairVelocityFactor +  //
         CrosshairAirFactor +       //
         CrosshairShootingFactor -  //
+        CrosshairHasEnemyFactor -  //
         CrosshairAimFactor -       //
         CrosshairCrouchingFactor;
 
@@ -172,10 +183,9 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
     bFireButtonPressed = bPressed;
     if (bFireButtonPressed)
     {
-        FHitResult HitResult;
-        TraceFromScreen(HitResult);
+        TraceFromScreen(TraceHitResult);
 
-        ServerFire(HitResult.ImpactPoint);
+        ServerFire(TraceHitResult.ImpactPoint);
 
         if (EquippedWeapon)
         {
@@ -198,7 +208,7 @@ void UWTRCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize
     }
 }
 
-void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceHitResult)
+void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
 {
     FVector2D ViewportSize;
     if (GEngine && GEngine->GameViewport)
@@ -229,17 +239,17 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceHitResult)
         FVector End = CrosshairWorldPosition + CrosshairWorldDirection * TraceRange;
 
         GetWorld()->LineTraceSingleByChannel(  //
-            TraceHitResult,                    //
+            TraceFromScreenHitResult,          //
             Start,                             //
             End,                               //
             ECC_Visibility                     //
         );
 
-        if (!TraceHitResult.bBlockingHit)
+        if (!TraceFromScreenHitResult.bBlockingHit)
         {
-            TraceHitResult.ImpactPoint = End;
+            TraceFromScreenHitResult.ImpactPoint = End;
         }
-        if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairInterface>())
+        if (TraceFromScreenHitResult.GetActor() && TraceFromScreenHitResult.GetActor()->Implements<UInteractWithCrosshairInterface>())
         {
             HUDPackage.CrosshairColor = CrosshairColorWithTarget;
         }

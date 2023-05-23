@@ -103,6 +103,15 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Aim")
     float AimFactorSpeedDown = 30.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Enemy")
+    float HasEnemyFactorSpread = 0.3f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Enemy")
+    float HasEnemyFactorSpeedUp = 30.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Enemy")
+    float HasEnemyFactorSpeedDown = 30.f;
+
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Aim")
     float DistanceFromCamera = 100.f;
 
@@ -130,6 +139,7 @@ private:
     float CrosshairVelocityFactor = 0.f;
     float CrosshairAirFactor = 0.f;
     float CrosshairAimFactor = 0.f;
+    float CrosshairHasEnemyFactor = 0.f;
     float CrosshairShootingFactor = 0.f;
     float CrosshairCrouchingFactor = 0.f;
 
@@ -152,6 +162,7 @@ private:
     AWTRCharacter* Character;
     AWTRPlayerController* Controller;
     AWTR_HUD* HUD;
+    FHitResult TraceHitResult;
 
     //////////
     // Functions
