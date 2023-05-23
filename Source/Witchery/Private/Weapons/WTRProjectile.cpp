@@ -38,6 +38,11 @@ void AWTRProjectile::BeginPlay()
 {
     Super::BeginPlay();
 
+    check(Tracer);
+    check(DefaultImpactParticles);
+    check(PlayerImpactParticles);
+    check(ImpactSound);
+
     if (Tracer)
     {
         // Spawn projectile tracer
@@ -66,17 +71,25 @@ void AWTRProjectile::OnHit(
         WTRCharacter->MulticastOnHit();
     }
 
-    MulticastOnDestroyed();
+    MulticastOnDestroyed(OtherActor);
     Destroy();
 }
 
-void AWTRProjectile::MulticastOnDestroyed_Implementation()
+void AWTRProjectile::MulticastOnDestroyed_Implementation(AActor* HitActor)
 {
-    if (ImpactParticles)
+    if (HitActor->Implements<UInteractWithCrosshairInterface>() && PlayerImpactParticles)
     {
         UGameplayStatics::SpawnEmitterAtLocation(  //
             GetWorld(),                            //
-            ImpactParticles,                       //
+            PlayerImpactParticles,                 //
+            GetActorTransform()                    //
+        );
+    }
+    else if (DefaultImpactParticles)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(  //
+            GetWorld(),                            //
+            DefaultImpactParticles,                //
             GetActorTransform()                    //
         );
     }

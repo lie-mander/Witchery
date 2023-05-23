@@ -35,11 +35,14 @@ private:
     class UParticleSystem* Tracer;
 
     UPROPERTY(EditDefaultsOnly, Category = "Hit")
-    UParticleSystem* ImpactParticles;
+    UParticleSystem* DefaultImpactParticles;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UParticleSystem* PlayerImpactParticles;
 
     UPROPERTY(EditDefaultsOnly, Category = "Hit")
     class USoundCue* ImpactSound;
 
     UFUNCTION(NetMulticast, Reliable)
-    void MulticastOnDestroyed();
+    void MulticastOnDestroyed(AActor* HitActor);
 };
