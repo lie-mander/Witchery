@@ -13,6 +13,7 @@
 #include "Character/WTRPlayerController.h"
 #include "HUD/WTR_HUD.h"
 #include "Camera/CameraComponent.h"
+#include "TimerManager.h"
 
 UWTRCombatComponent::UWTRCombatComponent()
 {
@@ -183,14 +184,48 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
     bFireButtonPressed = bPressed;
     if (bFireButtonPressed)
     {
-        TraceFromScreen(TraceHitResult);
+        Fire();
+    }
+}
 
-        ServerFire(TraceHitResult.ImpactPoint);
+void UWTRCombatComponent::Fire()
+{
+    if (bCanFire)
+    {
+        bCanFire = false;
+        ServerFire(HitTarget);
 
         if (EquippedWeapon)
         {
             CrosshairShootingFactor = ShootingFactorSpread;
         }
+
+        FireTimerStart();
+    }
+}
+
+void UWTRCombatComponent::FireTimerStart()
+{
+    if (!Character || !EquippedWeapon)
+    {
+        return;
+    }
+
+    Character->GetWorldTimerManager().SetTimer(  //
+        FireTimerHandle,                         //
+        this,                                    //
+        &UWTRCombatComponent::FireTimerUpdate,   //
+        EquippedWeapon->GetWeaponFiringDelay()   //
+    );
+}
+
+void UWTRCombatComponent::FireTimerUpdate()
+{
+    bCanFire = true;
+
+    if (bFireButtonPressed && EquippedWeapon && EquippedWeapon->IsAutomatic())
+    {
+        Fire();
     }
 }
 

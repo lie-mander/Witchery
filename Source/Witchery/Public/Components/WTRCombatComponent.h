@@ -32,6 +32,8 @@ protected:
     void SetAiming(bool bAiming);
     void OnFireButtonPressed(bool bPressed);
 
+    void Fire();
+
     //////////
     // Multiplayer functions and callbacks
     //
@@ -76,14 +78,17 @@ private:
     FVector3d SpringArmOffsetWhileEquipped = FVector3d(-160.f, 0.f, 180.f);
 
     bool bFireButtonPressed = false;
+    bool bCanFire = true;
 
     FVector HitTarget;
+
+    FTimerHandle FireTimerHandle;
 
     //////////
     // Crosshair variables
     //
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Base")
-    float CrosshairSpread = 0.5f;
+    float CrosshairSpread = 0.6f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Air")
     float AirFactorSpread = 2.25f;
@@ -104,7 +109,7 @@ private:
     float AimFactorSpeedDown = 30.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Enemy")
-    float HasEnemyFactorSpread = 0.3f;
+    float HasEnemyFactorSpread = 0.2f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Enemy")
     float HasEnemyFactorSpeedUp = 30.f;
@@ -170,4 +175,6 @@ private:
     void TraceFromScreen(FHitResult& TraceHitResult);
     void DrawCrosshair(float DeltaTime);
     void InterpFOV(float DeltaTime);
+    void FireTimerStart();
+    void FireTimerUpdate();
 };

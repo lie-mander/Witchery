@@ -24,6 +24,8 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void Fire(const FVector& HitTarget);
 
+    FORCEINLINE bool IsAutomatic() const { return bAutomaticWeapon; }
+
     void SetShowWidget(bool bShowWidget);
     void SetWeaponState(EWeaponState NewState);
 
@@ -31,6 +33,7 @@ public:
     FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
     FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
     FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
+    FORCEINLINE float GetWeaponFiringDelay() const { return FireDelay; }
 
     //////////
     // Crosshairs textures
@@ -61,6 +64,15 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "Sockets")
     FName AmmoEjectSocketName = "AmmoEject";
+
+    //////////
+    // Automatic properties
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
+    float FireDelay = 0.25f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
+    bool bAutomaticWeapon = true;
 
 private:
     //////////
