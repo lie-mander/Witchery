@@ -57,6 +57,9 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     // Set if character need to turn right or left while standing
     TurningInPlace = Character->GetTurningState();
 
+    // Sets whether or not to rotate the root bone (necessary if not a simulated proxy) 
+    bRotateRootBone = Character->ShouldRotateRootBone();
+
     // Set offset yaw for strafing
     FRotator AimRotation = Character->GetBaseAimRotation();
     FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());

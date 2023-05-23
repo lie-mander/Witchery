@@ -39,6 +39,9 @@ private:
     bool bIsAccelerating = false;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
+    bool bRotateRootBone = false;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
     ETurningInPlace TurningInPlace;
 
     UPROPERTY(BlueprintReadOnly, Category = "Equip", meta = (AllowPrivateAccess = true))

@@ -76,7 +76,21 @@ void AWTRCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    UpdateAimOffset(DeltaTime);
+    if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
+    {
+        UpdateAimOffset(DeltaTime);
+    }
+    else
+    {
+        CalculateAO_Pitch();
+
+        TimeSinceLastMovementReplication += DeltaTime;
+        if (TimeSinceLastMovementReplication > 0.25f)
+        {
+            OnRep_ReplicateMovement();
+        }
+    }
+
     HideCharacterWithWeaponIfCameraClose();
 }
 
@@ -185,18 +199,7 @@ void AWTRCharacter::LookUp(float Amount)
 
 void AWTRCharacter::UpdateAimOffset(float DeltaTime)
 {
-    // We can update pitch every frame
-    AO_Pitch = GetBaseAimRotation().Pitch;
-
-    // Fix for sending pitch to the simulated proxy if it greater then 90 degrees
-    // Because when we sent it = negative float convert to signed number in [270; 360) area
-    // We must convert it back to [-90; 0)
-    if (AO_Pitch > 90.f && !IsLocallyControlled())
-    {
-        FVector2D InRange(270.f, 360.f);
-        FVector2D OutRange(-90.f, 0.f);
-        AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
-    }
+    CalculateAO_Pitch();
 
     // If character without weapon - he`s using unequipped walk animations and we must to update StartAimRotation
     // Because can be glitching situations
@@ -206,9 +209,7 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
         return;
     }
 
-    FVector Velocity = GetVelocity();
-    Velocity.Z = 0.f;
-    const float Speed = Velocity.Size();
+    const float Speed = CalculateSpeed();
     const bool bIsInAir = GetMovementComponent()->IsFalling();
 
     // Character is moving and we want to 'use control yaw rotation'
@@ -216,6 +217,8 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
     // And also we want to set yaw to 0.f for currect start using aim offset without glitching
     if (Speed > 0.f || bIsInAir)
     {
+        bRotateRootBone = false;
+
         UpdateIfIsNotStanding();
 
         bUseControllerRotationYaw = true;
@@ -227,6 +230,8 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
     // We must turn off 'use control yaw rotation', cause we want that character stay an same pose (legs) and move only hands
     if (FMath::IsNearlyZero(Speed) && !bIsInAir)
     {
+        bRotateRootBone = true;
+
         const FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
         const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartAimRotation);
         AO_Yaw = DeltaAimRotation.Yaw;
@@ -239,6 +244,69 @@ void AWTRCharacter::UpdateAimOffset(float DeltaTime)
         SetTurningInPlace(DeltaTime);
 
         bUseControllerRotationYaw = true;
+    }
+}
+
+void AWTRCharacter::OnRep_ReplicateMovement()
+{
+    Super::OnRep_ReplicateMovement();
+
+    SimProxiesTurn();
+    TimeSinceLastMovementReplication = 0.f;
+}
+
+void AWTRCharacter::SimProxiesTurn()
+{
+    if (!Combat || !Combat->EquippedWeapon)
+    {
+        return;
+    }
+
+    bRotateRootBone = false;
+
+    const float Speed = CalculateSpeed();
+    if (Speed > 0.f)
+    {
+        TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+        return;
+    }
+
+    SimProxyLastFrameRotation = SimProxyRotation;
+    SimProxyRotation = GetActorRotation();
+    SimProxyDeltaYaw = UKismetMathLibrary::NormalizedDeltaRotator(SimProxyRotation, SimProxyLastFrameRotation).Yaw;
+
+    if (FMath::Abs(SimProxyDeltaYaw) > SimProxyTurnThreshold)
+    {
+        if (SimProxyDeltaYaw > SimProxyTurnThreshold)
+        {
+            TurningInPlace = ETurningInPlace::ETIP_Right;
+        }
+        else if (SimProxyDeltaYaw < -SimProxyTurnThreshold)
+        {
+            TurningInPlace = ETurningInPlace::ETIP_Left;
+        }
+        else
+        {
+            TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+        }
+        return;
+    }
+    TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+}
+
+void AWTRCharacter::CalculateAO_Pitch()
+{
+    // We can update pitch every frame
+    AO_Pitch = GetBaseAimRotation().Pitch;
+
+    // Fix for sending pitch to the simulated proxy if it greater then 90 degrees
+    // Because when we sent it = negative float convert to signed number in [270; 360) area
+    // We must convert it back to [-90; 0)
+    if (AO_Pitch > 90.f && !IsLocallyControlled())
+    {
+        FVector2D InRange(270.f, 360.f);
+        FVector2D OutRange(-90.f, 0.f);
+        AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
     }
 }
 
@@ -272,6 +340,13 @@ void AWTRCharacter::UpdateIfIsNotStanding()
     TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
+float AWTRCharacter::CalculateSpeed() const
+{
+    FVector Velocity = GetVelocity();
+    Velocity.Z = 0.f;
+    return Velocity.Size();
+}
+
 void AWTRCharacter::Jump()
 {
     if (bIsCrouched)
@@ -284,7 +359,7 @@ void AWTRCharacter::Jump()
     }
 }
 
-void AWTRCharacter::MulticastOnHit_Implementation() 
+void AWTRCharacter::MulticastOnHit_Implementation()
 {
     PlayHitReactMontage();
 }
@@ -301,7 +376,7 @@ void AWTRCharacter::PlayFireMontage(bool bAiming)
     AnimInstance->Montage_JumpToSection(SectionName);
 }
 
-void AWTRCharacter::PlayHitReactMontage() 
+void AWTRCharacter::PlayHitReactMontage()
 {
     if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !HitReactMontage) return;
 
@@ -431,7 +506,7 @@ AWTRWeapon* AWTRCharacter::GetEquippedWeapon() const
 
 FVector AWTRCharacter::GetHitTarget() const
 {
-    if(!Combat) return FVector();
+    if (!Combat) return FVector();
     return Combat->HitTarget;
 }
 
@@ -445,7 +520,7 @@ bool AWTRCharacter::IsAiming() const
     return Combat && Combat->bIsAiming;
 }
 
-void AWTRCharacter::HideCharacterWithWeaponIfCameraClose() 
+void AWTRCharacter::HideCharacterWithWeaponIfCameraClose()
 {
     if (!IsLocallyControlled())
     {

@@ -29,6 +29,8 @@ public:
     virtual void PostInitializeComponents() override;
     virtual void Jump() override;
 
+    virtual void OnRep_ReplicateMovement() override;
+
     UFUNCTION(NetMulticast, Unreliable)
     void MulticastOnHit();
 
@@ -36,6 +38,7 @@ public:
 
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
+    FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
 
@@ -56,6 +59,8 @@ protected:
     void Turn(float Amount);
     void LookUp(float Amount);
     void UpdateAimOffset(float DeltaTime);
+    void CalculateAO_Pitch();
+    void SimProxiesTurn();
 
     void OnEquipButtonPressed();
     void OnCrouchButtonPressed();
@@ -112,8 +117,11 @@ private:
     //////////
     // Movement
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Aim")
+    UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float AngleToTurn = 80.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Movement", meta = (ClampMin = 0.0))
+    float SimProxyTurnThreshold = 10.f;
 
     float AO_Yaw = 0.f;
     float AO_Pitch = 0.f;
@@ -121,6 +129,12 @@ private:
 
     ETurningInPlace TurningInPlace;
     FRotator StartAimRotation;
+
+    bool bRotateRootBone = false;
+    float SimProxyDeltaYaw = 0.0f;
+    float TimeSinceLastMovementReplication = 0.0f;
+    FRotator SimProxyLastFrameRotation;
+    FRotator SimProxyRotation;
 
     //////////
     // Other variables
@@ -149,4 +163,5 @@ private:
     void SetTurningInPlace(float DeltaTime);
     void UpdateIfIsNotStanding();
     void HideCharacterWithWeaponIfCameraClose();
+    float CalculateSpeed() const;
 };
