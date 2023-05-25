@@ -15,6 +15,7 @@ class UAnimMontage;
 class UWidgetComponent;
 class UTextRenderComponent;
 class AWTRWeapon;
+class AWTRPlayerController;
 
 UCLASS()
 class WITCHERY_API AWTRCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -137,6 +138,20 @@ private:
     FRotator SimProxyRotation;
 
     //////////
+    // Health
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
+    float MaxHealth = 100.f;
+
+    UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
+    float Health = 100.f;
+
+    //////////
+    // Base variables
+    //
+    AWTRPlayerController* WTRPlayerController;
+
+    //////////
     // Other variables
     //
     UPROPERTY(EditDefaultsOnly, Category = "Camera")
@@ -145,6 +160,9 @@ private:
     //////////
     // Multiplayer functions
     //
+    UFUNCTION()
+    void OnRep_Health();
+
     UFUNCTION()
     void OnRep_Username();
 

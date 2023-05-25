@@ -70,6 +70,7 @@ void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
     DOREPLIFETIME_CONDITION(AWTRCharacter, OverlappingWeapon, COND_OwnerOnly);
     DOREPLIFETIME(AWTRCharacter, Username);
+    DOREPLIFETIME(AWTRCharacter, Health);
 }
 
 void AWTRCharacter::Tick(float DeltaTime)
@@ -102,19 +103,22 @@ void AWTRCharacter::BeginPlay()
     check(HitReactMontage);
 
     // Send controller and HUD to Combat component
-    AWTRPlayerController* WTRController = Cast<AWTRPlayerController>(Controller);
-    if (Combat && WTRController)
+    WTRPlayerController = Cast<AWTRPlayerController>(Controller);
+    if (Combat && WTRPlayerController)
     {
-        Combat->Controller = WTRController;
-        if (WTRController)
+        Combat->Controller = WTRPlayerController;
+        if (WTRPlayerController)
         {
-            AWTR_HUD* WTR_HUD = Cast<AWTR_HUD>(WTRController->GetHUD());
+            AWTR_HUD* WTR_HUD = Cast<AWTR_HUD>(WTRPlayerController->GetHUD());
             if (WTR_HUD)
             {
                 Combat->HUD = WTR_HUD;
             }
         }
     }
+
+    // Set current health at start
+    WTRPlayerController->SetHUDHealth(Health, MaxHealth);
 
     // Set user name
     if (IsLocallyControlled() && GetPlayerState() && HasAuthority())
@@ -475,6 +479,11 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
             OverlappingWeapon->SetShowWidget(true);
         }
     }
+}
+
+void AWTRCharacter::OnRep_Health() 
+{
+
 }
 
 void AWTRCharacter::OnRep_Username()
