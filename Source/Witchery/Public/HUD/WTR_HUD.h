@@ -8,6 +8,8 @@
 #include "WTR_HUD.generated.h"
 
 class UTexture2D;
+class UWTRCharacterOverlayWidget;
+class UUserWidget;
 
 UCLASS()
 class WITCHERY_API AWTR_HUD : public AHUD
@@ -18,6 +20,15 @@ public:
     virtual void DrawHUD() override;
 
     FORCEINLINE void SetCrosshairHUDPackage(const FCrosshairHUDPackage& Package) { CrosshairHUDPackage = Package; }
+
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UUserWidget> CharacterOverlayWidgetClass;
+
+    UWTRCharacterOverlayWidget* CharacterOverlayWidget;
+
+protected:
+    virtual void BeginPlay() override;
+    void AddCharacterOverlay();
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair")

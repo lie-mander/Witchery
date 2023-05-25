@@ -1,6 +1,26 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "HUD/WTR_HUD.h"
+#include "GameFramework/PlayerController.h"
+#include "HUD/WTRCharacterOverlayWidget.h"
+
+void AWTR_HUD::BeginPlay() 
+{
+    Super::BeginPlay();
+
+    AddCharacterOverlay();
+}
+
+void AWTR_HUD::AddCharacterOverlay() 
+{
+    APlayerController* PlayerController = GetOwningPlayerController();
+
+    if (PlayerController && CharacterOverlayWidgetClass)
+    {
+        CharacterOverlayWidget = CreateWidget<UWTRCharacterOverlayWidget>(PlayerController, CharacterOverlayWidgetClass);
+        CharacterOverlayWidget->AddToViewport();
+    }
+}
 
 void AWTR_HUD::DrawHUD()
 {
