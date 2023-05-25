@@ -32,9 +32,6 @@ public:
 
     virtual void OnRep_ReplicateMovement() override;
 
-    UFUNCTION(NetMulticast, Unreliable)
-    void MulticastOnHit();
-
     void PlayFireMontage(bool bAiming);
 
     bool IsWeaponEquipped() const;
@@ -146,6 +143,8 @@ private:
     UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
     float Health = 100.f;
 
+    void UpdateHUDHealth();
+
     //////////
     // Base variables
     //
@@ -182,4 +181,11 @@ private:
     void UpdateIfIsNotStanding();
     void HideCharacterWithWeaponIfCameraClose();
     float CalculateSpeed() const;
+
+    //////////
+    // Callbacks
+    //
+    UFUNCTION()
+    void OnTakeAnyDamageCallback(
+        AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 };

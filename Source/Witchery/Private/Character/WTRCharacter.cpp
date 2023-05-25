@@ -118,7 +118,16 @@ void AWTRCharacter::BeginPlay()
     }
 
     // Set current health at start
-    WTRPlayerController->SetHUDHealth(Health, MaxHealth);
+    if (WTRPlayerController)
+    {
+        WTRPlayerController->SetHUDHealth(Health, MaxHealth);
+    }
+
+    // Set callbacks for authority character
+    if (HasAuthority())
+    {
+        OnTakeAnyDamage.AddDynamic(this, &ThisClass::OnTakeAnyDamageCallback);
+    }
 
     // Set user name
     if (IsLocallyControlled() && GetPlayerState() && HasAuthority())
@@ -363,11 +372,6 @@ void AWTRCharacter::Jump()
     }
 }
 
-void AWTRCharacter::MulticastOnHit_Implementation()
-{
-    PlayHitReactMontage();
-}
-
 void AWTRCharacter::PlayFireMontage(bool bAiming)
 {
     if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !FireWeaponMontage) return;
@@ -481,9 +485,28 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
     }
 }
 
-void AWTRCharacter::OnRep_Health() 
+void AWTRCharacter::UpdateHUDHealth()
 {
+    WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
+    if (WTRPlayerController)
+    {
+        WTRPlayerController->SetHUDHealth(Health, MaxHealth);
+    }
+}
 
+void AWTRCharacter::OnTakeAnyDamageCallback(
+    AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+    Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+
+    UpdateHUDHealth();
+    PlayHitReactMontage();
+}
+
+void AWTRCharacter::OnRep_Health()
+{
+    UpdateHUDHealth();
+    PlayHitReactMontage();
 }
 
 void AWTRCharacter::OnRep_Username()

@@ -65,18 +65,13 @@ void AWTRProjectile::BeginPlay()
 void AWTRProjectile::OnHit(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    const auto WTRCharacter = Cast<AWTRCharacter>(OtherActor);
-    if (WTRCharacter)
-    {
-        WTRCharacter->MulticastOnHit();
-    }
-
     MulticastOnDestroyed(OtherActor);
     Destroy();
 }
 
 void AWTRProjectile::MulticastOnDestroyed_Implementation(AActor* HitActor)
 {
+    // Different impacts for different actors
     if (HitActor->Implements<UInteractWithCrosshairInterface>() && PlayerImpactParticles)
     {
         UGameplayStatics::SpawnEmitterAtLocation(  //
