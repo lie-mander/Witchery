@@ -63,6 +63,8 @@ AWTRCharacter::AWTRCharacter()
 
     NetUpdateFrequency = 66.f;
     MinNetUpdateFrequency = 33.f;
+
+    SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 }
 
 void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -515,10 +517,30 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
     }
 }
 
-void AWTRCharacter::Elim_Implementation() 
+void AWTRCharacter::Elim()
+{
+    GetWorldTimerManager().SetTimer(                //
+        EliminatedTimerHandle,                      //
+        this,                                       //
+        &AWTRCharacter::OnEliminatedTimerFinished,  //
+        EliminatedTimerDelay);
+
+    MulticastElim();
+}
+
+void AWTRCharacter::MulticastElim_Implementation()
 {
     PlayEliminationMontage();
     bElimmed = true;
+}
+
+void AWTRCharacter::OnEliminatedTimerFinished() 
+{
+    AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(GetWorld()->GetAuthGameMode());
+    if (WTRGameMode)
+    {
+        WTRGameMode->RequestRespawn(this, Controller);
+    }
 }
 
 void AWTRCharacter::UpdateHUDHealth()

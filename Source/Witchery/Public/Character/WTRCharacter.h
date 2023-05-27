@@ -32,8 +32,9 @@ public:
     virtual void OnRep_ReplicateMovement() override;
 
     UFUNCTION(NetMulticast, Reliable)
-    void Elim();
+    void MulticastElim();
 
+    void Elim();
     virtual void Jump() override;
     void PlayFireMontage(bool bAiming);
 
@@ -153,7 +154,16 @@ private:
 
     void UpdateHUDHealth();
 
+    //////////
+    // Eliminated
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Respawn")
+    float EliminatedTimerDelay = 3.f;
+
     bool bElimmed = false;
+    FTimerHandle EliminatedTimerHandle;
+
+    void OnEliminatedTimerFinished();
 
     //////////
     // Base variables

@@ -17,4 +17,5 @@ class WITCHERY_API AWTRGameMode : public AGameMode
 public:
     virtual void PlayerEliminated(
         AWTRCharacter* EliminatedCharacter, AWTRPlayerController* VictimController, AWTRPlayerController* AttackerController);
+    virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
 };
