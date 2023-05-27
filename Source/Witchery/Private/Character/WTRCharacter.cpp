@@ -18,6 +18,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "HUD/OverheadWidget.h"
 #include "HUD/WTR_HUD.h"
+#include "GameModes/WTRGameMode.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -485,6 +486,11 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
     }
 }
 
+void AWTRCharacter::Elim() 
+{
+
+}
+
 void AWTRCharacter::UpdateHUDHealth()
 {
     WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
@@ -501,6 +507,18 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
 
     UpdateHUDHealth();
     PlayHitReactMontage();
+
+    if (Health <= 0.f && GetWorld())
+    {
+        AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(GetWorld()->GetAuthGameMode());
+        if (WTRGameMode)
+        {
+            WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
+            AWTRPlayerController* AttackerController = Cast<AWTRPlayerController>(InstigatedBy);
+
+            WTRGameMode->PlayerEliminated(this, WTRPlayerController, AttackerController);
+        }
+    }
 }
 
 void AWTRCharacter::OnRep_Health()

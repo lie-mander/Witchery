@@ -28,10 +28,11 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void PostInitializeComponents() override;
-    virtual void Jump() override;
 
     virtual void OnRep_ReplicateMovement() override;
 
+    void Elim();
+    virtual void Jump() override;
     void PlayFireMontage(bool bAiming);
 
     bool IsWeaponEquipped() const;
