@@ -100,6 +100,7 @@ void AWTRCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    check(EliminationMontage);
     check(FireWeaponMontage);
     check(HitReactMontage);
 
@@ -375,10 +376,16 @@ void AWTRCharacter::Jump()
 
 void AWTRCharacter::PlayFireMontage(bool bAiming)
 {
-    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !FireWeaponMontage) return;
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !FireWeaponMontage)
+    {
+        return;
+    }
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance) return;
+    if (!AnimInstance)
+    {
+        return;
+    }
 
     AnimInstance->Montage_Play(FireWeaponMontage);
     const FName SectionName = bAiming ? FName("RifleHip") : FName("RifleAim");
@@ -387,14 +394,36 @@ void AWTRCharacter::PlayFireMontage(bool bAiming)
 
 void AWTRCharacter::PlayHitReactMontage()
 {
-    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !HitReactMontage) return;
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !HitReactMontage)
+    {
+        return;
+    }
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance) return;
+    if (!AnimInstance)
+    {
+        return;
+    }
 
     AnimInstance->Montage_Play(HitReactMontage);
     const FName SectionName("FromFront");
     AnimInstance->Montage_JumpToSection(SectionName);
+}
+
+void AWTRCharacter::PlayEliminationMontage()
+{
+    if (!GetMesh() || !EliminationMontage)
+    {
+        return;
+    }
+
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance)
+    {
+        return;
+    }
+
+    AnimInstance->Montage_Play(EliminationMontage);
 }
 
 void AWTRCharacter::OnEquipButtonPressed()
@@ -486,9 +515,10 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
     }
 }
 
-void AWTRCharacter::Elim() 
+void AWTRCharacter::Elim_Implementation() 
 {
-
+    PlayEliminationMontage();
+    bElimmed = true;
 }
 
 void AWTRCharacter::UpdateHUDHealth()

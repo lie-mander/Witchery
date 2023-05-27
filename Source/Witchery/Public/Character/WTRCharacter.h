@@ -31,12 +31,15 @@ public:
 
     virtual void OnRep_ReplicateMovement() override;
 
+    UFUNCTION(NetMulticast, Reliable)
     void Elim();
+
     virtual void Jump() override;
     void PlayFireMontage(bool bAiming);
 
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
+    FORCEINLINE bool IsElimmed() const { return bElimmed; }
     FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
@@ -105,13 +108,17 @@ private:
     //////////
     // Animation
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UAnimMontage* EliminationMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* FireWeaponMontage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* HitReactMontage;
 
     void PlayHitReactMontage();
+    void PlayEliminationMontage();
 
     //////////
     // Movement
@@ -145,6 +152,8 @@ private:
     float Health = 100.f;
 
     void UpdateHUDHealth();
+
+    bool bElimmed = false;
 
     //////////
     // Base variables

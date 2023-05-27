@@ -60,6 +60,9 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     // Sets whether or not to rotate the root bone (necessary if not a simulated proxy) 
     bRotateRootBone = Character->ShouldRotateRootBone();
 
+    // Sets to true when character is dead
+    bElimmed = Character->IsElimmed();
+
     // Set offset yaw for strafing
     FRotator AimRotation = Character->GetBaseAimRotation();
     FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());

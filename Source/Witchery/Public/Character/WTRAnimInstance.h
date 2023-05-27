@@ -23,6 +23,9 @@ private:
     UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = true))
     bool bIsLocallyControlled = false;
 
+    UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = true))
+    bool bElimmed = false;
+
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
     float Speed = 0.f;
 
@@ -44,11 +47,11 @@ private:
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
     ETurningInPlace TurningInPlace;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Equip", meta = (AllowPrivateAccess = true))
-    bool bIsEquippedWeapon = false;
-
     UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = true))
     bool bIsCrouched = false;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Equip", meta = (AllowPrivateAccess = true))
+    bool bIsEquippedWeapon = false;
 
     UPROPERTY(BlueprintReadOnly, Category = "Aiming", meta = (AllowPrivateAccess = true))
     bool bIsAiming = false;
