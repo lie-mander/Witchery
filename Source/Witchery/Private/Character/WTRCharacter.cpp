@@ -24,13 +24,13 @@ AWTRCharacter::AWTRCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
+    SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
     SpringArmComponent->SetupAttachment(GetMesh());
     SpringArmComponent->TargetArmLength = 600.f;
     SpringArmComponent->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), FVector3d(0.f, 0.f, 180.f)));
     SpringArmComponent->bUsePawnControlRotation = true;
 
-    CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
+    CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(SpringArmComponent, USpringArmComponent::SocketName);
     CameraComponent->bUsePawnControlRotation = true;
 
@@ -46,6 +46,8 @@ AWTRCharacter::AWTRCharacter()
 
     Combat = CreateDefaultSubobject<UWTRCombatComponent>("Combat");
     Combat->SetIsReplicated(true);
+
+    DissolveTimelineComponent = CreateDefaultSubobject<UTimelineComponent>("DissolveTimelineComponent");
 
     GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
     GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 800.f);
@@ -105,6 +107,8 @@ void AWTRCharacter::BeginPlay()
     check(EliminationMontage);
     check(FireWeaponMontage);
     check(HitReactMontage);
+    check(DissolveCurve);
+    check(DissolveMaterialInst);
 
     // Send controller and HUD to Combat component
     WTRPlayerController = Cast<AWTRPlayerController>(Controller);
@@ -532,6 +536,16 @@ void AWTRCharacter::MulticastElim_Implementation()
 {
     PlayEliminationMontage();
     bElimmed = true;
+
+    if (DissolveMaterialInst)
+    {
+        DissolveMaterialInstDynamic = UMaterialInstanceDynamic::Create(DissolveMaterialInst, this);
+        GetMesh()->SetMaterial(0, DissolveMaterialInstDynamic);
+
+        DissolveMaterialInstDynamic->SetScalarParameterValue(FName("Dissolve"), -0.55f);
+        DissolveMaterialInstDynamic->SetScalarParameterValue(FName("Glow"), DissolveMaterialGlow);
+    }
+    StartDissolve();
 }
 
 void AWTRCharacter::OnEliminatedTimerFinished() 
@@ -541,6 +555,21 @@ void AWTRCharacter::OnEliminatedTimerFinished()
     {
         WTRGameMode->RequestRespawn(this, Controller);
     }
+}
+
+void AWTRCharacter::StartDissolve() 
+{
+    OnDissolveTimelineFloat.BindDynamic(this, &AWTRCharacter::OnDissolveTrackFloatChange);
+    if (DissolveTimelineComponent && DissolveCurve)
+    {
+        DissolveTimelineComponent->AddInterpFloat(DissolveCurve, OnDissolveTimelineFloat);
+        DissolveTimelineComponent->Play();
+    }
+}
+
+void AWTRCharacter::OnDissolveTrackFloatChange(float DissolveValue) 
+{
+    DissolveMaterialInstDynamic->SetScalarParameterValue(FName("Dissolve"), DissolveValue);
 }
 
 void AWTRCharacter::UpdateHUDHealth()

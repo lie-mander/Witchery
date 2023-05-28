@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "WTRTypes.h"
 #include "Interfaces/InteractWithCrosshairInterface.h"
+#include "Components/TimelineComponent.h"
 #include "WTRCharacter.generated.h"
 
 class USpringArmComponent;
@@ -97,6 +98,9 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "OverheadText")
     UTextRenderComponent* OverheadText;
 
+    UPROPERTY(VisibleAnywhere, Category = "Elimination")
+    UTimelineComponent* DissolveTimelineComponent;
+
     //////////
     // Multiplayer variables
     //
@@ -164,6 +168,27 @@ private:
     FTimerHandle EliminatedTimerHandle;
 
     void OnEliminatedTimerFinished();
+
+    //////////
+    // Dissolve
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+    UCurveFloat* DissolveCurve;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+    UMaterialInstance* DissolveMaterialInst;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+    float DissolveMaterialGlow = 40.f;
+
+    UMaterialInstanceDynamic* DissolveMaterialInstDynamic;
+
+    FOnTimelineFloat OnDissolveTimelineFloat;
+
+    UFUNCTION()
+    void OnDissolveTrackFloatChange(float DissolveValue);
+
+    void StartDissolve();
 
     //////////
     // Base variables
