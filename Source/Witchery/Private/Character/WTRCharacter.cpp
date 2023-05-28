@@ -429,6 +429,7 @@ void AWTRCharacter::PlayEliminationMontage()
         return;
     }
 
+
     AnimInstance->Montage_Play(EliminationMontage);
 }
 
@@ -523,6 +524,11 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
 
 void AWTRCharacter::Elim()
 {
+    if (Combat && Combat->EquippedWeapon)
+    {
+        Combat->EquippedWeapon->Dropped();
+    }
+
     GetWorldTimerManager().SetTimer(                //
         EliminatedTimerHandle,                      //
         this,                                       //
@@ -537,6 +543,7 @@ void AWTRCharacter::MulticastElim_Implementation()
     PlayEliminationMontage();
     bElimmed = true;
 
+    // Play dissolve animation with dissolve material
     if (DissolveMaterialInst)
     {
         DissolveMaterialInstDynamic = UMaterialInstanceDynamic::Create(DissolveMaterialInst, this);
@@ -546,6 +553,17 @@ void AWTRCharacter::MulticastElim_Implementation()
         DissolveMaterialInstDynamic->SetScalarParameterValue(FName("Glow"), DissolveMaterialGlow);
     }
     StartDissolve();
+
+    // Disable character movement
+    GetCharacterMovement()->DisableMovement();
+    GetCharacterMovement()->StopMovementImmediately();
+
+    if (WTRPlayerController && GetCapsuleComponent() && GetMesh())
+    {
+        DisableInput(WTRPlayerController);
+        GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
 }
 
 void AWTRCharacter::OnEliminatedTimerFinished() 
@@ -605,7 +623,11 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
 void AWTRCharacter::OnRep_Health()
 {
     UpdateHUDHealth();
-    PlayHitReactMontage();
+
+    if (Health > 0.f)
+    {
+        PlayHitReactMontage();
+    }
 }
 
 void AWTRCharacter::OnRep_Username()

@@ -172,15 +172,16 @@ private:
     //////////
     // Dissolve
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+    UPROPERTY(EditDefaultsOnly, Category = "Dissolve")
     UCurveFloat* DissolveCurve;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Elimination")
+    UPROPERTY(EditDefaultsOnly, Category = "Dissolve")
     UMaterialInstance* DissolveMaterialInst;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Elimination")
-    float DissolveMaterialGlow = 40.f;
+    UPROPERTY(EditDefaultsOnly, Category = "Dissolve")
+    float DissolveMaterialGlow = 200.f;
 
+    UPROPERTY(VisibleAnywhere, Category = "Dissolve")
     UMaterialInstanceDynamic* DissolveMaterialInstDynamic;
 
     FOnTimelineFloat OnDissolveTimelineFloat;

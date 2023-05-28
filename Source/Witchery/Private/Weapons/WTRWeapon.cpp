@@ -104,11 +104,26 @@ void AWTRWeapon::SetWeaponState(EWeaponState NewState)
     switch (WeaponState)
     {
         case EWeaponState::EWS_Initial: break;
+
         case EWeaponState::EWS_Equipped:
             AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            WeaponMesh->SetSimulatePhysics(false);
+            WeaponMesh->SetEnableGravity(false);
+            WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             SetShowWidget(false);
             break;
-        case EWeaponState::EWS_Dropped: break;
+
+        case EWeaponState::EWS_Dropped:
+            if (HasAuthority())
+            {
+                AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+            }
+            WeaponMesh->SetSimulatePhysics(true);
+            WeaponMesh->SetEnableGravity(true);
+            WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+            SetShowWidget(true);
+            break;
+
         case EWeaponState::EWS_MAX: break;
     }
 }
@@ -118,12 +133,28 @@ void AWTRWeapon::OnRep_WeaponState()
     switch (WeaponState)
     {
         case EWeaponState::EWS_Initial: break;
-        case EWeaponState::EWS_Equipped:  //
+        case EWeaponState::EWS_Equipped:
+            WeaponMesh->SetSimulatePhysics(false);
+            WeaponMesh->SetEnableGravity(false);
+            WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             SetShowWidget(false);
             break;
-        case EWeaponState::EWS_Dropped: break;
+        case EWeaponState::EWS_Dropped:
+            WeaponMesh->SetSimulatePhysics(true);
+            WeaponMesh->SetEnableGravity(true);
+            WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+            SetShowWidget(true);
+            break;
         case EWeaponState::EWS_MAX: break;
     }
+}
+
+void AWTRWeapon::Dropped()
+{
+    SetWeaponState(EWeaponState::EWS_Dropped);
+    FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+    WeaponMesh->DetachFromComponent(DetachRules);
+    SetOwner(nullptr);
 }
 
 void AWTRWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

@@ -173,6 +173,12 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
 {
     if (Character && EquippedWeapon)
     {
+        EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+        const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+        if (HandSocket)
+        {
+            HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+        }
         Character->GetCharacterMovement()->bOrientRotationToMovement = false;
         Character->bUseControllerRotationYaw = true;
         Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
