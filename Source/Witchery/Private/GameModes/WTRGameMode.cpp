@@ -2,12 +2,22 @@
 
 #include "GameModes/WTRGameMode.h"
 #include "Character/WTRCharacter.h"
+#include "Character/WTRPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
+#include "WTRPlayerState.h"
 
 void AWTRGameMode::PlayerEliminated(
     AWTRCharacter* EliminatedCharacter, AWTRPlayerController* VictimController, AWTRPlayerController* AttackerController)
 {
+    AWTRPlayerState* AttackerPlayerState = AttackerController ? Cast<AWTRPlayerState>(AttackerController->PlayerState) : nullptr;
+    AWTRPlayerState* VictimPlayerState = VictimController ? Cast<AWTRPlayerState>(VictimController->PlayerState) : nullptr;
+
+    if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+    {
+        AttackerPlayerState->AddToScore(1.f);
+    }
+
     if (EliminatedCharacter)
     {
         EliminatedCharacter->Elim();

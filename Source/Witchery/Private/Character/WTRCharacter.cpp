@@ -21,6 +21,7 @@
 #include "GameModes/WTRGameMode.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "WTRPlayerState.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -100,6 +101,7 @@ void AWTRCharacter::Tick(float DeltaTime)
     }
 
     HideCharacterWithWeaponIfCameraClose();
+    PullInit();
 }
 
 void AWTRCharacter::BeginPlay()
@@ -188,6 +190,18 @@ void AWTRCharacter::PostInitializeComponents()
     if (Combat)
     {
         Combat->Character = this;
+    }
+}
+
+void AWTRCharacter::PullInit() 
+{
+    if (!WTRPlayerState)
+    {
+        WTRPlayerState = GetPlayerState<AWTRPlayerState>();
+        if (WTRPlayerState)
+        {
+            WTRPlayerState->AddToScore(0.f);
+        }
     }
 }
 

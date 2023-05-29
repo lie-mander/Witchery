@@ -17,6 +17,7 @@ class UWidgetComponent;
 class UTextRenderComponent;
 class AWTRWeapon;
 class AWTRPlayerController;
+class AWTRPlayerState;
 class USoundCue;
 
 UCLASS()
@@ -30,6 +31,9 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void PostInitializeComponents() override;
+
+    // Try to declare variables in Tick that can`t be declare in BeginPlay
+    void PullInit();
 
     virtual void OnRep_ReplicateMovement() override;
 
@@ -47,6 +51,8 @@ public:
 
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
 
+    FORCEINLINE float GetHealth() const { return Health; }
+    FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
     FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
     FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
     FORCEINLINE ETurningInPlace GetTurningState() const { return TurningInPlace; }
@@ -210,6 +216,7 @@ private:
     // Base variables
     //
     AWTRPlayerController* WTRPlayerController;
+    AWTRPlayerState* WTRPlayerState;
 
     //////////
     // Other variables

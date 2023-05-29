@@ -14,7 +14,10 @@ class WITCHERY_API AWTRPlayerController : public APlayerController
     GENERATED_BODY()
 
 public:
+    virtual void OnPossess(APawn* InPawn) override;
+
     void SetHUDHealth(float CurrentHealth, float MaxHealth);
+    void SetHUDScore(float ScoreAmount);
 
 protected:
     virtual void BeginPlay() override;
