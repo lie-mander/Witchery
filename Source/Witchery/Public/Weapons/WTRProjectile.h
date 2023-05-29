@@ -47,5 +47,5 @@ private:
     class USoundCue* ImpactSound;
 
     UFUNCTION(NetMulticast, Reliable)
-    void MulticastOnDestroyed(AActor* HitActor);
+    void Multicast_OnDestroyed(AActor* HitActor);
 };

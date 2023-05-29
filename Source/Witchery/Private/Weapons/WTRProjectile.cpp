@@ -65,11 +65,11 @@ void AWTRProjectile::BeginPlay()
 void AWTRProjectile::OnHit(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    MulticastOnDestroyed(OtherActor);
+    Multicast_OnDestroyed(OtherActor);
     Destroy();
 }
 
-void AWTRProjectile::MulticastOnDestroyed_Implementation(AActor* HitActor)
+void AWTRProjectile::Multicast_OnDestroyed_Implementation(AActor* HitActor)
 {
     // Different impacts for different actors
     if (HitActor->Implements<UInteractWithCrosshairInterface>() && PlayerImpactParticles)

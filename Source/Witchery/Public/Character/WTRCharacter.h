@@ -17,6 +17,7 @@ class UWidgetComponent;
 class UTextRenderComponent;
 class AWTRWeapon;
 class AWTRPlayerController;
+class USoundCue;
 
 UCLASS()
 class WITCHERY_API AWTRCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -172,16 +173,16 @@ private:
     //////////
     // Dissolve
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Dissolve")
+    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | Base")
     UCurveFloat* DissolveCurve;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Dissolve")
+    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | Base")
     UMaterialInstance* DissolveMaterialInst;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Dissolve")
+    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | Base")
     float DissolveMaterialGlow = 200.f;
 
-    UPROPERTY(VisibleAnywhere, Category = "Dissolve")
+    UPROPERTY(VisibleAnywhere, Category = "Dissolve | Base")
     UMaterialInstanceDynamic* DissolveMaterialInstDynamic;
 
     FOnTimelineFloat OnDissolveTimelineFloat;
@@ -190,6 +191,20 @@ private:
     void OnDissolveTrackFloatChange(float DissolveValue);
 
     void StartDissolve();
+
+    //////////
+    // ElimBot
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | ElimBot")
+    UParticleSystem* ElimBotParticleSys;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | ElimBot")
+    USoundCue* ElimBotSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | ElimBot")
+    float ElimBotHeightAbovePlayer = 200.f;
+
+    UParticleSystemComponent* ElimBotParticleSysComponent;
 
     //////////
     // Base variables
@@ -219,6 +234,9 @@ private:
 
     UFUNCTION(Server, Reliable)
     void Server_SetUsername();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_OnDestroyed();
 
     //////////
     // Functions

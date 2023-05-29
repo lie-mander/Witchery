@@ -19,6 +19,8 @@
 #include "HUD/OverheadWidget.h"
 #include "HUD/WTR_HUD.h"
 #include "GameModes/WTRGameMode.h"
+#include "Sound/SoundCue.h"
+#include "Particles/ParticleSystemComponent.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -109,6 +111,7 @@ void AWTRCharacter::BeginPlay()
     check(HitReactMontage);
     check(DissolveCurve);
     check(DissolveMaterialInst);
+    check(ElimBotParticleSys);
 
     // Send controller and HUD to Combat component
     WTRPlayerController = Cast<AWTRPlayerController>(Controller);
@@ -429,7 +432,6 @@ void AWTRCharacter::PlayEliminationMontage()
         return;
     }
 
-
     AnimInstance->Montage_Play(EliminationMontage);
 }
 
@@ -564,18 +566,40 @@ void AWTRCharacter::MulticastElim_Implementation()
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
+
+    // Spawn ElimBot
+    if (GetWorld() && ElimBotParticleSys)
+    {
+        FVector ElimBotLocation(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + ElimBotHeightAbovePlayer);
+        ElimBotParticleSysComponent = UGameplayStatics::SpawnEmitterAtLocation(  //
+            GetWorld(),                            //
+            ElimBotParticleSys,                    //
+            ElimBotLocation,                       //
+            GetActorRotation()                     //
+        );
+    }
+    if (ElimBotSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(  //
+            this,                               //
+            ElimBotSound,                       //
+            GetActorLocation()                  //
+        );
+    }
 }
 
-void AWTRCharacter::OnEliminatedTimerFinished() 
+void AWTRCharacter::OnEliminatedTimerFinished()
 {
     AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(GetWorld()->GetAuthGameMode());
     if (WTRGameMode)
     {
         WTRGameMode->RequestRespawn(this, Controller);
     }
+
+    Multicast_OnDestroyed();
 }
 
-void AWTRCharacter::StartDissolve() 
+void AWTRCharacter::StartDissolve()
 {
     OnDissolveTimelineFloat.BindDynamic(this, &AWTRCharacter::OnDissolveTrackFloatChange);
     if (DissolveTimelineComponent && DissolveCurve)
@@ -585,9 +609,14 @@ void AWTRCharacter::StartDissolve()
     }
 }
 
-void AWTRCharacter::OnDissolveTrackFloatChange(float DissolveValue) 
+void AWTRCharacter::OnDissolveTrackFloatChange(float DissolveValue)
 {
     DissolveMaterialInstDynamic->SetScalarParameterValue(FName("Dissolve"), DissolveValue);
+}
+
+void AWTRCharacter::Multicast_OnDestroyed_Implementation() 
+{
+    ElimBotParticleSysComponent->DestroyComponent();
 }
 
 void AWTRCharacter::UpdateHUDHealth()
