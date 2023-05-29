@@ -41,13 +41,13 @@ protected:
     void OnRep_EquippedWeapon();
 
     UFUNCTION(Server, Reliable)
-    void ServerSetAiming(bool bAiming);
+    void Server_SetAiming(bool bAiming);
 
     UFUNCTION(Server, Reliable)
-    void ServerFire(const FVector_NetQuantize& TraceHitTarget);
+    void Server_Fire(const FVector_NetQuantize& TraceHitTarget);
 
     UFUNCTION(NetMulticast, Reliable)
-    void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
+    void Multicast_Fire(const FVector_NetQuantize& TraceHitTarget);
 
 private:
     //////////
@@ -164,9 +164,15 @@ private:
     //////////
     // Base variables
     //
+    UPROPERTY()
     AWTRCharacter* Character;
+
+    UPROPERTY()
     AWTRPlayerController* Controller;
+
+    UPROPERTY()
     AWTR_HUD* HUD;
+
     FHitResult TraceHitResult;
 
     //////////

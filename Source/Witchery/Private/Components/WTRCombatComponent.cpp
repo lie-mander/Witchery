@@ -199,7 +199,7 @@ void UWTRCombatComponent::Fire()
     if (bCanFire)
     {
         bCanFire = false;
-        ServerFire(HitTarget);
+        Server_Fire(HitTarget);
 
         if (EquippedWeapon)
         {
@@ -235,12 +235,12 @@ void UWTRCombatComponent::FireTimerUpdate()
     }
 }
 
-void UWTRCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+void UWTRCombatComponent::Server_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-    MulticastFire(TraceHitTarget);
+    Multicast_Fire(TraceHitTarget);
 }
 
-void UWTRCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
     if (Character && EquippedWeapon)
     {
@@ -310,10 +310,10 @@ void UWTRCombatComponent::SetAiming(bool bAiming)
         Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
     }
 
-    ServerSetAiming(bAiming);
+    Server_SetAiming(bAiming);
 }
 
-void UWTRCombatComponent::ServerSetAiming_Implementation(bool bAiming)
+void UWTRCombatComponent::Server_SetAiming_Implementation(bool bAiming)
 {
     bIsAiming = bAiming;
 

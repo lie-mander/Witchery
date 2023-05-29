@@ -23,4 +23,10 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     UTextBlock* ScoreText;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* DefeatsText;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* DeathMessageText;
 };

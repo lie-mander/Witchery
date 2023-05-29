@@ -38,7 +38,7 @@ public:
     virtual void OnRep_ReplicateMovement() override;
 
     UFUNCTION(NetMulticast, Reliable)
-    void MulticastElim();
+    void Multicast_Elim();
 
     void Elim();
     virtual void Jump() override;
@@ -210,6 +210,7 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Dissolve | ElimBot")
     float ElimBotHeightAbovePlayer = 200.f;
 
+    UPROPERTY()
     UParticleSystemComponent* ElimBotParticleSysComponent;
 
     //////////

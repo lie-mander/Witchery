@@ -7,6 +7,10 @@
 #include "WTRTypes.h"
 #include "WTRAnimInstance.generated.h"
 
+class UCharacterMovementComponent;
+class AWTRWeapon;
+class AWTRCharacter;
+
 UCLASS()
 class WITCHERY_API UWTRAnimInstance : public UAnimInstance
 {
@@ -18,7 +22,7 @@ public:
 
 private:
     UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = true))
-    class AWTRCharacter* Character = nullptr;
+    AWTRCharacter* Character;
 
     UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = true))
     bool bIsLocallyControlled = false;
@@ -72,6 +76,9 @@ private:
     FRotator CharacterRotation;
     FRotator DeltaRotation;
 
-    class UCharacterMovementComponent* Movement = nullptr;
-    class AWTRWeapon* EquippedWeapon = nullptr;
+    UPROPERTY()
+    UCharacterMovementComponent* Movement;
+
+    UPROPERTY()
+    AWTRWeapon* EquippedWeapon;
 };

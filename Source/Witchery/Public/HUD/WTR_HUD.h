@@ -24,6 +24,7 @@ public:
     UPROPERTY(EditAnywhere)
     TSubclassOf<UUserWidget> CharacterOverlayWidgetClass;
 
+    UPROPERTY()
     UWTRCharacterOverlayWidget* CharacterOverlayWidget;
 
 protected:

@@ -2,6 +2,8 @@
 
 #include "WTRTypes.generated.h"
 
+class UTexture2D;
+
 // Collision
 
 #define ECC_SkeletalMesh ECollisionChannel::ECC_GameTraceChannel1
@@ -35,11 +37,21 @@ struct FCrosshairHUDPackage
 {
     GENERATED_USTRUCT_BODY()
 
-    class UTexture2D* CrosshairsCenter = nullptr;
+    UPROPERTY()
+    UTexture2D* CrosshairsCenter = nullptr;
+
+    UPROPERTY()
     UTexture2D* CrosshairsLeft = nullptr;
+
+    UPROPERTY()
     UTexture2D* CrosshairsRight = nullptr;
+
+    UPROPERTY()
     UTexture2D* CrosshairsTop = nullptr;
+
+    UPROPERTY()
     UTexture2D* CrosshairsBottom = nullptr;
+
     float CrosshairSpread = 0.0f;
     FLinearColor CrosshairColor = FLinearColor::White;
 };

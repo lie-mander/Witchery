@@ -201,6 +201,7 @@ void AWTRCharacter::PullInit()
         if (WTRPlayerState)
         {
             WTRPlayerState->AddToScore(0.f);
+            WTRPlayerState->AddToDefeats(0);
         }
     }
 }
@@ -551,10 +552,10 @@ void AWTRCharacter::Elim()
         &AWTRCharacter::OnEliminatedTimerFinished,  //
         EliminatedTimerDelay);
 
-    MulticastElim();
+    Multicast_Elim();
 }
 
-void AWTRCharacter::MulticastElim_Implementation()
+void AWTRCharacter::Multicast_Elim_Implementation()
 {
     PlayEliminationMontage();
     bElimmed = true;
@@ -599,6 +600,12 @@ void AWTRCharacter::MulticastElim_Implementation()
             ElimBotSound,                       //
             GetActorLocation()                  //
         );
+    }
+
+    // Show DeathMessage (will hidden in WTRPlayerController.cpp in OnPossess() function)
+    if (WTRPlayerController)
+    {
+        WTRPlayerController->SetHUDDeathMessage(true);
     }
 }
 

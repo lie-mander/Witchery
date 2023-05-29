@@ -18,10 +18,15 @@ public:
 
     void SetHUDHealth(float CurrentHealth, float MaxHealth);
     void SetHUDScore(float ScoreAmount);
+    void SetHUDDefeats(int32 DefeatsAmount);
+    void SetHUDDeathMessage(bool bVisible);
 
 protected:
     virtual void BeginPlay() override;
 
 private:
     AWTR_HUD* WTR_HUD;
+
+    UFUNCTION(Client, Reliable)
+    void Client_HideDeathMessage();
 };

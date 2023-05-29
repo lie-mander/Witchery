@@ -6,6 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "WTRProjectile.generated.h"
 
+class UBoxComponent;
+class UProjectileMovementComponent;
+class UParticleSystemComponent;
+class UParticleSystem;
+class USoundCue;
+
 UCLASS()
 class WITCHERY_API AWTRProjectile : public AActor
 {
@@ -27,15 +33,16 @@ protected:
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Collision")
-    class UBoxComponent* BoxCollision;
+    UBoxComponent* BoxCollision;
 
     UPROPERTY(VisibleAnywhere, Category = "Movement")
-    class UProjectileMovementComponent* ProjectileMovementComponent;
+    UProjectileMovementComponent* ProjectileMovementComponent;
 
-    class UParticleSystemComponent* ParticleSystemComponent;
+    UPROPERTY()
+    UParticleSystemComponent* ParticleSystemComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
-    class UParticleSystem* Tracer;
+    UParticleSystem* Tracer;
 
     UPROPERTY(EditDefaultsOnly, Category = "Hit")
     UParticleSystem* DefaultImpactParticles;
@@ -44,7 +51,7 @@ private:
     UParticleSystem* PlayerImpactParticles;
 
     UPROPERTY(EditDefaultsOnly, Category = "Hit")
-    class USoundCue* ImpactSound;
+    USoundCue* ImpactSound;
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_OnDestroyed(AActor* HitActor);
