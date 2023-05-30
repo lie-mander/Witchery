@@ -26,7 +26,7 @@ void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
     DOREPLIFETIME(UWTRCombatComponent, EquippedWeapon);
     DOREPLIFETIME(UWTRCombatComponent, bIsAiming);
-    DOREPLIFETIME_CONDITION(UWTRCombatComponent, bIsAiming, COND_OwnerOnly);
+    DOREPLIFETIME_CONDITION(UWTRCombatComponent, CarriedAmmo, COND_OwnerOnly);
 }
 
 void UWTRCombatComponent::BeginPlay()
@@ -37,6 +37,11 @@ void UWTRCombatComponent::BeginPlay()
     {
         DefaultZoomFOV = Character->GetCameraComponent()->FieldOfView;
         CurrentZoomFOV = DefaultZoomFOV;
+
+        if (Character->HasAuthority())
+        {
+            InitCarriedAmmoMap();
+        }
     }
 
     bCanFire = true;
@@ -54,6 +59,11 @@ void UWTRCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
         DrawCrosshair(DeltaTime);
         InterpFOV(DeltaTime);
     }
+}
+
+void UWTRCombatComponent::InitCarriedAmmoMap() 
+{
+    CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_AssaultRifle, AssaultRifleCarrAmmo);
 }
 
 void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
@@ -170,6 +180,18 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
     // Need to know weapon owner, must be set after SetOwner() function
     EquippedWeapon->SetHUDAmmo();
 
+    // Set CarriedAmmo by EquippedWeapon weapon type
+    if (CarriedAmmoByWeaponTypeMap.Contains(EquippedWeapon->GetWeaponType()))
+    {
+        CarriedAmmo = CarriedAmmoByWeaponTypeMap[EquippedWeapon->GetWeaponType()];
+
+        Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Controller) : Controller;
+        if (Controller)
+        {
+            Controller->SetHUDCarriedAmmo(CarriedAmmo);
+        }
+    }
+
     Character->GetCharacterMovement()->bOrientRotationToMovement = false;
     Character->bUseControllerRotationYaw = true;
     Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
@@ -199,7 +221,11 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
 
 void UWTRCombatComponent::OnRep_CarriedAmmo() 
 {
-
+    Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Controller) : Controller;
+    if (Controller)
+    {
+        Controller->SetHUDCarriedAmmo(CarriedAmmo);
+    }
 }
 
 void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)

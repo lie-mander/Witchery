@@ -87,7 +87,9 @@ private:
     //////////
     // Carried ammo
     //
-    
+    UPROPERTY(EditDefaultsOnly, Category = "Carried ammo")
+    int32 AssaultRifleCarrAmmo = 30;
+
     // Carried ammo for current equipped weapon
     UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo);
     int32 CarriedAmmo;
@@ -96,6 +98,8 @@ private:
 
     UFUNCTION()
     void OnRep_CarriedAmmo();
+
+    void InitCarriedAmmoMap();
 
     //////////
     // Crosshair variables

@@ -36,6 +36,7 @@ public:
 
     FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
     FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
+    FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
     FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
     FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
     FORCEINLINE float GetWeaponFiringDelay() const { return FireDelay; }
@@ -109,6 +110,9 @@ private:
 
     UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon properties")
     EWeaponState WeaponState;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Weapon properties")
+    EWeaponType WeaponType;
 
     //////////
     // Ammo
