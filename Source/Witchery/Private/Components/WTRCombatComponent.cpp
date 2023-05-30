@@ -26,6 +26,7 @@ void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
     DOREPLIFETIME(UWTRCombatComponent, EquippedWeapon);
     DOREPLIFETIME(UWTRCombatComponent, bIsAiming);
+    DOREPLIFETIME_CONDITION(UWTRCombatComponent, bIsAiming, COND_OwnerOnly);
 }
 
 void UWTRCombatComponent::BeginPlay()
@@ -194,6 +195,11 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
         Character->bUseControllerRotationYaw = true;
         Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
     }
+}
+
+void UWTRCombatComponent::OnRep_CarriedAmmo() 
+{
+
 }
 
 void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)

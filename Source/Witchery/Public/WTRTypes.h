@@ -23,6 +23,14 @@ enum class ETurningInPlace : uint8
 // Weapon
 
 UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+    EWT_AssaultRifle UMETA(DisplayName = "Assault Rifle"),
+
+    EWT_MAX UMETA(DisplayName = "MAX")
+};
+
+UENUM(BlueprintType)
 enum class EWeaponState : uint8
 {
     EWS_Initial UMETA(DisplayName = "Initial"),

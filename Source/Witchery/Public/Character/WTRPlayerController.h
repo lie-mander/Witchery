@@ -21,6 +21,7 @@ public:
     void SetHUDDefeats(int32 DefeatsAmount);
     void SetHUDDeathMessage(bool bVisible);
     void SetHUDWeaponAmmo(int32 AmmoAmount);
+    void SetHUDCarriedAmmo(int32 AmmoAmount);
 
 protected:
     virtual void BeginPlay() override;

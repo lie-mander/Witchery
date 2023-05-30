@@ -118,3 +118,18 @@ void AWTRPlayerController::SetHUDWeaponAmmo(int32 AmmoAmount)
         WTR_HUD->CharacterOverlayWidget->WeaponAmmoText->SetText(FText::FromString(AmmoText));
     }
 }
+
+void AWTRPlayerController::SetHUDCarriedAmmo(int32 AmmoAmount) 
+{
+    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+
+    bool bHUDValid = WTR_HUD &&                                        //
+                     WTR_HUD->CharacterOverlayWidget &&                //
+                     WTR_HUD->CharacterOverlayWidget->CarriedAmmoText;  // CarriedAmmoText
+
+    if (bHUDValid)
+    {
+        const FString AmmoText = FString::Printf(TEXT("%d"), AmmoAmount);
+        WTR_HUD->CharacterOverlayWidget->CarriedAmmoText->SetText(FText::FromString(AmmoText));
+    }
+}

@@ -85,6 +85,19 @@ private:
     FTimerHandle FireTimerHandle;
 
     //////////
+    // Carried ammo
+    //
+    
+    // Carried ammo for current equipped weapon
+    UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo);
+    int32 CarriedAmmo;
+
+    TMap<EWeaponType, int32> CarriedAmmoByWeaponTypeMap;
+
+    UFUNCTION()
+    void OnRep_CarriedAmmo();
+
+    //////////
     // Crosshair variables
     //
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Base")
