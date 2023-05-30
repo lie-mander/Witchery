@@ -29,4 +29,7 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     UTextBlock* DeathMessageText;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* WeaponAmmoText;
 };

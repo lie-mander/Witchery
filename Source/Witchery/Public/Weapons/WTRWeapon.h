@@ -12,6 +12,8 @@ class USkeletalMeshComponent;
 class UWidgetComponent;
 class UTexture2D;
 class AWTRBulletShell;
+class AWTRCharacter;
+class AWTRPlayerController;
 
 UCLASS()
 class WITCHERY_API AWTRWeapon : public AActor
@@ -27,6 +29,7 @@ public:
 
     FORCEINLINE bool IsAutomatic() const { return bAutomaticWeapon; }
 
+    void SetHUDAmmo();
     void SetShowWidget(bool bShowWidget);
     void SetWeaponState(EWeaponState NewState);
 
@@ -107,6 +110,20 @@ private:
     EWeaponState WeaponState;
 
     //////////
+    // Ammo
+    //
+    UPROPERTY(ReplicatedUsing = OnRep_Ammo, EditDefaultsOnly)
+    int32 Ammo = 10;
+
+    UPROPERTY(EditDefaultsOnly)
+    int32 MagazineCapacity = 10;
+
+    UFUNCTION()
+    void OnRep_Ammo();
+
+    void DecreaseAmmo();
+
+    //////////
     // Zooming
     //
     UPROPERTY(EditDefaultsOnly, Category = "Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
@@ -116,10 +133,22 @@ private:
     float ZoomInterpSpeed = 20.f;
 
     //////////
+    // Base variables
+    //
+    UPROPERTY()
+    AWTRPlayerController* WTROwnerPlayerController;
+
+    //////////
+    // Functions
+    //
+
+    //////////
     // Callbacks
     //
     UFUNCTION()
     void OnRep_WeaponState();
+
+    virtual void OnRep_Owner() override;
 
     UFUNCTION()
     void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

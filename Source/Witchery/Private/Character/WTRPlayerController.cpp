@@ -103,3 +103,18 @@ void AWTRPlayerController::SetHUDDeathMessage(bool bVisible)
         WTR_HUD->CharacterOverlayWidget->DeathMessageText->SetVisibility(SlateVisibility);
     }
 }
+
+void AWTRPlayerController::SetHUDWeaponAmmo(int32 AmmoAmount)
+{
+    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+
+    bool bHUDValid = WTR_HUD &&                                        //
+                     WTR_HUD->CharacterOverlayWidget &&                //
+                     WTR_HUD->CharacterOverlayWidget->WeaponAmmoText;  // WeaponAmmoText
+
+    if (bHUDValid)
+    {
+        const FString AmmoText = FString::Printf(TEXT("%d"), AmmoAmount);
+        WTR_HUD->CharacterOverlayWidget->WeaponAmmoText->SetText(FText::FromString(AmmoText));
+    }
+}

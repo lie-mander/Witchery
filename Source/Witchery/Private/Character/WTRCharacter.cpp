@@ -603,9 +603,11 @@ void AWTRCharacter::Multicast_Elim_Implementation()
     }
 
     // Show DeathMessage (will hidden in WTRPlayerController.cpp in OnPossess() function)
+    // And set weapon ammo to 0
     if (WTRPlayerController)
     {
         WTRPlayerController->SetHUDDeathMessage(true);
+        WTRPlayerController->SetHUDWeaponAmmo(0);
     }
 }
 

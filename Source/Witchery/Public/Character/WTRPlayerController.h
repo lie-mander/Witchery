@@ -20,6 +20,7 @@ public:
     void SetHUDScore(float ScoreAmount);
     void SetHUDDefeats(int32 DefeatsAmount);
     void SetHUDDeathMessage(bool bVisible);
+    void SetHUDWeaponAmmo(int32 AmmoAmount);
 
 protected:
     virtual void BeginPlay() override;

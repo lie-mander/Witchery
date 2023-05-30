@@ -37,6 +37,8 @@ void UWTRCombatComponent::BeginPlay()
         DefaultZoomFOV = Character->GetCameraComponent()->FieldOfView;
         CurrentZoomFOV = DefaultZoomFOV;
     }
+
+    bCanFire = true;
 }
 
 void UWTRCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -154,9 +156,18 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
 {
     if (!Character || !WeaponToEquip) return;
 
+    if (EquippedWeapon)
+    {
+        EquippedWeapon->Dropped();
+        EquippedWeapon = nullptr;
+    }
+
     EquippedWeapon = WeaponToEquip;
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
     EquippedWeapon->SetOwner(Character);
+
+    // Need to know weapon owner, must be set after SetOwner() function
+    EquippedWeapon->SetHUDAmmo();
 
     Character->GetCharacterMovement()->bOrientRotationToMovement = false;
     Character->bUseControllerRotationYaw = true;

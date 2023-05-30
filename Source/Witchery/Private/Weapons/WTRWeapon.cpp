@@ -9,6 +9,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "WTRTools.h"
 
 AWTRWeapon::AWTRWeapon()
 {
@@ -39,6 +40,7 @@ void AWTRWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AWTRWeapon, WeaponState);
+    DOREPLIFETIME(AWTRWeapon, Ammo);
 }
 
 void AWTRWeapon::BeginPlay()
@@ -95,6 +97,20 @@ void AWTRWeapon::Fire(const FVector& HitTarget)
             RandRotator                              //
         );
     }
+
+    DecreaseAmmo();
+}
+
+void AWTRWeapon::DecreaseAmmo()
+{
+    --Ammo;
+
+    SetHUDAmmo();
+}
+
+void AWTRWeapon::OnRep_Ammo()
+{
+    SetHUDAmmo();
 }
 
 void AWTRWeapon::SetWeaponState(EWeaponState NewState)
@@ -121,7 +137,6 @@ void AWTRWeapon::SetWeaponState(EWeaponState NewState)
             WeaponMesh->SetSimulatePhysics(true);
             WeaponMesh->SetEnableGravity(true);
             WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-            SetShowWidget(true);
             break;
 
         case EWeaponState::EWS_MAX: break;
@@ -143,9 +158,22 @@ void AWTRWeapon::OnRep_WeaponState()
             WeaponMesh->SetSimulatePhysics(true);
             WeaponMesh->SetEnableGravity(true);
             WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-            SetShowWidget(true);
             break;
         case EWeaponState::EWS_MAX: break;
+    }
+}
+
+void AWTRWeapon::OnRep_Owner()
+{
+    Super::OnRep_Owner();
+
+    if (!Owner)
+    {
+        WTROwnerPlayerController = nullptr;
+    }
+    else
+    {
+        SetHUDAmmo();
     }
 }
 
@@ -154,7 +182,9 @@ void AWTRWeapon::Dropped()
     SetWeaponState(EWeaponState::EWS_Dropped);
     FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
     WeaponMesh->DetachFromComponent(DetachRules);
+
     SetOwner(nullptr);
+    WTROwnerPlayerController = nullptr;
 }
 
 void AWTRWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -182,5 +212,16 @@ void AWTRWeapon::SetShowWidget(bool bShowWidget)
     if (PickupWidget)
     {
         PickupWidget->SetVisibility(bShowWidget);
+    }
+}
+
+void AWTRWeapon::SetHUDAmmo()
+{
+    WTROwnerPlayerController =
+        (WTROwnerPlayerController == nullptr) ? UWTRTools::GetPlayerControllerByActor(GetOwner()) : WTROwnerPlayerController;
+
+    if (WTROwnerPlayerController)
+    {
+        WTROwnerPlayerController->SetHUDWeaponAmmo(Ammo);
     }
 }
