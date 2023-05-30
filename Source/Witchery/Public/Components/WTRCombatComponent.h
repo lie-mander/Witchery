@@ -183,4 +183,5 @@ private:
     void InterpFOV(float DeltaTime);
     void FireTimerStart();
     void FireTimerUpdate();
+    bool CanFire() const;
 };

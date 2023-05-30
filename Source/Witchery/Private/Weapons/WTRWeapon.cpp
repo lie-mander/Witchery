@@ -103,7 +103,7 @@ void AWTRWeapon::Fire(const FVector& HitTarget)
 
 void AWTRWeapon::DecreaseAmmo()
 {
-    --Ammo;
+    Ammo = FMath::Clamp(Ammo - 1, 0, MagazineCapacity);
 
     SetHUDAmmo();
 }

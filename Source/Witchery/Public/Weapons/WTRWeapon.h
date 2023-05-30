@@ -28,6 +28,7 @@ public:
     void Dropped();
 
     FORCEINLINE bool IsAutomatic() const { return bAutomaticWeapon; }
+    FORCEINLINE bool IsEmply() const { return Ammo <= 0; }
 
     void SetHUDAmmo();
     void SetShowWidget(bool bShowWidget);

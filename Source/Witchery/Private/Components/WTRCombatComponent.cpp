@@ -207,7 +207,7 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
 
 void UWTRCombatComponent::Fire()
 {
-    if (bCanFire)
+    if (CanFire())
     {
         bCanFire = false;
         Server_Fire(HitTarget);
@@ -332,4 +332,9 @@ void UWTRCombatComponent::Server_SetAiming_Implementation(bool bAiming)
     {
         Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
     }
+}
+
+bool UWTRCombatComponent::CanFire() const
+{
+    return EquippedWeapon && bCanFire && !EquippedWeapon->IsEmply();
 }
