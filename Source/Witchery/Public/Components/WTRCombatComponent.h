@@ -31,6 +31,7 @@ protected:
 
     void SetAiming(bool bAiming);
     void OnFireButtonPressed(bool bPressed);
+    void OnReloadButtonPressed();
 
     void Fire();
 
@@ -42,6 +43,9 @@ protected:
 
     UFUNCTION(Server, Reliable)
     void Server_SetAiming(bool bAiming);
+
+    UFUNCTION(Server, Reliable)
+    void Server_Reload();
 
     UFUNCTION(Server, Reliable)
     void Server_Fire(const FVector_NetQuantize& TraceHitTarget);

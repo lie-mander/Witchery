@@ -22,6 +22,7 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "WTRPlayerState.h"
+#include "WTRTypes.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -176,6 +177,7 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ThisClass::OnFireButtonPressed);
     PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ThisClass::OnFireButtonReleased);
     PlayerInputComponent->BindAction("Pause", EInputEvent::IE_Pressed, this, &ThisClass::OnPauseButtonPressed);
+    PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &ThisClass::OnReloadButtonPressed);
 
     PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ThisClass::MoveForward);
     PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ThisClass::MoveRight);
@@ -416,6 +418,33 @@ void AWTRCharacter::PlayFireMontage(bool bAiming)
     AnimInstance->Montage_JumpToSection(SectionName);
 }
 
+void AWTRCharacter::PlayReloadMontage() 
+{
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !ReloadMontage)
+    {
+        return;
+    }
+
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance)
+    {
+        return;
+    }
+
+    AnimInstance->Montage_Play(ReloadMontage);
+
+    FName SectionName;
+
+    switch (Combat->EquippedWeapon->GetWeaponType())
+    {
+        case EWeaponType::EWT_AssaultRifle: 
+            SectionName = FName("Rifle");
+            break;
+    }
+
+    AnimInstance->Montage_JumpToSection(SectionName);
+}
+
 void AWTRCharacter::PlayHitReactMontage()
 {
     if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !HitReactMontage)
@@ -514,6 +543,14 @@ void AWTRCharacter::OnFireButtonReleased()
     if (Combat)
     {
         Combat->OnFireButtonPressed(false);
+    }
+}
+
+void AWTRCharacter::OnReloadButtonPressed() 
+{
+    if (Combat)
+    {
+        Combat->OnReloadButtonPressed();
     }
 }
 

@@ -292,6 +292,24 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
     }
 }
 
+void UWTRCombatComponent::OnReloadButtonPressed() 
+{
+    if (CarriedAmmo > 0)
+    {
+        Server_Reload();
+    }
+}
+
+void UWTRCombatComponent::Server_Reload_Implementation() 
+{
+    if (Character == nullptr)
+    {
+        return;
+    }
+
+    Character->PlayReloadMontage();
+}
+
 void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
 {
     FVector2D ViewportSize;

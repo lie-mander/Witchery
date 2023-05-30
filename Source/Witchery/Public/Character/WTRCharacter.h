@@ -43,6 +43,9 @@ public:
     void Elim();
     virtual void Jump() override;
     void PlayFireMontage(bool bAiming);
+    void PlayReloadMontage();
+    void PlayHitReactMontage();
+    void PlayEliminationMontage();
 
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
@@ -80,6 +83,7 @@ protected:
     void OnPauseButtonPressed();
     void OnFireButtonPressed();
     void OnFireButtonReleased();
+    void OnReloadButtonPressed();
 
     //////////
     // Other functions
@@ -121,16 +125,16 @@ private:
     // Animation
     //
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
-    UAnimMontage* EliminationMontage;
-
-    UPROPERTY(EditDefaultsOnly, Category = "Animation")
     UAnimMontage* FireWeaponMontage;
 
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
-    UAnimMontage* HitReactMontage;
+    UAnimMontage* ReloadMontage;
 
-    void PlayHitReactMontage();
-    void PlayEliminationMontage();
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UAnimMontage* EliminationMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UAnimMontage* HitReactMontage;
 
     //////////
     // Movement
