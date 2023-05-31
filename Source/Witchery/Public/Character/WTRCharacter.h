@@ -61,6 +61,7 @@ public:
     FORCEINLINE ETurningInPlace GetTurningState() const { return TurningInPlace; }
     FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArmComponent; }
     FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
+    ECombatState GetCombatState() const;
     AWTRWeapon* GetEquippedWeapon() const;
     FVector GetHitTarget() const;
 
@@ -264,4 +265,6 @@ private:
     UFUNCTION()
     void OnTakeAnyDamageCallback(
         AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+    void OnReloadFinishedNotifyPlayed(USkeletalMeshComponent* MeshComp);
 };

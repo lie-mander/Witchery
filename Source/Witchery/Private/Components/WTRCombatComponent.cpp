@@ -26,6 +26,7 @@ void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
     DOREPLIFETIME(UWTRCombatComponent, EquippedWeapon);
     DOREPLIFETIME(UWTRCombatComponent, bIsAiming);
+    DOREPLIFETIME(UWTRCombatComponent, CombatState);
     DOREPLIFETIME_CONDITION(UWTRCombatComponent, CarriedAmmo, COND_OwnerOnly);
 }
 
@@ -61,7 +62,7 @@ void UWTRCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
     }
 }
 
-void UWTRCombatComponent::InitCarriedAmmoMap() 
+void UWTRCombatComponent::InitCarriedAmmoMap()
 {
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_AssaultRifle, AssaultRifleCarrAmmo);
 }
@@ -219,7 +220,7 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
     }
 }
 
-void UWTRCombatComponent::OnRep_CarriedAmmo() 
+void UWTRCombatComponent::OnRep_CarriedAmmo()
 {
     Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Controller) : Controller;
     if (Controller)
@@ -292,22 +293,51 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
     }
 }
 
-void UWTRCombatComponent::OnReloadButtonPressed() 
+void UWTRCombatComponent::OnReloadButtonPressed()
 {
-    if (CarriedAmmo > 0)
+    if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
     {
         Server_Reload();
     }
 }
 
-void UWTRCombatComponent::Server_Reload_Implementation() 
+void UWTRCombatComponent::Server_Reload_Implementation()
 {
     if (Character == nullptr)
     {
         return;
     }
 
+    CombatState = ECombatState::ECS_Reloading;
+    ReloadHandle();
+}
+
+void UWTRCombatComponent::OnRep_CombatState()
+{
+    switch (CombatState)
+    {
+        case ECombatState::ECS_Reloading:  //
+            ReloadHandle();
+            break;
+    }
+}
+
+void UWTRCombatComponent::ReloadHandle()
+{
     Character->PlayReloadMontage();
+}
+
+void UWTRCombatComponent::FinishReloading() 
+{
+    if (Character == nullptr)
+    {
+        return;
+    }
+
+    if (Character->HasAuthority())
+    {
+        CombatState = ECombatState::ECS_Unoccupied;
+    }
 }
 
 void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)

@@ -23,6 +23,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "WTRPlayerState.h"
 #include "WTRTypes.h"
+#include "WTRTools.h"
+#include "Animation/Notifies/WTRReloadFinishedAnimNotify.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -151,6 +153,18 @@ void AWTRCharacter::BeginPlay()
     else if (IsLocallyControlled() && !HasAuthority())
     {
         Server_SetUsername();
+    }
+
+    // Set callbacks for anim notifies
+    if (ReloadMontage)
+    {
+        UWTRReloadFinishedAnimNotify* WTRReloadFinishedAnimNotify =
+            UWTRTools::FindNotifyByClass<UWTRReloadFinishedAnimNotify>(ReloadMontage);
+
+        if (WTRReloadFinishedAnimNotify)
+        {
+            WTRReloadFinishedAnimNotify->OnNotifyPlayed.AddUObject(this, &ThisClass::OnReloadFinishedNotifyPlayed);
+        }
     }
 }
 
@@ -560,6 +574,14 @@ void AWTRCharacter::OnPauseButtonPressed()
     UKismetSystemLibrary::QuitGame(GetWorld(), PlayerController, EQuitPreference::Quit, true);
 }
 
+void AWTRCharacter::OnReloadFinishedNotifyPlayed(USkeletalMeshComponent* MeshComp) 
+{
+    if (Combat)
+    {
+        Combat->FinishReloading();
+    }
+}
+
 void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
 {
     if (OverlappingWeapon)
@@ -738,6 +760,12 @@ void AWTRCharacter::OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon)
     {
         LastWeapon->SetShowWidget(false);
     }
+}
+
+ECombatState AWTRCharacter::GetCombatState() const
+{
+    if (!Combat) return ECombatState::ECS_MAX;
+    return Combat->CombatState;
 }
 
 AWTRWeapon* AWTRCharacter::GetEquippedWeapon() const

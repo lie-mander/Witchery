@@ -72,6 +72,9 @@ private:
     UPROPERTY(BlueprintReadOnly, Category = "FABRIK", meta = (AllowPrivateAccess = true))
     FTransform LeftHandTransform;
 
+    UPROPERTY(BlueprintReadOnly, Category = "FABRIK", meta = (AllowPrivateAccess = true))
+    bool bUseFABRIK = true;
+
     FRotator CharacterRotationLastFrame;
     FRotator CharacterRotation;
     FRotator DeltaRotation;

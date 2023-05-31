@@ -8,6 +8,10 @@ class UTexture2D;
 
 #define ECC_SkeletalMesh ECollisionChannel::ECC_GameTraceChannel1
 
+// Delegates
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotifyPlayed, class USkeletalMeshComponent*)
+
 // Animation
 
 UENUM(BlueprintType)
@@ -38,6 +42,15 @@ enum class EWeaponState : uint8
     EWS_Dropped UMETA(DisplayName = "Dropped"),
 
     EWS_MAX UMETA(DisplayName = "MAX")
+};
+
+UENUM(BlueprintType)
+enum class ECombatState : uint8
+{
+    ECS_Unoccupied UMETA(DisplayName = "Unoccupied"),
+    ECS_Reloading UMETA(DisplayName = "Reloading"),
+
+    ECS_MAX UMETA(DisplayName = "MAX")
 };
 
 USTRUCT(BlueprintType)

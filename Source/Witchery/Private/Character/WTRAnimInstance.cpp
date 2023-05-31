@@ -63,6 +63,9 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     // Sets to true when character is dead
     bElimmed = Character->IsElimmed();
 
+    // When character is reloading, he doesn`t need to use FABRIK to left hand
+    bUseFABRIK = Character->GetCombatState() != ECombatState::ECS_Reloading;
+
     // Set offset yaw for strafing
     FRotator AimRotation = Character->GetBaseAimRotation();
     FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());

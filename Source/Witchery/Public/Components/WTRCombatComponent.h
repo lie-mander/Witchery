@@ -25,6 +25,7 @@ public:
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     void EquipWeapon(AWTRWeapon* WeaponToEquip);
+    void FinishReloading();
 
 protected:
     virtual void BeginPlay() override;
@@ -55,31 +56,31 @@ protected:
 
 private:
     //////////
-    // Multiplayer variables
+    // Movement
     //
-    UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
-    AWTRWeapon* EquippedWeapon;
+    UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+    ECombatState CombatState = ECombatState::ECS_Unoccupied;
 
-    UPROPERTY(Replicated)
-    bool bIsAiming = false;
-
-    //////////
-    // Movement variables
-    //
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float BaseWalkSpeed = 600.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Movement")
     float AimWalkSpeed = 300.f;
 
+    UFUNCTION()
+    void OnRep_CombatState();
+
     //////////
-    // Shooting variables
+    // Shooting
     //
     UPROPERTY(EditDefaultsOnly, Category = "Shoot")
     float TraceRange = 300.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Shoot")
     FVector3d SpringArmOffsetWhileEquipped = FVector3d(-160.f, 0.f, 180.f);
+
+    UPROPERTY(Replicated)
+    bool bIsAiming = false;
 
     bool bFireButtonPressed = false;
     bool bCanFire = true;
@@ -106,7 +107,7 @@ private:
     void InitCarriedAmmoMap();
 
     //////////
-    // Crosshair variables
+    // Crosshair
     //
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Base")
     float CrosshairSpread = 0.6f;
@@ -194,6 +195,9 @@ private:
     UPROPERTY()
     AWTR_HUD* HUD;
 
+    UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
+    AWTRWeapon* EquippedWeapon;
+
     FHitResult TraceHitResult;
 
     //////////
@@ -204,5 +208,6 @@ private:
     void InterpFOV(float DeltaTime);
     void FireTimerStart();
     void FireTimerUpdate();
+    void ReloadHandle();
     bool CanFire() const;
 };
