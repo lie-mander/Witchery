@@ -286,7 +286,7 @@ void UWTRCombatComponent::Server_Fire_Implementation(const FVector_NetQuantize& 
 
 void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
-    if (Character && EquippedWeapon)
+    if (Character && EquippedWeapon && CombatState == ECombatState::ECS_Unoccupied)
     {
         Character->PlayFireMontage(bIsAiming);
         EquippedWeapon->Fire(TraceHitTarget);
@@ -316,6 +316,12 @@ void UWTRCombatComponent::OnRep_CombatState()
 {
     switch (CombatState)
     {
+        case ECombatState::ECS_Unoccupied:  //
+            if (bFireButtonPressed)
+            {
+                Fire();
+            }
+
         case ECombatState::ECS_Reloading:  //
             ReloadHandle();
             break;
@@ -327,7 +333,7 @@ void UWTRCombatComponent::ReloadHandle()
     Character->PlayReloadMontage();
 }
 
-void UWTRCombatComponent::FinishReloading() 
+void UWTRCombatComponent::FinishReloading()
 {
     if (Character == nullptr)
     {
@@ -337,6 +343,11 @@ void UWTRCombatComponent::FinishReloading()
     if (Character->HasAuthority())
     {
         CombatState = ECombatState::ECS_Unoccupied;
+    }
+
+    if (bFireButtonPressed)
+    {
+        Fire();
     }
 }
 
@@ -416,5 +427,5 @@ void UWTRCombatComponent::Server_SetAiming_Implementation(bool bAiming)
 
 bool UWTRCombatComponent::CanFire() const
 {
-    return EquippedWeapon && bCanFire && !EquippedWeapon->IsEmply();
+    return EquippedWeapon && !EquippedWeapon->IsEmply() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }
