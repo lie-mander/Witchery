@@ -7,13 +7,14 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Weapons/WTRWeapon.h"
 #include "Character/WTRCharacter.h"
+#include "Character/WTRPlayerController.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Character/WTRPlayerController.h"
 #include "HUD/WTR_HUD.h"
 #include "Camera/CameraComponent.h"
 #include "TimerManager.h"
+#include "Sound/SoundCue.h"
 
 UWTRCombatComponent::UWTRCombatComponent()
 {
@@ -193,6 +194,12 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
         }
     }
 
+    // Play pickup sound (for server, for client will play in OnRep_EquippedWeapon)
+    UGameplayStatics::PlaySoundAtLocation(  //
+        this,                               //
+        EquippedWeapon->PickupSound,        //
+        Character->GetActorLocation());
+
     Character->GetCharacterMovement()->bOrientRotationToMovement = false;
     Character->bUseControllerRotationYaw = true;
     Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
@@ -217,6 +224,12 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
         Character->GetCharacterMovement()->bOrientRotationToMovement = false;
         Character->bUseControllerRotationYaw = true;
         Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
+
+        // Play pickup sound
+        UGameplayStatics::PlaySoundAtLocation(  //
+            this,                               //
+            EquippedWeapon->PickupSound,        //
+            Character->GetActorLocation());
     }
 }
 
@@ -225,7 +238,7 @@ void UWTRCombatComponent::OnRep_CarriedAmmo()
     SetHUDCarriedAmmo();
 }
 
-void UWTRCombatComponent::SetHUDCarriedAmmo() 
+void UWTRCombatComponent::SetHUDCarriedAmmo()
 {
     Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Controller) : Controller;
     if (Controller)
@@ -358,7 +371,7 @@ int32 UWTRCombatComponent::AmmoToReload()
     return 0;
 }
 
-void UWTRCombatComponent::ReloadWeaponAndSubCarriedAmmo() 
+void UWTRCombatComponent::ReloadWeaponAndSubCarriedAmmo()
 {
     if (!EquippedWeapon)
     {

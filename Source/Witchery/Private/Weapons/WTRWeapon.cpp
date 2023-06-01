@@ -52,6 +52,7 @@ void AWTRWeapon::BeginPlay()
     check(PickupWidget);
     check(FireAnimation);
     check(BulletShellClass);
+    check(PickupSound);
 
     if (PickupWidget)
     {

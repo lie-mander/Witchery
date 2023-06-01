@@ -14,6 +14,7 @@ class UTexture2D;
 class AWTRBulletShell;
 class AWTRCharacter;
 class AWTRPlayerController;
+class USoundCue;
 
 UCLASS()
 class WITCHERY_API AWTRWeapon : public AActor
@@ -61,6 +62,12 @@ public:
 
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
     UTexture2D* CrosshairsBottom = nullptr;
+
+    //////////
+    // Sounds
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    USoundCue* PickupSound;
 
 protected:
     virtual void BeginPlay() override;
