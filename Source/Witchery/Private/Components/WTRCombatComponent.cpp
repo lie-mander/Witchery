@@ -182,7 +182,7 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
     // Need to know weapon owner, must be set after SetOwner() function
     EquippedWeapon->SetHUDAmmo();
 
-    // Set CarriedAmmo by EquippedWeapon weapon type
+    // Set CarriedAmmo and WeaponType on HUD by EquippedWeapon weapon type
     if (CarriedAmmoByWeaponTypeMap.Contains(EquippedWeapon->GetWeaponType()))
     {
         CarriedAmmo = CarriedAmmoByWeaponTypeMap[EquippedWeapon->GetWeaponType()];
@@ -191,6 +191,7 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
         if (Controller)
         {
             Controller->SetHUDCarriedAmmo(CarriedAmmo);
+            Controller->SetHUDWeaponType(EquippedWeapon->GetWeaponType());
         }
     }
 
@@ -236,6 +237,12 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
             this,                               //
             EquippedWeapon->PickupSound,        //
             Character->GetActorLocation());
+
+        Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Character->Controller) : Controller;
+        if (Controller)
+        {
+            Controller->SetHUDWeaponType(EquippedWeapon->GetWeaponType());
+        }
     }
 }
 

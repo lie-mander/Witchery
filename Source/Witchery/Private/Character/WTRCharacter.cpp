@@ -222,6 +222,15 @@ void AWTRCharacter::PullInit()
     }
 }
 
+void AWTRCharacter::OnPossessHandle(AWTRPlayerController* NewController, AWTR_HUD* NewHUD) 
+{
+    if (Combat && NewController && NewHUD)
+    {
+        Combat->Controller = NewController;
+        Combat->HUD = NewHUD;
+    }
+}
+
 void AWTRCharacter::MoveForward(float Amount)
 {
     if (Controller && Amount != 0.f)
@@ -604,10 +613,12 @@ void AWTRCharacter::Elim()
     {
         Combat->EquippedWeapon->Dropped();
     }
-    if (Combat)
+    if (Combat && WTRPlayerController)
     {
         Combat->CarriedAmmo = 0;
         Combat->SetHUDCarriedAmmo();
+
+        WTRPlayerController->SetHUDWeaponType(EWeaponType::EWT_MAX);
     }
 
     GetWorldTimerManager().SetTimer(                //
@@ -667,11 +678,13 @@ void AWTRCharacter::Multicast_Elim_Implementation()
     }
 
     // Show DeathMessage (will hidden in WTRPlayerController.cpp in OnPossess() function)
-    // And set weapon ammo to 0
+    // Set weapon ammo to 0
+    // Set weapon type to NONE
     if (WTRPlayerController)
     {
         WTRPlayerController->SetHUDDeathMessage(true);
         WTRPlayerController->SetHUDWeaponAmmo(0);
+        WTRPlayerController->SetHUDWeaponType(EWeaponType::EWT_MAX);
     }
 }
 

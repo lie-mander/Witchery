@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "WTRTypes.h"
 #include "WTRPlayerController.generated.h"
 
 class AWTR_HUD;
@@ -23,6 +24,7 @@ public:
     void SetHUDDeathMessage(bool bVisible);
     void SetHUDWeaponAmmo(int32 AmmoAmount);
     void SetHUDCarriedAmmo(int32 AmmoAmount);
+    void SetHUDWeaponType(EWeaponType Type);
 
 protected:
     virtual void BeginPlay() override;

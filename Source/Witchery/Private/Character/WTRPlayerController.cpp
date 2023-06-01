@@ -29,10 +29,12 @@ void AWTRPlayerController::OnPossess(APawn* InPawn)
     }
 
     AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(InPawn);
-    if (WTRCharacter)
+    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+
+    if (WTRCharacter && WTR_HUD)
     {
+        WTRCharacter->OnPossessHandle(this, WTR_HUD);
         SetHUDHealth(WTRCharacter->GetHealth(), WTRCharacter->GetMaxHealth());
-        //SetHUDCarriedAmmo(WTRCharacter->GetCarriedAmmo());
     }
 }
 
@@ -132,5 +134,31 @@ void AWTRPlayerController::SetHUDCarriedAmmo(int32 AmmoAmount)
     {
         const FString AmmoText = FString::Printf(TEXT("%d"), AmmoAmount);
         WTR_HUD->CharacterOverlayWidget->CarriedAmmoText->SetText(FText::FromString(AmmoText));
+    }
+}
+
+void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
+{
+    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+
+    bool bHUDValid = WTR_HUD &&                                        //
+                     WTR_HUD->CharacterOverlayWidget &&                //
+                     WTR_HUD->CharacterOverlayWidget->WeaponTypeText;  // WeaponTypeText
+
+    if (bHUDValid)
+    {
+        FString WeaponTypeText;
+        switch (Type)
+        {
+            case EWeaponType::EWT_AssaultRifle:     //
+                WeaponTypeText = FString("Rifle");  //
+                break;
+
+            case EWeaponType::EWT_MAX:         //
+                WeaponTypeText = FString("");  //
+                break;
+        }
+
+        WTR_HUD->CharacterOverlayWidget->WeaponTypeText->SetText(FText::FromString(WeaponTypeText));
     }
 }

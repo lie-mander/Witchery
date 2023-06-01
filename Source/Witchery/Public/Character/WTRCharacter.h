@@ -19,6 +19,7 @@ class AWTRWeapon;
 class AWTRPlayerController;
 class AWTRPlayerState;
 class USoundCue;
+class AWTR_HUD;
 
 UCLASS()
 class WITCHERY_API AWTRCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -53,6 +54,7 @@ public:
     FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
+    void OnPossessHandle(AWTRPlayerController* NewController, AWTR_HUD* NewHUD);
 
     FORCEINLINE int32 GetCarriedAmmo() const;
     FORCEINLINE float GetHealth() const { return Health; }
