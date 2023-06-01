@@ -26,6 +26,7 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void Fire(const FVector& HitTarget);
     void Dropped();
+    void AddAmmo(int32 AmmoToAdd);
 
     FORCEINLINE bool IsAutomatic() const { return bAutomaticWeapon; }
     FORCEINLINE bool IsEmply() const { return Ammo <= 0; }
@@ -40,6 +41,8 @@ public:
     FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
     FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
     FORCEINLINE float GetWeaponFiringDelay() const { return FireDelay; }
+    FORCEINLINE int32 GetAmmo() const { return Ammo; }
+    FORCEINLINE int32 GetMagazineCapacity() const { return MagazineCapacity; }
 
     //////////
     // Crosshairs textures

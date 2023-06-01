@@ -187,6 +187,13 @@ void AWTRWeapon::Dropped()
     WTROwnerPlayerController = nullptr;
 }
 
+void AWTRWeapon::AddAmmo(int32 AmmoToAdd) 
+{
+    Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagazineCapacity);
+
+    SetHUDAmmo();
+}
+
 void AWTRWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
     int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

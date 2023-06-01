@@ -209,5 +209,8 @@ private:
     void FireTimerStart();
     void FireTimerUpdate();
     void ReloadHandle();
+    void SetHUDCarriedAmmo();
     bool CanFire() const;
+    int32 AmmoToReload();
+    void ReloadWeaponAndSubCarriedAmmo();
 };
