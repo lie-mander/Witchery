@@ -30,7 +30,8 @@ public:
     void AddAmmo(int32 AmmoToAdd);
 
     FORCEINLINE bool IsAutomatic() const { return bAutomaticWeapon; }
-    FORCEINLINE bool IsEmply() const { return Ammo <= 0; }
+    FORCEINLINE bool IsEmpty() const { return Ammo <= 0; }
+    FORCEINLINE bool IsFull() const { return Ammo == MagazineCapacity; }
 
     void SetHUDAmmo();
     void SetShowWidget(bool bShowWidget);

@@ -25,17 +25,18 @@ void AWTRPlayerController::OnPossess(APawn* InPawn)
     }
     else
     {
-        Client_HideDeathMessage();
+        Client_OnPossess();
     }
 
     AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(InPawn);
     if (WTRCharacter)
     {
         SetHUDHealth(WTRCharacter->GetHealth(), WTRCharacter->GetMaxHealth());
+        //SetHUDCarriedAmmo(WTRCharacter->GetCarriedAmmo());
     }
 }
 
-void AWTRPlayerController::Client_HideDeathMessage_Implementation()
+void AWTRPlayerController::Client_OnPossess_Implementation()
 {
     SetHUDDeathMessage(false);
 }
@@ -119,12 +120,12 @@ void AWTRPlayerController::SetHUDWeaponAmmo(int32 AmmoAmount)
     }
 }
 
-void AWTRPlayerController::SetHUDCarriedAmmo(int32 AmmoAmount) 
+void AWTRPlayerController::SetHUDCarriedAmmo(int32 AmmoAmount)
 {
     WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
 
-    bool bHUDValid = WTR_HUD &&                                        //
-                     WTR_HUD->CharacterOverlayWidget &&                //
+    bool bHUDValid = WTR_HUD &&                                         //
+                     WTR_HUD->CharacterOverlayWidget &&                 //
                      WTR_HUD->CharacterOverlayWidget->CarriedAmmoText;  // CarriedAmmoText
 
     if (bHUDValid)

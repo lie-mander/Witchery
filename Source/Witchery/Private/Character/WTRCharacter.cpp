@@ -564,7 +564,7 @@ void AWTRCharacter::OnReloadButtonPressed()
 {
     if (Combat)
     {
-        Combat->OnReloadButtonPressed();
+        Combat->Reload();
     }
 }
 
@@ -603,6 +603,11 @@ void AWTRCharacter::Elim()
     if (Combat && Combat->EquippedWeapon)
     {
         Combat->EquippedWeapon->Dropped();
+    }
+    if (Combat)
+    {
+        Combat->CarriedAmmo = 0;
+        Combat->SetHUDCarriedAmmo();
     }
 
     GetWorldTimerManager().SetTimer(                //
@@ -760,6 +765,12 @@ void AWTRCharacter::OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon)
     {
         LastWeapon->SetShowWidget(false);
     }
+}
+
+int32 AWTRCharacter::GetCarriedAmmo() const
+{
+    if (!Combat) return 0;
+    return Combat->CarriedAmmo;
 }
 
 ECombatState AWTRCharacter::GetCombatState() const

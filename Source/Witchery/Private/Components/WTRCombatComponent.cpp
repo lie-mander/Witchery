@@ -187,7 +187,7 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
     {
         CarriedAmmo = CarriedAmmoByWeaponTypeMap[EquippedWeapon->GetWeaponType()];
 
-        Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Controller) : Controller;
+        Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Character->Controller) : Controller;
         if (Controller)
         {
             Controller->SetHUDCarriedAmmo(CarriedAmmo);
@@ -199,6 +199,12 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
         this,                               //
         EquippedWeapon->PickupSound,        //
         Character->GetActorLocation());
+
+    // Want to reload if equipped weapon is empty
+    if (EquippedWeapon->IsEmpty())
+    {
+        Reload();
+    }
 
     Character->GetCharacterMovement()->bOrientRotationToMovement = false;
     Character->bUseControllerRotationYaw = true;
@@ -240,10 +246,13 @@ void UWTRCombatComponent::OnRep_CarriedAmmo()
 
 void UWTRCombatComponent::SetHUDCarriedAmmo()
 {
-    Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Controller) : Controller;
-    if (Controller)
+    if (Character)
     {
-        Controller->SetHUDCarriedAmmo(CarriedAmmo);
+        Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Character->Controller) : Controller;
+        if (Controller)
+        {
+            Controller->SetHUDCarriedAmmo(CarriedAmmo);
+        }
     }
 }
 
@@ -261,6 +270,7 @@ void UWTRCombatComponent::Fire()
     if (CanFire())
     {
         bCanFire = false;
+
         Server_Fire(HitTarget);
 
         if (EquippedWeapon)
@@ -269,6 +279,10 @@ void UWTRCombatComponent::Fire()
         }
 
         FireTimerStart();
+    }
+    else if (EquippedWeapon && EquippedWeapon->IsEmpty())
+    {
+        Reload();
     }
 }
 
@@ -311,9 +325,9 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
     }
 }
 
-void UWTRCombatComponent::OnReloadButtonPressed()
+void UWTRCombatComponent::Reload()
 {
-    if (CarriedAmmo > 0 && CombatState != ECombatState::ECS_Reloading)
+    if (CarriedAmmo > 0 && EquippedWeapon && !EquippedWeapon->IsFull() && CombatState != ECombatState::ECS_Reloading)
     {
         Server_Reload();
     }
@@ -321,7 +335,7 @@ void UWTRCombatComponent::OnReloadButtonPressed()
 
 void UWTRCombatComponent::Server_Reload_Implementation()
 {
-    if (!Character || !EquippedWeapon)
+    if (!Character)
     {
         return;
     }
@@ -398,7 +412,7 @@ void UWTRCombatComponent::FinishReloading()
         return;
     }
 
-    if (Character->HasAuthority())
+    if (Character->HasAuthority() && CombatState == ECombatState::ECS_Reloading)
     {
         CombatState = ECombatState::ECS_Unoccupied;
 
@@ -487,5 +501,5 @@ void UWTRCombatComponent::Server_SetAiming_Implementation(bool bAiming)
 
 bool UWTRCombatComponent::CanFire() const
 {
-    return EquippedWeapon && !EquippedWeapon->IsEmply() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
+    return EquippedWeapon && !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }

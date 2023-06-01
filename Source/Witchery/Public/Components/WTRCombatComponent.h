@@ -32,7 +32,7 @@ protected:
 
     void SetAiming(bool bAiming);
     void OnFireButtonPressed(bool bPressed);
-    void OnReloadButtonPressed();
+    void Reload();
 
     void Fire();
 

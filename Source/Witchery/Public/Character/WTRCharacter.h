@@ -54,6 +54,7 @@ public:
 
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
 
+    FORCEINLINE int32 GetCarriedAmmo() const;
     FORCEINLINE float GetHealth() const { return Health; }
     FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
     FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }

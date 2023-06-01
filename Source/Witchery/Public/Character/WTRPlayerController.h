@@ -7,6 +7,7 @@
 #include "WTRPlayerController.generated.h"
 
 class AWTR_HUD;
+class AWTRCharacter;
 
 UCLASS()
 class WITCHERY_API AWTRPlayerController : public APlayerController
@@ -30,5 +31,5 @@ private:
     AWTR_HUD* WTR_HUD;
 
     UFUNCTION(Client, Reliable)
-    void Client_HideDeathMessage();
+    void Client_OnPossess();
 };
