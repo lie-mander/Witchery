@@ -6,12 +6,72 @@
 #include "HUD/WTRCharacterOverlayWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Kismet/KismetStringLibrary.h"
 
 void AWTRPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
     WTR_HUD = Cast<AWTR_HUD>(GetHUD());
+}
+
+void AWTRPlayerController::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    UpdateSyncTime(DeltaTime);
+
+    WorldTime += DeltaTime;
+    SetHUDMatchCountdownTime(WorldTime);
+}
+
+void AWTRPlayerController::UpdateSyncTime(float DeltaTime)
+{
+    TimeToSyncUpdate += DeltaTime;
+    if (IsLocalController() && TimeToSyncUpdate >= TimeSyncUpdateFrequency)
+    {
+        Server_SendClientTime(GetWorld()->GetTimeSeconds());
+        TimeToSyncUpdate = 0.f;
+    }
+}
+
+void AWTRPlayerController::Server_SendClientTime_Implementation(float ClientTimeOfSending)
+{
+    if (GetWorld())
+    {
+        float CurrentServerTime = GetWorld()->GetTimeSeconds();
+        Client_SendServerTime(ClientTimeOfSending, CurrentServerTime);
+    }
+}
+
+void AWTRPlayerController::Client_SendServerTime_Implementation(float ClientTimeOfSending, float ServerTimeResponse)
+{
+    if (GetWorld())
+    {
+        float RoundTrip = GetWorld()->GetTimeSeconds() - ClientTimeOfSending;
+        float CurrentServerTime = ServerTimeResponse - (RoundTrip * 0.5f);
+        ClientServerTimeDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
+    }
+}
+
+float AWTRPlayerController::GetServerTime()
+{
+    if (GetWorld())
+    {
+        return GetWorld()->GetTimeSeconds() + ClientServerTimeDelta;
+    }
+
+    return 0.0f;
+}
+
+void AWTRPlayerController::ReceivedPlayer() 
+{
+    Super::ReceivedPlayer();
+
+    if (IsLocalController() && GetWorld())
+    {
+        Server_SendClientTime(GetWorld()->GetTimeSeconds());
+    }
 }
 
 void AWTRPlayerController::OnPossess(APawn* InPawn)
@@ -28,7 +88,7 @@ void AWTRPlayerController::OnPossess(APawn* InPawn)
         Client_OnPossess();
     }
 
-    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(InPawn);
+    WTRCharacter = Cast<AWTRCharacter>(InPawn);
     WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
 
     if (WTRCharacter && WTR_HUD)
@@ -160,5 +220,22 @@ void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
         }
 
         WTR_HUD->CharacterOverlayWidget->WeaponTypeText->SetText(FText::FromString(WeaponTypeText));
+    }
+}
+
+void AWTRPlayerController::SetHUDMatchCountdownTime(float Time)
+{
+    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+
+    bool bHUDValid = WTR_HUD &&                                            //
+                     WTR_HUD->CharacterOverlayWidget &&                    //
+                     WTR_HUD->CharacterOverlayWidget->MatchCountdownText;  // MatchCountdownText
+
+    if (bHUDValid)
+    {
+        FString TimeString = UKismetStringLibrary::TimeSecondsToString(Time + ClientServerTimeDelta);
+        TimeString = UKismetStringLibrary::GetSubstring(TimeString, 0, 5);
+
+        WTR_HUD->CharacterOverlayWidget->MatchCountdownText->SetText(FText::FromString(TimeString));
     }
 }

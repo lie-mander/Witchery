@@ -77,7 +77,7 @@ private:
     float TraceRange = 300.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Shoot")
-    FVector3d SpringArmOffsetWhileEquipped = FVector3d(-160.f, 0.f, 180.f);
+    FVector3d SpringArmOffsetWhileEquipped = FVector3d(0.f, 180.f, 0.f);
 
     UPROPERTY(Replicated)
     bool bIsAiming = false;

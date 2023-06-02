@@ -209,7 +209,8 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
 
     Character->GetCharacterMovement()->bOrientRotationToMovement = false;
     Character->bUseControllerRotationYaw = true;
-    Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
+    Character->GetSpringArm()->SocketOffset = SpringArmOffsetWhileEquipped;
+    //Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
 
     const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
     if (HandSocket)
@@ -230,7 +231,8 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
         }
         Character->GetCharacterMovement()->bOrientRotationToMovement = false;
         Character->bUseControllerRotationYaw = true;
-        Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
+        Character->GetSpringArm()->SocketOffset = SpringArmOffsetWhileEquipped;
+        //Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
 
         // Play pickup sound
         UGameplayStatics::PlaySoundAtLocation(  //
