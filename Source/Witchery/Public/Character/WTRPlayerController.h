@@ -33,6 +33,7 @@ public:
     void SetHUDCarriedAmmo(int32 AmmoAmount);
     void SetHUDWeaponType(EWeaponType Type);
     void SetHUDMatchCountdownTime(float Time);
+    void SetHUDWarmupTime(float Time);
 
 protected:
     virtual void BeginPlay() override;
@@ -71,9 +72,6 @@ private:
     // Time difference between the server and the client
     float ClientServerTimeDelta = 0.f;
 
-    // For test timer
-    float WorldTime = 0.f;
-
     void UpdateSyncTime(float DeltaTime);
 
     // Sending the client time to the server to get the current time on the server
@@ -94,11 +92,25 @@ private:
     int32 DelayInit_DefeatsAmount = 0;
 
     //////////
+    // MatchType timers
+    //
+    UFUNCTION(Server, Reliable)
+    void Server_CheckMatchState();
+
+    UFUNCTION(Client, Reliable)
+    void Client_ApplyMatchState(float TimeofWarmup, float TimeOfMatch, float MapCreationTime, const FName& State);
+
+    float WarmupTime = 0.f;
+    float MatchTime = 0.f;
+    float TimeOfMapCreation = 0.f;
+
+    //////////
     // Functions
     //
     UFUNCTION(Client, Reliable)
     void Client_OnPossess();
 
     AWTR_HUD* GetWTR_HUD();
+    void SetHUDTime();
     void HandleMatchStateInProgress();
 };

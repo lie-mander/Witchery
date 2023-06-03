@@ -324,7 +324,7 @@ void AWTRPlayerController::SetHUDMatchCountdownTime(float Time)
 
     if (bHUDValid)
     {
-        FString TimeString = UKismetStringLibrary::TimeSecondsToString(Time);
+        FString TimeString = UKismetStringLibrary::TimeSecondsToString(Time + ClientServerTimeDelta);
         TimeString = UKismetStringLibrary::GetSubstring(TimeString, 0, 5);
 
         WTR_HUD->CharacterOverlayWidget->MatchCountdownText->SetText(FText::FromString(TimeString));

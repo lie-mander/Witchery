@@ -22,14 +22,19 @@ public:
     virtual void Tick(float DeltaTime);
 
     FORCEINLINE float GetWarmupTime() const { return WarmupTime; }
+    FORCEINLINE float GetMatchTime() const { return MatchTime; }
+    FORCEINLINE float GetTimeOfMapCreation() const { return TimeOfMapCreation; }
 
 protected:
     virtual void BeginPlay() override;
     virtual void OnMatchStateSet() override;
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "GameStart")
+    UPROPERTY(EditDefaultsOnly, Category = "GameTime | WaitingStart")
     float WarmupTime = 10.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "GameTime | InProgress")
+    float MatchTime = 10.f;
 
     float CountdownWarmupTime = 0.f;
     float TimeOfMapCreation = 0.f;
