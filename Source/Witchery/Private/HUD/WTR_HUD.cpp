@@ -7,8 +7,6 @@
 void AWTR_HUD::BeginPlay() 
 {
     Super::BeginPlay();
-
-    AddCharacterOverlay();
 }
 
 void AWTR_HUD::AddCharacterOverlay() 

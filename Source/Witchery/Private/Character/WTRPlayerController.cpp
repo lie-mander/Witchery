@@ -7,6 +7,15 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "Net/UnrealNetwork.h"
+#include "GameModes/WTRGameMode.h"
+
+void AWTRPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const 
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+    DOREPLIFETIME(AWTRPlayerController, MatchState);
+}
 
 void AWTRPlayerController::BeginPlay()
 {
@@ -20,9 +29,40 @@ void AWTRPlayerController::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     UpdateSyncTime(DeltaTime);
+    DelayInit();
 
     WorldTime += DeltaTime;
     SetHUDMatchCountdownTime(WorldTime);
+}
+
+void AWTRPlayerController::DelayInit() 
+{
+    if (!CharacterOverlay)
+    {
+        WTR_HUD = GetWTR_HUD();
+        if (WTR_HUD)
+        {
+            CharacterOverlay = Cast<UWTRCharacterOverlayWidget>(WTR_HUD->CharacterOverlayWidget);
+            if (CharacterOverlay)
+            {
+                SetHUDHealth(DelayInit_CurrentHealth, DelayInit_MaxHealth);
+                SetHUDScore(DelayInit_ScoreAmount);
+                SetHUDDefeats(DelayInit_DefeatsAmount);
+            }
+        }
+    }
+}
+
+void AWTRPlayerController::SetMatchState(const FName& State) 
+{
+    MatchState = State;
+
+    AddCharacterOverlay();
+}
+
+void AWTRPlayerController::OnRep_MatchState() 
+{
+    AddCharacterOverlay();
 }
 
 void AWTRPlayerController::UpdateSyncTime(float DeltaTime)
@@ -89,7 +129,7 @@ void AWTRPlayerController::OnPossess(APawn* InPawn)
     }
 
     WTRCharacter = Cast<AWTRCharacter>(InPawn);
-    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+    WTR_HUD = GetWTR_HUD();
 
     if (WTRCharacter && WTR_HUD)
     {
@@ -105,7 +145,7 @@ void AWTRPlayerController::Client_OnPossess_Implementation()
 
 void AWTRPlayerController::SetHUDHealth(float CurrentHealth, float MaxHealth)
 {
-    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+    WTR_HUD = GetWTR_HUD();
 
     bool bHUDValid = WTR_HUD &&                                     //
                      WTR_HUD->CharacterOverlayWidget &&             //
@@ -120,11 +160,16 @@ void AWTRPlayerController::SetHUDHealth(float CurrentHealth, float MaxHealth)
         const FString HealthText = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(CurrentHealth), FMath::CeilToInt(MaxHealth));
         WTR_HUD->CharacterOverlayWidget->HealthText->SetText(FText::FromString(HealthText));
     }
+    else
+    {
+        DelayInit_CurrentHealth = CurrentHealth;
+        DelayInit_MaxHealth = MaxHealth;
+    }
 }
 
 void AWTRPlayerController::SetHUDScore(float ScoreAmount)
 {
-    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+    WTR_HUD = GetWTR_HUD();
 
     bool bHUDValid = WTR_HUD &&                                   //
                      WTR_HUD->CharacterOverlayWidget &&           //
@@ -135,11 +180,15 @@ void AWTRPlayerController::SetHUDScore(float ScoreAmount)
         const FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(ScoreAmount));
         WTR_HUD->CharacterOverlayWidget->ScoreText->SetText(FText::FromString(ScoreText));
     }
+    else
+    {
+        DelayInit_ScoreAmount = ScoreAmount;
+    }
 }
 
 void AWTRPlayerController::SetHUDDefeats(int32 DefeatsAmount)
 {
-    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+    WTR_HUD = GetWTR_HUD();
 
     bool bHUDValid = WTR_HUD &&                                     //
                      WTR_HUD->CharacterOverlayWidget &&             //
@@ -150,11 +199,15 @@ void AWTRPlayerController::SetHUDDefeats(int32 DefeatsAmount)
         const FString DefeatsText = FString::Printf(TEXT("%d"), DefeatsAmount);
         WTR_HUD->CharacterOverlayWidget->DefeatsText->SetText(FText::FromString(DefeatsText));
     }
+    else
+    {
+        DelayInit_DefeatsAmount = DefeatsAmount;
+    }
 }
 
 void AWTRPlayerController::SetHUDDeathMessage(bool bVisible)
 {
-    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+    WTR_HUD = GetWTR_HUD();
 
     bool bHUDValid = WTR_HUD &&                                          //
                      WTR_HUD->CharacterOverlayWidget &&                  //
@@ -169,7 +222,7 @@ void AWTRPlayerController::SetHUDDeathMessage(bool bVisible)
 
 void AWTRPlayerController::SetHUDWeaponAmmo(int32 AmmoAmount)
 {
-    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+    WTR_HUD = GetWTR_HUD();
 
     bool bHUDValid = WTR_HUD &&                                        //
                      WTR_HUD->CharacterOverlayWidget &&                //
@@ -184,7 +237,7 @@ void AWTRPlayerController::SetHUDWeaponAmmo(int32 AmmoAmount)
 
 void AWTRPlayerController::SetHUDCarriedAmmo(int32 AmmoAmount)
 {
-    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+    WTR_HUD = GetWTR_HUD();
 
     bool bHUDValid = WTR_HUD &&                                         //
                      WTR_HUD->CharacterOverlayWidget &&                 //
@@ -199,7 +252,7 @@ void AWTRPlayerController::SetHUDCarriedAmmo(int32 AmmoAmount)
 
 void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
 {
-    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+    WTR_HUD = GetWTR_HUD();
 
     bool bHUDValid = WTR_HUD &&                                        //
                      WTR_HUD->CharacterOverlayWidget &&                //
@@ -225,7 +278,7 @@ void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
 
 void AWTRPlayerController::SetHUDMatchCountdownTime(float Time)
 {
-    WTR_HUD = (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+    WTR_HUD = GetWTR_HUD();
 
     bool bHUDValid = WTR_HUD &&                                            //
                      WTR_HUD->CharacterOverlayWidget &&                    //
@@ -237,5 +290,19 @@ void AWTRPlayerController::SetHUDMatchCountdownTime(float Time)
         TimeString = UKismetStringLibrary::GetSubstring(TimeString, 0, 5);
 
         WTR_HUD->CharacterOverlayWidget->MatchCountdownText->SetText(FText::FromString(TimeString));
+    }
+}
+
+AWTR_HUD* AWTRPlayerController::GetWTR_HUD() 
+{
+    return (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
+}
+
+void AWTRPlayerController::AddCharacterOverlay() 
+{
+    WTR_HUD = GetWTR_HUD();
+    if (WTR_HUD && MatchState == MatchState::InProgress)
+    {
+        WTR_HUD->AddCharacterOverlay();
     }
 }

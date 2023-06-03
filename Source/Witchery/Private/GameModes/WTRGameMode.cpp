@@ -7,12 +7,12 @@
 #include "GameFramework/PlayerStart.h"
 #include "WTRPlayerState.h"
 
-AWTRGameMode::AWTRGameMode() 
+AWTRGameMode::AWTRGameMode()
 {
     bDelayedStart = true;
 }
 
-void AWTRGameMode::BeginPlay() 
+void AWTRGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
@@ -22,7 +22,7 @@ void AWTRGameMode::BeginPlay()
     }
 }
 
-void AWTRGameMode::Tick(float DeltaTime) 
+void AWTRGameMode::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
@@ -32,6 +32,23 @@ void AWTRGameMode::Tick(float DeltaTime)
         if (CountdownWarmupTime <= 0.f)
         {
             StartMatch();
+        }
+    }
+}
+
+void AWTRGameMode::OnMatchStateSet()
+{
+    Super::OnMatchStateSet();
+
+    if (GetWorld())
+    {
+        for (FConstControllerIterator It = GetWorld()->GetControllerIterator(); It; ++It)
+        {
+            AWTRPlayerController* WTRController = Cast<AWTRPlayerController>(*It);
+            if (WTRController)
+            {
+                WTRController->SetMatchState(MatchState);
+            }
         }
     }
 }
@@ -57,7 +74,7 @@ void AWTRGameMode::PlayerEliminated(
     }
 }
 
-void AWTRGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController) 
+void AWTRGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController)
 {
     if (EliminatedCharacter)
     {

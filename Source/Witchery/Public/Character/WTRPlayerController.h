@@ -9,6 +9,7 @@
 
 class AWTR_HUD;
 class AWTRCharacter;
+class UWTRCharacterOverlayWidget;
 
 UCLASS()
 class WITCHERY_API AWTRPlayerController : public APlayerController
@@ -16,9 +17,13 @@ class WITCHERY_API AWTRPlayerController : public APlayerController
     GENERATED_BODY()
 
 public:
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void OnPossess(APawn* InPawn) override;
     virtual void ReceivedPlayer() override;
     virtual void Tick(float DeltaTime) override;
+    virtual void DelayInit();
+
+    void SetMatchState(const FName& State);
 
     void SetHUDHealth(float CurrentHealth, float MaxHealth);
     void SetHUDScore(float ScoreAmount);
@@ -34,14 +39,26 @@ protected:
     virtual float GetServerTime();
 
 private:
+    //////////
+    // Base variables
+    //
     UPROPERTY()
     AWTR_HUD* WTR_HUD;
 
     UPROPERTY()
     AWTRCharacter* WTRCharacter;
 
-    UFUNCTION(Client, Reliable)
-    void Client_OnPossess();
+    UPROPERTY()
+    UWTRCharacterOverlayWidget* CharacterOverlay;
+
+    //////////
+    // Match states
+    //
+    UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+    FName MatchState;
+
+    UFUNCTION()
+    void OnRep_MatchState();
 
     //////////
     // Sync client time to server
@@ -67,4 +84,21 @@ private:
     // round trip. Must be called from Server_SendClientTime
     UFUNCTION(Client, Reliable)
     void Client_SendServerTime(float ClientTimeOfSending, float ServerTimeResponse);
+
+    //////////
+    // Delay Init variables (need to be CharacterOverlay was created, and after that variables can set)
+    //
+    float DelayInit_CurrentHealth = 0.f;
+    float DelayInit_MaxHealth = 0.f;
+    float DelayInit_ScoreAmount = 0.f;
+    int32 DelayInit_DefeatsAmount = 0;
+
+    //////////
+    // Functions
+    //
+    UFUNCTION(Client, Reliable)
+    void Client_OnPossess();
+
+    AWTR_HUD* GetWTR_HUD();
+    void AddCharacterOverlay();
 };

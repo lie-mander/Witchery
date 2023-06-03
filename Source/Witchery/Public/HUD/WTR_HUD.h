@@ -19,6 +19,8 @@ class WITCHERY_API AWTR_HUD : public AHUD
 public:
     virtual void DrawHUD() override;
 
+    void AddCharacterOverlay();
+
     FORCEINLINE void SetCrosshairHUDPackage(const FCrosshairHUDPackage& Package) { CrosshairHUDPackage = Package; }
 
     UPROPERTY(EditAnywhere)
@@ -29,7 +31,6 @@ public:
 
 protected:
     virtual void BeginPlay() override;
-    void AddCharacterOverlay();
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
