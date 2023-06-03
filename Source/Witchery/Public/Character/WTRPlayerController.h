@@ -100,5 +100,5 @@ private:
     void Client_OnPossess();
 
     AWTR_HUD* GetWTR_HUD();
-    void AddCharacterOverlay();
+    void HandleMatchStateInProgress();
 };

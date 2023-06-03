@@ -4,6 +4,7 @@
 #include "Character/WTRCharacter.h"
 #include "HUD/WTR_HUD.h"
 #include "HUD/WTRCharacterOverlayWidget.h"
+#include "HUD/WTRAnnouncementWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Kismet/KismetStringLibrary.h"
@@ -22,6 +23,10 @@ void AWTRPlayerController::BeginPlay()
     Super::BeginPlay();
 
     WTR_HUD = Cast<AWTR_HUD>(GetHUD());
+    if (WTR_HUD)
+    {
+        WTR_HUD->AddAnnouncement();
+    }
 }
 
 void AWTRPlayerController::Tick(float DeltaTime)
@@ -57,12 +62,18 @@ void AWTRPlayerController::SetMatchState(const FName& State)
 {
     MatchState = State;
 
-    AddCharacterOverlay();
+    if (MatchState == MatchState::InProgress)
+    {
+        HandleMatchStateInProgress();
+    }
 }
 
 void AWTRPlayerController::OnRep_MatchState() 
 {
-    AddCharacterOverlay();
+    if (MatchState == MatchState::InProgress)
+    {
+        HandleMatchStateInProgress();
+    }
 }
 
 void AWTRPlayerController::UpdateSyncTime(float DeltaTime)
@@ -298,11 +309,15 @@ AWTR_HUD* AWTRPlayerController::GetWTR_HUD()
     return (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
 }
 
-void AWTRPlayerController::AddCharacterOverlay() 
+void AWTRPlayerController::HandleMatchStateInProgress() 
 {
     WTR_HUD = GetWTR_HUD();
-    if (WTR_HUD && MatchState == MatchState::InProgress)
+    if (WTR_HUD)
     {
+        if (WTR_HUD->AnnouncementWidget)
+        {
+            WTR_HUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Hidden);
+        }
         WTR_HUD->AddCharacterOverlay();
     }
 }

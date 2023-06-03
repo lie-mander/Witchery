@@ -9,6 +9,7 @@
 
 class UTexture2D;
 class UWTRCharacterOverlayWidget;
+class UWTRAnnouncementWidget;
 class UUserWidget;
 
 UCLASS()
@@ -20,14 +21,21 @@ public:
     virtual void DrawHUD() override;
 
     void AddCharacterOverlay();
+    void AddAnnouncement();
 
     FORCEINLINE void SetCrosshairHUDPackage(const FCrosshairHUDPackage& Package) { CrosshairHUDPackage = Package; }
 
-    UPROPERTY(EditAnywhere)
+    UPROPERTY(EditAnywhere, Category = "Widgets")
     TSubclassOf<UUserWidget> CharacterOverlayWidgetClass;
+
+    UPROPERTY(EditAnywhere, Category = "Widgets")
+    TSubclassOf<UUserWidget> AnnouncementWidgetClass;
 
     UPROPERTY()
     UWTRCharacterOverlayWidget* CharacterOverlayWidget;
+
+    UPROPERTY()
+    UWTRAnnouncementWidget* AnnouncementWidget;
 
 protected:
     virtual void BeginPlay() override;

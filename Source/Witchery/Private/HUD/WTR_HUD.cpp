@@ -1,8 +1,9 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "HUD/WTR_HUD.h"
-#include "GameFramework/PlayerController.h"
 #include "HUD/WTRCharacterOverlayWidget.h"
+#include "HUD/WTRAnnouncementWidget.h"
+#include "GameFramework/PlayerController.h"
 
 void AWTR_HUD::BeginPlay() 
 {
@@ -17,6 +18,17 @@ void AWTR_HUD::AddCharacterOverlay()
     {
         CharacterOverlayWidget = CreateWidget<UWTRCharacterOverlayWidget>(PlayerController, CharacterOverlayWidgetClass);
         CharacterOverlayWidget->AddToViewport();
+    }
+}
+
+void AWTR_HUD::AddAnnouncement() 
+{
+    APlayerController* PlayerController = GetOwningPlayerController();
+
+    if (PlayerController && AnnouncementWidgetClass)
+    {
+        AnnouncementWidget = CreateWidget<UWTRAnnouncementWidget>(PlayerController, AnnouncementWidgetClass);
+        AnnouncementWidget->AddToViewport();
     }
 }
 
