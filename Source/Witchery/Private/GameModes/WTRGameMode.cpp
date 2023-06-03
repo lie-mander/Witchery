@@ -7,6 +7,35 @@
 #include "GameFramework/PlayerStart.h"
 #include "WTRPlayerState.h"
 
+AWTRGameMode::AWTRGameMode() 
+{
+    bDelayedStart = true;
+}
+
+void AWTRGameMode::BeginPlay() 
+{
+    Super::BeginPlay();
+
+    if (GetWorld())
+    {
+        TimeOfMapCreation = GetWorld()->GetTimeSeconds();
+    }
+}
+
+void AWTRGameMode::Tick(float DeltaTime) 
+{
+    Super::Tick(DeltaTime);
+
+    if (GetWorld() && MatchState == MatchState::WaitingToStart)
+    {
+        CountdownWarmupTime = WarmupTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
+        if (CountdownWarmupTime <= 0.f)
+        {
+            StartMatch();
+        }
+    }
+}
+
 void AWTRGameMode::PlayerEliminated(
     AWTRCharacter* EliminatedCharacter, AWTRPlayerController* VictimController, AWTRPlayerController* AttackerController)
 {
