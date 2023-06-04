@@ -32,6 +32,7 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void PostInitializeComponents() override;
+    virtual void Destroyed() override;
 
     // Try to declare variables in Tick that can`t be declare in BeginPlay
     void PullInit();
@@ -52,7 +53,9 @@ public:
     bool IsAiming() const;
     FORCEINLINE bool IsElimmed() const { return bElimmed; }
     FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+    FORCEINLINE bool IsDisableGameplay() const { return bDisableGameplay; }
 
+    FORCEINLINE void SetDisableGameplay(bool bDisable) { bDisableGameplay = bDisable; }
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
     void OnPossessHandle(AWTRPlayerController* NewController, AWTR_HUD* NewHUD);
 
@@ -64,6 +67,7 @@ public:
     FORCEINLINE ETurningInPlace GetTurningState() const { return TurningInPlace; }
     FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArmComponent; }
     FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
+    FORCEINLINE UWTRCombatComponent* GetCombatComponent() const { return Combat; }
     ECombatState GetCombatState() const;
     AWTRWeapon* GetEquippedWeapon() const;
     FVector GetHitTarget() const;
@@ -124,6 +128,9 @@ private:
 
     UPROPERTY(ReplicatedUsing = OnRep_Username)
     FString Username;
+
+    UPROPERTY(Replicated)
+    bool bDisableGameplay = false;
 
     //////////
     // Animation
@@ -257,6 +264,7 @@ private:
     //////////
     // Functions
     //
+    void RotateInPlace(float DeltaTime);
     void SetTurningInPlace(float DeltaTime);
     void UpdateIfIsNotStanding();
     void HideCharacterWithWeaponIfCameraClose();

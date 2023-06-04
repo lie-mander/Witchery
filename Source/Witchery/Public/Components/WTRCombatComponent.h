@@ -25,15 +25,14 @@ public:
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     void EquipWeapon(AWTRWeapon* WeaponToEquip);
+    void OnFireButtonPressed(bool bPressed);
+    void SetAiming(bool bAiming);
     void FinishReloading();
 
 protected:
     virtual void BeginPlay() override;
 
-    void SetAiming(bool bAiming);
-    void OnFireButtonPressed(bool bPressed);
     void Reload();
-
     void Fire();
 
     //////////

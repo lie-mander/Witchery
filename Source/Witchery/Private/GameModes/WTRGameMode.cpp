@@ -47,6 +47,14 @@ void AWTRGameMode::Tick(float DeltaTime)
             SetMatchState(FName(TEXT("Cooldown")));
         }
     }
+    else if (GetWorld() && MatchState == MatchState::Cooldown)
+    {
+        CountdownWarmupTime = WarmupTime + MatchTime + CooldownTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
+        if (CountdownWarmupTime <= 0.f)
+        {
+            RestartGame();
+        }
+    }
 }
 
 void AWTRGameMode::OnMatchStateSet()

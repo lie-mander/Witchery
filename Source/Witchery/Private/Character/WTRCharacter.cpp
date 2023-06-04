@@ -88,21 +88,7 @@ void AWTRCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
-    {
-        UpdateAimOffset(DeltaTime);
-    }
-    else
-    {
-        CalculateAO_Pitch();
-
-        TimeSinceLastMovementReplication += DeltaTime;
-        if (TimeSinceLastMovementReplication > 0.25f)
-        {
-            OnRep_ReplicateMovement();
-        }
-    }
-
+    RotateInPlace(DeltaTime);
     HideCharacterWithWeaponIfCameraClose();
     PullInit();
 }
@@ -209,6 +195,16 @@ void AWTRCharacter::PostInitializeComponents()
     }
 }
 
+void AWTRCharacter::Destroyed() 
+{
+    Super::Destroyed();
+
+    if (Combat && Combat->EquippedWeapon)
+    {
+        Combat->EquippedWeapon->Destroy();
+    }
+}
+
 void AWTRCharacter::PullInit() 
 {
     if (!WTRPlayerState)
@@ -218,6 +214,31 @@ void AWTRCharacter::PullInit()
         {
             WTRPlayerState->AddToScore(0.f);
             WTRPlayerState->AddToDefeats(0);
+        }
+    }
+}
+
+void AWTRCharacter::RotateInPlace(float DeltaTime) 
+{
+    if (bDisableGameplay)
+    {
+        bUseControllerRotationYaw = false;
+        TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+        return;
+    }
+
+    if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
+    {
+        UpdateAimOffset(DeltaTime);
+    }
+    else
+    {
+        CalculateAO_Pitch();
+
+        TimeSinceLastMovementReplication += DeltaTime;
+        if (TimeSinceLastMovementReplication > 0.25f)
+        {
+            OnRep_ReplicateMovement();
         }
     }
 }
@@ -233,6 +254,11 @@ void AWTRCharacter::OnPossessHandle(AWTRPlayerController* NewController, AWTR_HU
 
 void AWTRCharacter::MoveForward(float Amount)
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (Controller && Amount != 0.f)
     {
         const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -243,6 +269,11 @@ void AWTRCharacter::MoveForward(float Amount)
 
 void AWTRCharacter::MoveRight(float Amount)
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (Controller && Amount != 0.f)
     {
         const FRotator YawRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -413,6 +444,11 @@ float AWTRCharacter::CalculateSpeed() const
 
 void AWTRCharacter::Jump()
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (bIsCrouched)
     {
         UnCrouch();
@@ -504,6 +540,11 @@ void AWTRCharacter::PlayEliminationMontage()
 
 void AWTRCharacter::OnEquipButtonPressed()
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (Combat)
     {
         if (HasAuthority())
@@ -527,6 +568,11 @@ void AWTRCharacter::Server_OnEquippedButtonPressed_Implementation()
 
 void AWTRCharacter::OnCrouchButtonPressed()
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (bIsCrouched)
     {
         UnCrouch();
@@ -539,6 +585,11 @@ void AWTRCharacter::OnCrouchButtonPressed()
 
 void AWTRCharacter::OnAimButtonPressed()
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (Combat && Combat->EquippedWeapon)
     {
         Combat->SetAiming(true);
@@ -547,6 +598,11 @@ void AWTRCharacter::OnAimButtonPressed()
 
 void AWTRCharacter::OnAimButtonReleased()
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (Combat && Combat->EquippedWeapon)
     {
         Combat->SetAiming(false);
@@ -555,6 +611,11 @@ void AWTRCharacter::OnAimButtonReleased()
 
 void AWTRCharacter::OnFireButtonPressed()
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (Combat)
     {
         Combat->OnFireButtonPressed(true);
@@ -563,6 +624,11 @@ void AWTRCharacter::OnFireButtonPressed()
 
 void AWTRCharacter::OnFireButtonReleased()
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (Combat)
     {
         Combat->OnFireButtonPressed(false);
@@ -571,6 +637,11 @@ void AWTRCharacter::OnFireButtonReleased()
 
 void AWTRCharacter::OnReloadButtonPressed() 
 {
+    if (bDisableGameplay)
+    {
+        return;
+    }
+
     if (Combat)
     {
         Combat->Reload();
@@ -647,7 +718,7 @@ void AWTRCharacter::Multicast_Elim_Implementation()
     StartDissolve();
 
     // Disable character movement
-    GetCharacterMovement()->DisableMovement();
+    bDisableGameplay = true;
     GetCharacterMovement()->StopMovementImmediately();
 
     if (WTRPlayerController && GetCapsuleComponent() && GetMesh())

@@ -7,6 +7,7 @@
 #include "HUD/WTRAnnouncementWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/WTRCombatComponent.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -434,6 +435,18 @@ void AWTRPlayerController::HandleMatchCooldown()
             WTR_HUD->AnnouncementWidget->InfoText->SetVisibility(ESlateVisibility::Hidden);
 
             WTR_HUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
+        }
+    }
+
+    AWTRCharacter* OwnerCharacter = Cast<AWTRCharacter>(GetPawn());
+    if (OwnerCharacter && OwnerCharacter->GetCombatComponent())
+    {
+        OwnerCharacter->SetDisableGameplay(true);
+        OwnerCharacter->GetCombatComponent()->OnFireButtonPressed(false);
+        OwnerCharacter->GetCombatComponent()->SetAiming(false);
+        if (OwnerCharacter->bIsCrouched)
+        {
+            OwnerCharacter->UnCrouch();
         }
     }
 }

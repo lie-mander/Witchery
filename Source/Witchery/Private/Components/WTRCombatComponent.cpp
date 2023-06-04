@@ -72,6 +72,13 @@ void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
 {
     if (!Character || !Controller || !HUD) return;
 
+    if (Character->IsDisableGameplay() && EquippedWeapon)
+    {
+        FCrosshairHUDPackage EmptyHUDPackage;
+        HUD->SetCrosshairHUDPackage(EmptyHUDPackage);
+        return;
+    }
+
     if (EquippedWeapon)
     {
         HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
@@ -210,7 +217,7 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
     Character->GetCharacterMovement()->bOrientRotationToMovement = false;
     Character->bUseControllerRotationYaw = true;
     Character->GetSpringArm()->SocketOffset = SpringArmOffsetWhileEquipped;
-    //Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
+    // Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
 
     const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
     if (HandSocket)
@@ -232,7 +239,7 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
         Character->GetCharacterMovement()->bOrientRotationToMovement = false;
         Character->bUseControllerRotationYaw = true;
         Character->GetSpringArm()->SocketOffset = SpringArmOffsetWhileEquipped;
-        //Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
+        // Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
 
         // Play pickup sound
         UGameplayStatics::PlaySoundAtLocation(  //

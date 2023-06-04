@@ -67,10 +67,10 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     bUseFABRIK = Character->GetCombatState() != ECombatState::ECS_Reloading;
 
     // When character is reloading, he doesn`t need to use Offsets, cause reload animation will broke (hands). Will be more condition
-    bUseAimOffsets = Character->GetCombatState() != ECombatState::ECS_Reloading;
+    bUseAimOffsets = Character->GetCombatState() != ECombatState::ECS_Reloading && !Character->IsDisableGameplay();
 
     // When character is reloading, he doesn`t need to transform right hand, cause weapon will continue rotating while reloading. Will be more condition
-    bTransformRightHand = Character->GetCombatState() != ECombatState::ECS_Reloading;
+    bTransformRightHand = Character->GetCombatState() != ECombatState::ECS_Reloading && !Character->IsDisableGameplay();
 
     // Set offset yaw for strafing
     FRotator AimRotation = Character->GetBaseAimRotation();
