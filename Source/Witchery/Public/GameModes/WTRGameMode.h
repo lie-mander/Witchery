@@ -28,6 +28,7 @@ public:
 
     FORCEINLINE float GetWarmupTime() const { return WarmupTime; }
     FORCEINLINE float GetMatchTime() const { return MatchTime; }
+    FORCEINLINE float GetCooldownTime() const { return CooldownTime; }
     FORCEINLINE float GetTimeOfMapCreation() const { return TimeOfMapCreation; }
 
 protected:

@@ -64,18 +64,20 @@ void AWTRPlayerController::Server_CheckMatchState_Implementation()
     {
         WarmupTime = WTRGameMode->GetWarmupTime();
         MatchTime = WTRGameMode->GetMatchTime();
+        CooldownTime = WTRGameMode->GetCooldownTime();
         TimeOfMapCreation = WTRGameMode->GetTimeOfMapCreation();
         MatchState = WTRGameMode->GetMatchState();
 
-        Client_ApplyMatchState(WarmupTime, MatchTime, TimeOfMapCreation, MatchState);
+        Client_ApplyMatchState(WarmupTime, MatchTime, CooldownTime, TimeOfMapCreation, MatchState);
     }
 }
 
 void AWTRPlayerController::Client_ApplyMatchState_Implementation(
-    float TimeofWarmup, float TimeOfMatch, float MapCreationTime, const FName& State)
+    float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, float MapCreationTime, const FName& State)
 {
     WarmupTime = TimeofWarmup;
     MatchTime = TimeOfMatch;
+    CooldownTime = TimeOfCooldown;
     TimeOfMapCreation = MapCreationTime;
     MatchState = State;
 
@@ -94,7 +96,7 @@ void AWTRPlayerController::SetMatchState(const FName& State)
         HandleMatchStateInProgress();
     }
     else if (MatchState == MatchState::Cooldown)
-    {   
+    {
         HandleMatchCooldown();
     }
 }
@@ -332,6 +334,12 @@ void AWTRPlayerController::SetHUDMatchCountdownTime(float Time)
 
     if (bHUDValid)
     {
+        if (Time < 0.f)
+        {
+            WTR_HUD->AnnouncementWidget->WarmupText->SetText(FText::FromString("00:00"));
+            return;
+        }
+
         FString TimeString = UKismetStringLibrary::TimeSecondsToString(Time);
         TimeString = UKismetStringLibrary::GetSubstring(TimeString, 0, 5);
 
@@ -349,6 +357,12 @@ void AWTRPlayerController::SetHUDWarmupTime(float Time)
 
     if (bHUDValid)
     {
+        if (Time < 0.f)
+        {
+            WTR_HUD->AnnouncementWidget->WarmupText->SetText(FText::FromString("00:00"));
+            return;
+        }
+
         FString TimeString = UKismetStringLibrary::TimeSecondsToString(Time);
         TimeString = UKismetStringLibrary::GetSubstring(TimeString, 0, 5);
 
@@ -364,16 +378,27 @@ AWTR_HUD* AWTRPlayerController::GetWTR_HUD()
 void AWTRPlayerController::SetHUDTime()
 {
     float TimeLeft = 0.f;
-    if (MatchState == MatchState::WaitingToStart && GetWorld())
-    {
+
+    if (MatchState == MatchState::WaitingToStart)
         TimeLeft = WarmupTime - GetServerTime() + TimeOfMapCreation;
-        SetHUDWarmupTime(TimeLeft);
-    }
-    else if (MatchState == MatchState::InProgress && GetWorld())
-    {
+    else if (MatchState == MatchState::InProgress)
         TimeLeft = WarmupTime + MatchTime - GetServerTime() + TimeOfMapCreation;
-        SetHUDMatchCountdownTime(TimeLeft);
+    else if (MatchState == MatchState::Cooldown)
+        TimeLeft = WarmupTime + MatchTime + CooldownTime - GetServerTime() + TimeOfMapCreation;
+
+    SecondsInteger = FMath::CeilToInt(TimeLeft);
+
+    if (SecondsInteger != Previous)
+    {
+        if (MatchState == MatchState::WaitingToStart)
+            SetHUDWarmupTime(TimeLeft);
+        else if (MatchState == MatchState::InProgress)
+            SetHUDMatchCountdownTime(TimeLeft);
+        else if (MatchState == MatchState::Cooldown)
+            SetHUDWarmupTime(TimeLeft);
     }
+
+    Previous = SecondsInteger;
 }
 
 void AWTRPlayerController::HandleMatchStateInProgress()
@@ -389,15 +414,26 @@ void AWTRPlayerController::HandleMatchStateInProgress()
     }
 }
 
-void AWTRPlayerController::HandleMatchCooldown() 
+void AWTRPlayerController::HandleMatchCooldown()
 {
     WTR_HUD = GetWTR_HUD();
     if (WTR_HUD && WTR_HUD->CharacterOverlayWidget)
     {
         WTR_HUD->CharacterOverlayWidget->RemoveFromParent();
-        if (WTR_HUD->AnnouncementWidget)
+
+        bool bWTR_HUD =                                       //
+            WTR_HUD->AnnouncementWidget &&                    //
+            WTR_HUD->AnnouncementWidget->AnnouncementText &&  //
+            WTR_HUD->AnnouncementWidget->InfoText;
+
+        if (bWTR_HUD)
         {
+            WTR_HUD->AnnouncementWidget->AnnouncementText->SetText(FText::FromString(AnnounCooldownText));
+            WTR_HUD->AnnouncementWidget->InfoText->SetText(FText::FromString(AnnounInfoText));
+
+            WTR_HUD->AnnouncementWidget->InfoText->SetVisibility(ESlateVisibility::Hidden);
+
             WTR_HUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
-        } 
+        }
     }
 }

@@ -101,11 +101,25 @@ private:
     void Server_CheckMatchState();
 
     UFUNCTION(Client, Reliable)
-    void Client_ApplyMatchState(float TimeofWarmup, float TimeOfMatch, float MapCreationTime, const FName& State);
+    void Client_ApplyMatchState(float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, float MapCreationTime, const FName& State);
 
     float WarmupTime = 0.f;
     float MatchTime = 0.f;
+    float CooldownTime = 0.f;
     float TimeOfMapCreation = 0.f;
+
+    // To use the SetHUDTime every second, not in a Tick
+    int Previous = 0;
+    int SecondsInteger = 0;
+
+    //////////
+    // UI
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    FString AnnounCooldownText = "NEW GAME STARTS IN:";
+
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    FString AnnounInfoText = "NONE";
 
     //////////
     // Functions
