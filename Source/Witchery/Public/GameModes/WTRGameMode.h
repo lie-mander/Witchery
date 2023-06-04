@@ -9,6 +9,11 @@
 class AWTRCharacter;
 class AWTRPlayerController;
 
+namespace MatchState
+{
+extern WITCHERY_API const FName Cooldown;
+}
+
 UCLASS()
 class WITCHERY_API AWTRGameMode : public AGameMode
 {
@@ -30,11 +35,14 @@ protected:
     virtual void OnMatchStateSet() override;
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "GameTime | WaitingStart")
+    UPROPERTY(EditDefaultsOnly, Category = "GameTime")
     float WarmupTime = 10.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "GameTime | InProgress")
+    UPROPERTY(EditDefaultsOnly, Category = "GameTime")
     float MatchTime = 10.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "GameTime")
+    float CooldownTime = 10.f;
 
     float CountdownWarmupTime = 0.f;
     float TimeOfMapCreation = 0.f;

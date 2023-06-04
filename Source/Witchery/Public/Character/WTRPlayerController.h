@@ -61,6 +61,9 @@ private:
     UFUNCTION()
     void OnRep_MatchState();
 
+    void HandleMatchStateInProgress();
+    void HandleMatchCooldown();
+
     //////////
     // Sync client time to server
     //
@@ -112,5 +115,4 @@ private:
 
     AWTR_HUD* GetWTR_HUD();
     void SetHUDTime();
-    void HandleMatchStateInProgress();
 };

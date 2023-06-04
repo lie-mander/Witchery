@@ -93,6 +93,10 @@ void AWTRPlayerController::SetMatchState(const FName& State)
     {
         HandleMatchStateInProgress();
     }
+    else if (MatchState == MatchState::Cooldown)
+    {   
+        HandleMatchCooldown();
+    }
 }
 
 void AWTRPlayerController::OnRep_MatchState()
@@ -100,6 +104,10 @@ void AWTRPlayerController::OnRep_MatchState()
     if (MatchState == MatchState::InProgress)
     {
         HandleMatchStateInProgress();
+    }
+    else if (MatchState == MatchState::Cooldown)
+    {
+        HandleMatchCooldown();
     }
 }
 
@@ -378,5 +386,18 @@ void AWTRPlayerController::HandleMatchStateInProgress()
             WTR_HUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Hidden);
         }
         WTR_HUD->AddCharacterOverlay();
+    }
+}
+
+void AWTRPlayerController::HandleMatchCooldown() 
+{
+    WTR_HUD = GetWTR_HUD();
+    if (WTR_HUD && WTR_HUD->CharacterOverlayWidget)
+    {
+        WTR_HUD->CharacterOverlayWidget->RemoveFromParent();
+        if (WTR_HUD->AnnouncementWidget)
+        {
+            WTR_HUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
+        } 
     }
 }

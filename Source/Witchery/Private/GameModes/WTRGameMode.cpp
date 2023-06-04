@@ -7,6 +7,11 @@
 #include "GameFramework/PlayerStart.h"
 #include "WTRPlayerState.h"
 
+namespace MatchState
+{
+const FName Cooldown = FName(TEXT("Cooldown"));
+}
+
 AWTRGameMode::AWTRGameMode()
 {
     bDelayedStart = true;
@@ -32,6 +37,14 @@ void AWTRGameMode::Tick(float DeltaTime)
         if (CountdownWarmupTime <= 0.f)
         {
             StartMatch();
+        }
+    }
+    else if (GetWorld() && MatchState == MatchState::InProgress)
+    {
+        CountdownWarmupTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
+        if (CountdownWarmupTime <= 0.f)
+        {
+            SetMatchState(FName(TEXT("Cooldown")));
         }
     }
 }
