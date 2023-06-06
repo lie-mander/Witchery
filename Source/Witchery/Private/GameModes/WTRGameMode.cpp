@@ -1,6 +1,7 @@
 // Witchery. Copyright Liemander. All Rights Reserved.
 
 #include "GameModes/WTRGameMode.h"
+#include "GameStates/WTRGameState.h"
 #include "Character/WTRCharacter.h"
 #include "Character/WTRPlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -33,24 +34,24 @@ void AWTRGameMode::Tick(float DeltaTime)
 
     if (GetWorld() && MatchState == MatchState::WaitingToStart)
     {
-        CountdownWarmupTime = WarmupTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
-        if (CountdownWarmupTime <= 0.f)
+        CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
+        if (CountdownTime <= 0.f)
         {
             StartMatch();
         }
     }
     else if (GetWorld() && MatchState == MatchState::InProgress)
     {
-        CountdownWarmupTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
-        if (CountdownWarmupTime <= 0.f)
+        CountdownTime = WarmupTime + MatchTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
+        if (CountdownTime <= 0.f)
         {
             SetMatchState(FName(TEXT("Cooldown")));
         }
     }
     else if (GetWorld() && MatchState == MatchState::Cooldown)
     {
-        CountdownWarmupTime = WarmupTime + MatchTime + CooldownTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
-        if (CountdownWarmupTime <= 0.f)
+        CountdownTime = WarmupTime + MatchTime + CooldownTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
+        if (CountdownTime <= 0.f)
         {
             RestartGame();
         }
@@ -80,9 +81,12 @@ void AWTRGameMode::PlayerEliminated(
     AWTRPlayerState* AttackerPlayerState = AttackerController ? Cast<AWTRPlayerState>(AttackerController->PlayerState) : nullptr;
     AWTRPlayerState* VictimPlayerState = VictimController ? Cast<AWTRPlayerState>(VictimController->PlayerState) : nullptr;
 
-    if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState)
+    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+
+    if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState && WTRGameState)
     {
         AttackerPlayerState->AddToScore(1.f);
+        WTRGameState->UpdateTopPlayers(AttackerPlayerState);
     }
     if (VictimPlayerState)
     {

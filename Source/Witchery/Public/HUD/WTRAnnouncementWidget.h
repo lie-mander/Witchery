@@ -22,4 +22,7 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     UTextBlock* InfoText;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* TopPlayersText;
 };

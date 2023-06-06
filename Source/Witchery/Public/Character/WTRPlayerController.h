@@ -9,7 +9,9 @@
 
 class AWTR_HUD;
 class AWTRCharacter;
+class AWTRGameMode;
 class UWTRCharacterOverlayWidget;
+class UWTRAnnouncementWidget;
 
 UCLASS()
 class WITCHERY_API AWTRPlayerController : public APlayerController
@@ -50,7 +52,13 @@ private:
     AWTRCharacter* WTRCharacter;
 
     UPROPERTY()
+    AWTRGameMode* WTRGameMode;
+
+    UPROPERTY()
     UWTRCharacterOverlayWidget* CharacterOverlay;
+
+    UPROPERTY()
+    UWTRAnnouncementWidget* AnnouncementWidget;
 
     //////////
     // Match states
@@ -119,7 +127,10 @@ private:
     FString AnnounCooldownText = "NEW GAME STARTS IN:";
 
     UPROPERTY(EditDefaultsOnly, Category = "UI")
-    FString AnnounInfoText = "NONE";
+    FString AnnounInfoText = "NO WINNER.";
+
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    FString TextYouWinner = "YOU`RE A WINNER!";
 
     //////////
     // Functions

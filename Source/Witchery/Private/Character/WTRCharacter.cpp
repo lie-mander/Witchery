@@ -199,7 +199,10 @@ void AWTRCharacter::Destroyed()
 {
     Super::Destroyed();
 
-    if (Combat && Combat->EquippedWeapon)
+    const AWTRGameMode* WTRGameMode = Cast < AWTRGameMode>(UGameplayStatics::GetGameMode(this));
+    bool bMatchIsNotInProgress = WTRGameMode && WTRGameMode->GetMatchState() != MatchState::InProgress;
+
+    if (Combat && Combat->EquippedWeapon && bMatchIsNotInProgress)
     {
         Combat->EquippedWeapon->Destroy();
     }
@@ -717,9 +720,13 @@ void AWTRCharacter::Multicast_Elim_Implementation()
     }
     StartDissolve();
 
-    // Disable character movement
+    // Disable character movement and firing
     bDisableGameplay = true;
     GetCharacterMovement()->StopMovementImmediately();
+    if (Combat)
+    {
+        Combat->OnFireButtonPressed(false);
+    }
 
     if (WTRPlayerController && GetCapsuleComponent() && GetMesh())
     {

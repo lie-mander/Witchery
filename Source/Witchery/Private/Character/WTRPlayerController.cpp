@@ -12,7 +12,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "GameModes/WTRGameMode.h"
+#include "GameStates/WTRGameState.h"
 #include "TimerManager.h"
+#include "WTRPlayerState.h"
 
 void AWTRPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -56,11 +58,20 @@ void AWTRPlayerController::DelayInit()
             }
         }
     }
+    if (!AnnouncementWidget)
+    {
+        WTR_HUD = GetWTR_HUD();
+        if (IsLocalController() && WTR_HUD && MatchState == MatchState::WaitingToStart && !WTR_HUD->AnnouncementWidget)
+        {
+            WTR_HUD->AddAnnouncement();
+            AnnouncementWidget = Cast<UWTRAnnouncementWidget>(WTR_HUD->AnnouncementWidget);
+        }
+    }
 }
 
 void AWTRPlayerController::Server_CheckMatchState_Implementation()
 {
-    AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
+    WTRGameMode = (WTRGameMode == nullptr) ? Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this)) : WTRGameMode;
     if (WTRGameMode)
     {
         WarmupTime = WTRGameMode->GetWarmupTime();
@@ -82,7 +93,7 @@ void AWTRPlayerController::Client_ApplyMatchState_Implementation(
     TimeOfMapCreation = MapCreationTime;
     MatchState = State;
 
-    if (IsLocalController() && WTR_HUD && MatchState == MatchState::WaitingToStart)
+    if (IsLocalController() && WTR_HUD && MatchState == MatchState::WaitingToStart && !WTR_HUD->AnnouncementWidget)
     {
         WTR_HUD->AddAnnouncement();
     }
@@ -337,7 +348,8 @@ void AWTRPlayerController::SetHUDMatchCountdownTime(float Time)
     {
         if (Time < 0.f)
         {
-            WTR_HUD->AnnouncementWidget->WarmupText->SetText(FText::FromString("00:00"));
+            GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Red, "Time < 0.f");
+            WTR_HUD->CharacterOverlayWidget->MatchCountdownText->SetText(FText::FromString("00:00"));
             return;
         }
 
@@ -360,6 +372,7 @@ void AWTRPlayerController::SetHUDWarmupTime(float Time)
     {
         if (Time < 0.f)
         {
+            GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Red, "Time < 0.f");
             WTR_HUD->AnnouncementWidget->WarmupText->SetText(FText::FromString("00:00"));
             return;
         }
@@ -380,12 +393,23 @@ void AWTRPlayerController::SetHUDTime()
 {
     float TimeLeft = 0.f;
 
-    if (MatchState == MatchState::WaitingToStart)
-        TimeLeft = WarmupTime - GetServerTime() + TimeOfMapCreation;
-    else if (MatchState == MatchState::InProgress)
-        TimeLeft = WarmupTime + MatchTime - GetServerTime() + TimeOfMapCreation;
-    else if (MatchState == MatchState::Cooldown)
-        TimeLeft = WarmupTime + MatchTime + CooldownTime - GetServerTime() + TimeOfMapCreation;
+    if (HasAuthority())
+    {
+        WTRGameMode = (WTRGameMode == nullptr) ? Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this)) : WTRGameMode;
+        if (WTRGameMode)
+        {
+            TimeLeft = WTRGameMode->GetCountdownTime() + TimeOfMapCreation;
+        }
+    }
+    else
+    {
+        if (MatchState == MatchState::WaitingToStart)
+            TimeLeft = WarmupTime - GetServerTime() + TimeOfMapCreation;
+        else if (MatchState == MatchState::InProgress)
+            TimeLeft = WarmupTime + MatchTime - GetServerTime() + TimeOfMapCreation;
+        else if (MatchState == MatchState::Cooldown)
+            TimeLeft = WarmupTime + MatchTime + CooldownTime - GetServerTime() + TimeOfMapCreation;
+    }
 
     SecondsInteger = FMath::CeilToInt(TimeLeft);
 
@@ -425,14 +449,44 @@ void AWTRPlayerController::HandleMatchCooldown()
         bool bWTR_HUD =                                       //
             WTR_HUD->AnnouncementWidget &&                    //
             WTR_HUD->AnnouncementWidget->AnnouncementText &&  //
-            WTR_HUD->AnnouncementWidget->InfoText;
+            WTR_HUD->AnnouncementWidget->InfoText &&          //
+            WTR_HUD->AnnouncementWidget->TopPlayersText;
 
         if (bWTR_HUD)
         {
+            AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+            AWTRPlayerState* WTRPlayerState = GetPlayerState<AWTRPlayerState>();
+
+            FString TopPlayersText = "";
+
+            if (WTRGameState && WTRPlayerState)
+            {
+                if (WTRGameState->GetTopPlayers().IsEmpty())
+                {
+                    AnnounInfoText = AnnounInfoText;
+                }
+                else if (WTRGameState->GetTopPlayers().Num() == 1 && WTRGameState->GetTopPlayers()[0] == WTRPlayerState)
+                {
+                    AnnounInfoText = TextYouWinner;
+                }
+                else if (WTRGameState->GetTopPlayers().Num() == 1)
+                {
+                    AnnounInfoText = FString(TEXT("WINNER:\n"));
+                    TopPlayersText = FString::Printf(TEXT("%s"), *WTRGameState->GetTopPlayers()[0]->GetPlayerName());
+                }
+                else if (WTRGameState->GetTopPlayers().Num() > 1)
+                {
+                    AnnounInfoText = FString(TEXT("THEY FOUGHT FOR WIN:\n"));
+                    for (auto TopPlayer : WTRGameState->GetTopPlayers())
+                    {
+                        TopPlayersText.Append(FString::Printf(TEXT("%s\n"), *TopPlayer->GetPlayerName()));
+                    }
+                }
+            }
+
             WTR_HUD->AnnouncementWidget->AnnouncementText->SetText(FText::FromString(AnnounCooldownText));
             WTR_HUD->AnnouncementWidget->InfoText->SetText(FText::FromString(AnnounInfoText));
-
-            WTR_HUD->AnnouncementWidget->InfoText->SetVisibility(ESlateVisibility::Hidden);
+            WTR_HUD->AnnouncementWidget->TopPlayersText->SetText(FText::FromString(TopPlayersText));
 
             WTR_HUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
         }

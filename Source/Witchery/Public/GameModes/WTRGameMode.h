@@ -30,6 +30,7 @@ public:
     FORCEINLINE float GetMatchTime() const { return MatchTime; }
     FORCEINLINE float GetCooldownTime() const { return CooldownTime; }
     FORCEINLINE float GetTimeOfMapCreation() const { return TimeOfMapCreation; }
+    FORCEINLINE float GetCountdownTime() const { return CountdownTime; }
 
 protected:
     virtual void BeginPlay() override;
@@ -45,6 +46,6 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "GameTime")
     float CooldownTime = 10.f;
 
-    float CountdownWarmupTime = 0.f;
+    float CountdownTime = 0.f;
     float TimeOfMapCreation = 0.f;
 };
