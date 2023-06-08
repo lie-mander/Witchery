@@ -255,9 +255,6 @@ private:
     UFUNCTION(Server, Reliable)
     void Server_OnEquippedButtonPressed();
 
-    UFUNCTION(Server, Reliable)
-    void Server_SetUsername();
-
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_OnDestroyed();
 

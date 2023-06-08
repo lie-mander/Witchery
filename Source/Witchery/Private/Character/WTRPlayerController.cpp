@@ -21,6 +21,7 @@ void AWTRPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AWTRPlayerController, MatchState);
+    DOREPLIFETIME(AWTRPlayerController, TimeOfMapCreation);
 }
 
 void AWTRPlayerController::BeginPlay()
@@ -28,8 +29,6 @@ void AWTRPlayerController::BeginPlay()
     Super::BeginPlay();
 
     WTR_HUD = Cast<AWTR_HUD>(GetHUD());
-
-    Server_CheckMatchState();
 }
 
 void AWTRPlayerController::Tick(float DeltaTime)
@@ -40,6 +39,11 @@ void AWTRPlayerController::Tick(float DeltaTime)
     DelayInit();
 
     SetHUDTime();
+
+    if (bShowTime)
+    {
+        Debug_ShowHUDTime();
+    }
 }
 
 void AWTRPlayerController::DelayInit()
@@ -58,6 +62,7 @@ void AWTRPlayerController::DelayInit()
             }
         }
     }
+
     if (!AnnouncementWidget)
     {
         WTR_HUD = GetWTR_HUD();
@@ -65,6 +70,15 @@ void AWTRPlayerController::DelayInit()
         {
             WTR_HUD->AddAnnouncement();
             AnnouncementWidget = Cast<UWTRAnnouncementWidget>(WTR_HUD->AnnouncementWidget);
+        }
+    }
+
+    if (!WTRGameMode)
+    {
+        WTRGameMode = (WTRGameMode == nullptr) ? Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this)) : WTRGameMode;
+        if (WTRGameMode)
+        {
+            Server_CheckMatchState();
         }
     }
 }
@@ -77,20 +91,18 @@ void AWTRPlayerController::Server_CheckMatchState_Implementation()
         WarmupTime = WTRGameMode->GetWarmupTime();
         MatchTime = WTRGameMode->GetMatchTime();
         CooldownTime = WTRGameMode->GetCooldownTime();
-        TimeOfMapCreation = WTRGameMode->GetTimeOfMapCreation();
         MatchState = WTRGameMode->GetMatchState();
 
-        Client_ApplyMatchState(WarmupTime, MatchTime, CooldownTime, TimeOfMapCreation, MatchState);
+        Client_ApplyMatchState(WarmupTime, MatchTime, CooldownTime, MatchState);
     }
 }
 
 void AWTRPlayerController::Client_ApplyMatchState_Implementation(
-    float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, float MapCreationTime, const FName& State)
+    float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, const FName& State)
 {
     WarmupTime = TimeofWarmup;
     MatchTime = TimeOfMatch;
     CooldownTime = TimeOfCooldown;
-    TimeOfMapCreation = MapCreationTime;
     MatchState = State;
 
     if (IsLocalController() && WTR_HUD && MatchState == MatchState::WaitingToStart && !WTR_HUD->AnnouncementWidget)
@@ -102,7 +114,10 @@ void AWTRPlayerController::Client_ApplyMatchState_Implementation(
 void AWTRPlayerController::SetMatchState(const FName& State)
 {
     MatchState = State;
-
+    if (MatchState == MatchState::WaitingToStart)
+    {
+        HandleMatchStateWaitingToStart();
+    }
     if (MatchState == MatchState::InProgress)
     {
         HandleMatchStateInProgress();
@@ -115,6 +130,10 @@ void AWTRPlayerController::SetMatchState(const FName& State)
 
 void AWTRPlayerController::OnRep_MatchState()
 {
+    if (MatchState == MatchState::WaitingToStart)
+    {
+        HandleMatchStateWaitingToStart();
+    }
     if (MatchState == MatchState::InProgress)
     {
         HandleMatchStateInProgress();
@@ -342,15 +361,21 @@ void AWTRPlayerController::SetHUDMatchCountdownTime(float Time)
 
     bool bHUDValid = WTR_HUD &&                                            //
                      WTR_HUD->CharacterOverlayWidget &&                    //
+                     WTR_HUD->CharacterOverlayWidget->Blinking &&          //
                      WTR_HUD->CharacterOverlayWidget->MatchCountdownText;  // MatchCountdownText
 
     if (bHUDValid)
     {
         if (Time < 0.f)
         {
-            GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Red, "Time < 0.f");
+            GEngine->AddOnScreenDebugMessage(14, 1.f, FColor::Red, "Time < 0.f");
             WTR_HUD->CharacterOverlayWidget->MatchCountdownText->SetText(FText::FromString("00:00"));
             return;
+        }
+
+        if (Time <= BlinkStartTime && Time >= 0.f)
+        {
+            WTR_HUD->CharacterOverlayWidget->PlayAnimation(WTR_HUD->CharacterOverlayWidget->Blinking);
         }
 
         FString TimeString = UKismetStringLibrary::TimeSecondsToString(Time);
@@ -372,7 +397,7 @@ void AWTRPlayerController::SetHUDWarmupTime(float Time)
     {
         if (Time < 0.f)
         {
-            GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Red, "Time < 0.f");
+            GEngine->AddOnScreenDebugMessage(14, 1.f, FColor::Red, "Time < 0.f");
             WTR_HUD->AnnouncementWidget->WarmupText->SetText(FText::FromString("00:00"));
             return;
         }
@@ -393,23 +418,12 @@ void AWTRPlayerController::SetHUDTime()
 {
     float TimeLeft = 0.f;
 
-    if (HasAuthority())
-    {
-        WTRGameMode = (WTRGameMode == nullptr) ? Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this)) : WTRGameMode;
-        if (WTRGameMode)
-        {
-            TimeLeft = WTRGameMode->GetCountdownTime() + TimeOfMapCreation;
-        }
-    }
-    else
-    {
-        if (MatchState == MatchState::WaitingToStart)
-            TimeLeft = WarmupTime - GetServerTime() + TimeOfMapCreation;
-        else if (MatchState == MatchState::InProgress)
-            TimeLeft = WarmupTime + MatchTime - GetServerTime() + TimeOfMapCreation;
-        else if (MatchState == MatchState::Cooldown)
-            TimeLeft = WarmupTime + MatchTime + CooldownTime - GetServerTime() + TimeOfMapCreation;
-    }
+    if (MatchState == MatchState::WaitingToStart)
+        TimeLeft = WarmupTime - GetServerTime() + TimeOfMapCreation;
+    else if (MatchState == MatchState::InProgress)
+        TimeLeft = WarmupTime + MatchTime - GetServerTime() + TimeOfMapCreation;
+    else if (MatchState == MatchState::Cooldown)
+        TimeLeft = WarmupTime + MatchTime + CooldownTime - GetServerTime() + TimeOfMapCreation;
 
     SecondsInteger = FMath::CeilToInt(TimeLeft);
 
@@ -424,6 +438,56 @@ void AWTRPlayerController::SetHUDTime()
     }
 
     Previous = SecondsInteger;
+}
+
+void AWTRPlayerController::Debug_ShowHUDTime()
+{
+    if (GEngine && GetWorld())
+    {
+        GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Orange, FString::Printf(TEXT("MatchState: %s"), *MatchState.ToString()));
+        GEngine->AddOnScreenDebugMessage(2, 1.f, FColor::Orange, FString::Printf(TEXT("WarmupTime: %.3f"), WarmupTime));
+        GEngine->AddOnScreenDebugMessage(3, 1.f, FColor::Orange, FString::Printf(TEXT("MatchTime: %.3f"), MatchTime));
+        GEngine->AddOnScreenDebugMessage(4, 1.f, FColor::Orange, FString::Printf(TEXT("CooldownTime: %.3f"), CooldownTime));
+        GEngine->AddOnScreenDebugMessage(5, 1.f, FColor::Orange, FString::Printf(TEXT("TimeOfMapCreation: %.3f\n"), TimeOfMapCreation));
+        GEngine->AddOnScreenDebugMessage(7, 1.f, FColor::Orange, FString::Printf(TEXT("Client time: %.3f"), GetWorld()->GetTimeSeconds()));
+        GEngine->AddOnScreenDebugMessage(8, 1.f, FColor::Orange, FString::Printf(TEXT("Server time: %.3f\n"), GetServerTime()));
+
+        float TimeLeft = 0.f;
+
+        if (MatchState == MatchState::WaitingToStart)
+        {
+            TimeLeft = WarmupTime - GetServerTime() + TimeOfMapCreation;
+            GEngine->AddOnScreenDebugMessage(11, 1.f, FColor::Orange,
+                FString::Printf(TEXT("MatchState::WaitingToStart time:\nWarmupTime - GetServerTime() + TimeOfMapCreation\n"
+                                     "%.3f - %.3f + %.3f = %.3f"),
+                    WarmupTime, GetServerTime(), TimeOfMapCreation, TimeLeft));
+        }
+        else if (MatchState == MatchState::InProgress)
+        {
+            TimeLeft = WarmupTime + MatchTime - GetServerTime() + TimeOfMapCreation;
+            GEngine->AddOnScreenDebugMessage(12, 1.f, FColor::Orange,
+                FString::Printf(TEXT("MatchState::InProgress time:\nWarmupTime + MatchTime - GetServerTime() + TimeOfMapCreation\n"
+                                     "%.3f + %.3f - %.3f + %.3f = %.3f"),
+                    WarmupTime, MatchTime, GetServerTime(), TimeOfMapCreation, TimeLeft));
+        }
+        else if (MatchState == MatchState::Cooldown)
+        {
+            TimeLeft = WarmupTime + MatchTime + CooldownTime - GetServerTime() + TimeOfMapCreation;
+            GEngine->AddOnScreenDebugMessage(13, 1.f, FColor::Orange,
+                FString::Printf(
+                    TEXT("MatchState::Cooldown time:\nWarmupTime + MatchTime + CooldownTime - GetServerTime() + TimeOfMapCreation\n"
+                         "%.3f + %.3f + %.3f - %.3f + %.3f = %.3f\n\n"),
+                    WarmupTime, MatchTime, CooldownTime, GetServerTime(), TimeOfMapCreation, TimeLeft));
+        }
+    }
+}
+
+void AWTRPlayerController::HandleMatchStateWaitingToStart()
+{
+    if (HasAuthority())
+    {
+        TimeOfMapCreation = GetWorld()->GetTimeSeconds();
+    }
 }
 
 void AWTRPlayerController::HandleMatchStateInProgress()

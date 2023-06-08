@@ -21,7 +21,7 @@ public:
     void SetDisplayText(FString Text);
 
 protected:
-    virtual void OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld);
+    virtual void NativeDestruct() override;
 
     UPROPERTY(meta = (BindWidget))
     class UTextBlock* OverheadText;

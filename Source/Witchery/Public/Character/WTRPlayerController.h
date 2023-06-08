@@ -60,6 +60,9 @@ private:
     UPROPERTY()
     UWTRAnnouncementWidget* AnnouncementWidget;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Debug")
+    bool bShowTime = false;
+
     //////////
     // Match states
     //
@@ -69,6 +72,7 @@ private:
     UFUNCTION()
     void OnRep_MatchState();
 
+    void HandleMatchStateWaitingToStart();
     void HandleMatchStateInProgress();
     void HandleMatchCooldown();
 
@@ -109,11 +113,13 @@ private:
     void Server_CheckMatchState();
 
     UFUNCTION(Client, Reliable)
-    void Client_ApplyMatchState(float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, float MapCreationTime, const FName& State);
+    void Client_ApplyMatchState(float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, const FName& State);
 
     float WarmupTime = 0.f;
     float MatchTime = 0.f;
     float CooldownTime = 0.f;
+
+    UPROPERTY(Replicated)
     float TimeOfMapCreation = 0.f;
 
     // To use the SetHUDTime every second, not in a Tick
@@ -132,6 +138,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "UI")
     FString TextYouWinner = "YOU`RE A WINNER!";
 
+    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    float BlinkStartTime = 30.f;
+
     //////////
     // Functions
     //
@@ -140,4 +149,5 @@ private:
 
     AWTR_HUD* GetWTR_HUD();
     void SetHUDTime();
+    void Debug_ShowHUDTime();
 };

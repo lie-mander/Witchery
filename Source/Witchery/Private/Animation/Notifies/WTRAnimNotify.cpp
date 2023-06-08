@@ -2,9 +2,9 @@
 
 #include "Animation/Notifies/WTRAnimNotify.h"
 
-void UWTRAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) 
+void UWTRAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-    Super::Notify(MeshComp, Animation);
+    Super::Notify(MeshComp, Animation, EventReference);
 
     OnNotifyPlayed.Broadcast(MeshComp);
 }

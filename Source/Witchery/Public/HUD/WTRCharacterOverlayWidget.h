@@ -8,6 +8,7 @@
 
 class UProgressBar;
 class UTextBlock;
+class UWidgetAnimation;
 
 UCLASS()
 class WITCHERY_API UWTRCharacterOverlayWidget : public UUserWidget
@@ -41,4 +42,7 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     UTextBlock* MatchCountdownText;
+
+    UPROPERTY(Transient, meta = (BindWidgetAnim))
+    UWidgetAnimation* Blinking;
 };

@@ -82,6 +82,7 @@ void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
     DOREPLIFETIME_CONDITION(AWTRCharacter, OverlappingWeapon, COND_OwnerOnly);
     DOREPLIFETIME(AWTRCharacter, Username);
     DOREPLIFETIME(AWTRCharacter, Health);
+    DOREPLIFETIME(AWTRCharacter, bDisableGameplay);
 }
 
 void AWTRCharacter::Tick(float DeltaTime)
@@ -131,16 +132,6 @@ void AWTRCharacter::BeginPlay()
         OnTakeAnyDamage.AddDynamic(this, &ThisClass::OnTakeAnyDamageCallback);
     }
 
-    // Set user name
-    if (IsLocallyControlled() && GetPlayerState() && HasAuthority())
-    {
-        Username = GetPlayerState()->GetPlayerName();
-    }
-    else if (IsLocallyControlled() && !HasAuthority())
-    {
-        Server_SetUsername();
-    }
-
     // Set callbacks for anim notifies
     if (ReloadMontage)
     {
@@ -151,17 +142,6 @@ void AWTRCharacter::BeginPlay()
         {
             WTRReloadFinishedAnimNotify->OnNotifyPlayed.AddUObject(this, &ThisClass::OnReloadFinishedNotifyPlayed);
         }
-    }
-}
-
-void AWTRCharacter::Server_SetUsername_Implementation()
-{
-    if (GetPlayerState() && OverheadText)
-    {
-        Username = GetPlayerState()->GetPlayerName();
-
-        OverheadText->SetText(FText::FromString(Username));
-        OverheadText->SetTextRenderColor(FColor::MakeRandomColor());
     }
 }
 
@@ -195,11 +175,11 @@ void AWTRCharacter::PostInitializeComponents()
     }
 }
 
-void AWTRCharacter::Destroyed() 
+void AWTRCharacter::Destroyed()
 {
     Super::Destroyed();
 
-    const AWTRGameMode* WTRGameMode = Cast < AWTRGameMode>(UGameplayStatics::GetGameMode(this));
+    const AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
     bool bMatchIsNotInProgress = WTRGameMode && WTRGameMode->GetMatchState() != MatchState::InProgress;
 
     if (Combat && Combat->EquippedWeapon && bMatchIsNotInProgress)
@@ -208,7 +188,7 @@ void AWTRCharacter::Destroyed()
     }
 }
 
-void AWTRCharacter::PullInit() 
+void AWTRCharacter::PullInit()
 {
     if (!WTRPlayerState)
     {
@@ -217,11 +197,19 @@ void AWTRCharacter::PullInit()
         {
             WTRPlayerState->AddToScore(0.f);
             WTRPlayerState->AddToDefeats(0);
+
+            // Set username
+            if (HasAuthority() && OverheadText)
+            {
+                Username = WTRPlayerState->GetPlayerName();
+                OverheadText->SetText(FText::FromString(Username));
+                OverheadText->SetTextRenderColor(FColor::MakeRandomColor());
+            }
         }
     }
 }
 
-void AWTRCharacter::RotateInPlace(float DeltaTime) 
+void AWTRCharacter::RotateInPlace(float DeltaTime)
 {
     if (bDisableGameplay)
     {
@@ -246,7 +234,7 @@ void AWTRCharacter::RotateInPlace(float DeltaTime)
     }
 }
 
-void AWTRCharacter::OnPossessHandle(AWTRPlayerController* NewController, AWTR_HUD* NewHUD) 
+void AWTRCharacter::OnPossessHandle(AWTRPlayerController* NewController, AWTR_HUD* NewHUD)
 {
     if (Combat && NewController && NewHUD)
     {
@@ -480,7 +468,7 @@ void AWTRCharacter::PlayFireMontage(bool bAiming)
     AnimInstance->Montage_JumpToSection(SectionName);
 }
 
-void AWTRCharacter::PlayReloadMontage() 
+void AWTRCharacter::PlayReloadMontage()
 {
     if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !ReloadMontage)
     {
@@ -499,9 +487,7 @@ void AWTRCharacter::PlayReloadMontage()
 
     switch (Combat->EquippedWeapon->GetWeaponType())
     {
-        case EWeaponType::EWT_AssaultRifle: 
-            SectionName = FName("Rifle");
-            break;
+        case EWeaponType::EWT_AssaultRifle: SectionName = FName("Rifle"); break;
     }
 
     AnimInstance->Montage_JumpToSection(SectionName);
@@ -638,7 +624,7 @@ void AWTRCharacter::OnFireButtonReleased()
     }
 }
 
-void AWTRCharacter::OnReloadButtonPressed() 
+void AWTRCharacter::OnReloadButtonPressed()
 {
     if (bDisableGameplay)
     {
@@ -657,7 +643,7 @@ void AWTRCharacter::OnPauseButtonPressed()
     UKismetSystemLibrary::QuitGame(GetWorld(), PlayerController, EQuitPreference::Quit, true);
 }
 
-void AWTRCharacter::OnReloadFinishedNotifyPlayed(USkeletalMeshComponent* MeshComp) 
+void AWTRCharacter::OnReloadFinishedNotifyPlayed(USkeletalMeshComponent* MeshComp)
 {
     if (Combat)
     {
@@ -740,10 +726,10 @@ void AWTRCharacter::Multicast_Elim_Implementation()
     {
         FVector ElimBotLocation(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + ElimBotHeightAbovePlayer);
         ElimBotParticleSysComponent = UGameplayStatics::SpawnEmitterAtLocation(  //
-            GetWorld(),                            //
-            ElimBotParticleSys,                    //
-            ElimBotLocation,                       //
-            GetActorRotation()                     //
+            GetWorld(),                                                          //
+            ElimBotParticleSys,                                                  //
+            ElimBotLocation,                                                     //
+            GetActorRotation()                                                   //
         );
     }
     if (ElimBotSound)
@@ -792,7 +778,7 @@ void AWTRCharacter::OnDissolveTrackFloatChange(float DissolveValue)
     DissolveMaterialInstDynamic->SetScalarParameterValue(FName("Dissolve"), DissolveValue);
 }
 
-void AWTRCharacter::Multicast_OnDestroyed_Implementation() 
+void AWTRCharacter::Multicast_OnDestroyed_Implementation()
 {
     ElimBotParticleSysComponent->DestroyComponent();
 }
