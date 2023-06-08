@@ -47,13 +47,6 @@ void AWTRWeapon::BeginPlay()
 {
     Super::BeginPlay();
 
-    check(WeaponMesh);
-    check(AreaSphere);
-    check(PickupWidget);
-    check(FireAnimation);
-    check(BulletShellClass);
-    check(PickupSound);
-
     if (PickupWidget)
     {
         PickupWidget->SetVisibility(false);
@@ -75,9 +68,12 @@ void AWTRWeapon::Tick(float DeltaTime)
 
 void AWTRWeapon::Fire(const FVector& HitTarget)
 {
-    if (!WeaponMesh || !FireAnimation || !BulletShellClass) return;
+    if (!WeaponMesh) return;
 
-    WeaponMesh->PlayAnimation(FireAnimation, false);
+    if (FireAnimation)
+    {
+        WeaponMesh->PlayAnimation(FireAnimation, false);
+    }
 
     const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh->GetSocketByName(FName(AmmoEjectSocketName));
     if (AmmoEjectSocket && GetWorld())
@@ -92,11 +88,14 @@ void AWTRWeapon::Fire(const FVector& HitTarget)
             AmmoEjectSocketTransform.GetRotation().Rotator().Roll + RandRoll     //
         );
 
-        GetWorld()->SpawnActor<AWTRBulletShell>(     //
-            BulletShellClass,                        //
-            AmmoEjectSocketTransform.GetLocation(),  //
-            RandRotator                              //
-        );
+        if (BulletShellClass)
+        {
+            GetWorld()->SpawnActor<AWTRBulletShell>(     //
+                BulletShellClass,                        //
+                AmmoEjectSocketTransform.GetLocation(),  //
+                RandRotator                              //
+            );
+        }
     }
 
     DecreaseAmmo();

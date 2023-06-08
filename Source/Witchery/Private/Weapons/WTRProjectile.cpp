@@ -38,11 +38,6 @@ void AWTRProjectile::BeginPlay()
 {
     Super::BeginPlay();
 
-    check(Tracer);
-    check(DefaultImpactParticles);
-    check(PlayerImpactParticles);
-    check(ImpactSound);
-
     if (Tracer)
     {
         // Spawn projectile tracer

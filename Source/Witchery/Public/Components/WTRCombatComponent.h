@@ -94,6 +94,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "Carried ammo")
     int32 AssaultRifleCarrAmmo = 30;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Carried ammo")
+    int32 RocketLauncherCarrAmmo = 4;
+
     // Carried ammo for current equipped weapon
     UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo);
     int32 CarriedAmmo;
