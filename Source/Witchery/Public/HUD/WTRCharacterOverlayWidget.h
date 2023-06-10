@@ -43,6 +43,12 @@ public:
     UPROPERTY(meta = (BindWidget))
     UTextBlock* MatchCountdownText;
 
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* FPS_Text;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* FPS_String;
+
     UPROPERTY(Transient, meta = (BindWidgetAnim))
     UWidgetAnimation* Blinking;
 };

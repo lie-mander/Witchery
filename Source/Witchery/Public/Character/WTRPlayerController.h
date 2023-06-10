@@ -36,6 +36,7 @@ public:
     void SetHUDWeaponType(EWeaponType Type);
     void SetHUDMatchCountdownTime(float Time);
     void SetHUDWarmupTime(float Time);
+    void SetHUD_FPS();
 
 protected:
     virtual void BeginPlay() override;
@@ -62,6 +63,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "Debug")
     bool bShowTime = false;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Debug")
+    bool bShowFPS = false;
 
     //////////
     // Match states
@@ -142,6 +146,16 @@ private:
     float BlinkStartTime = 30.f;
 
     //////////
+    // FPS timer
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "Time")
+    float TimeFPSUpdateFrequency = 2.f;
+
+    float TimeToFPSUpdate = 0.f;
+
+    float FPS = 0.f;
+
+    //////////
     // Functions
     //
     UFUNCTION(Client, Reliable)
@@ -150,4 +164,5 @@ private:
     AWTR_HUD* GetWTR_HUD();
     void SetHUDTime();
     void Debug_ShowHUDTime();
+    void ShowFPS(float DeltaTime);
 };

@@ -40,10 +40,8 @@ void AWTRPlayerController::Tick(float DeltaTime)
 
     SetHUDTime();
 
-    if (bShowTime)
-    {
-        Debug_ShowHUDTime();
-    }
+    ShowFPS(DeltaTime);
+    Debug_ShowHUDTime();
 }
 
 void AWTRPlayerController::DelayInit()
@@ -59,6 +57,16 @@ void AWTRPlayerController::DelayInit()
                 SetHUDHealth(DelayInit_CurrentHealth, DelayInit_MaxHealth);
                 SetHUDScore(DelayInit_ScoreAmount);
                 SetHUDDefeats(DelayInit_DefeatsAmount);
+
+                if (!bShowFPS)
+                {
+                    CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Hidden);
+                }
+                else
+                {
+                    TimeToFPSUpdate = TimeFPSUpdateFrequency;
+                    CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Visible);
+                }
             }
         }
     }
@@ -409,6 +417,21 @@ void AWTRPlayerController::SetHUDWarmupTime(float Time)
     }
 }
 
+void AWTRPlayerController::SetHUD_FPS()
+{
+    WTR_HUD = GetWTR_HUD();
+
+    bool bHUDValid = WTR_HUD &&                                  //
+                     WTR_HUD->CharacterOverlayWidget &&          //
+                     WTR_HUD->CharacterOverlayWidget->FPS_Text;  // FPS_Text
+
+    if (bHUDValid)
+    {
+        const FString FPS_Text = FString::Printf(TEXT("%d"), FMath::FloorToInt(FPS));
+        WTR_HUD->CharacterOverlayWidget->FPS_Text->SetText(FText::FromString(FPS_Text));
+    }
+}
+
 AWTR_HUD* AWTRPlayerController::GetWTR_HUD()
 {
     return (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
@@ -442,7 +465,7 @@ void AWTRPlayerController::SetHUDTime()
 
 void AWTRPlayerController::Debug_ShowHUDTime()
 {
-    if (GEngine && GetWorld())
+    if (GEngine && GetWorld() && bShowTime)
     {
         GEngine->AddOnScreenDebugMessage(0, 1.f, FColor::Orange, FString::Printf(TEXT("MatchState: %s"), *MatchState.ToString()));
         GEngine->AddOnScreenDebugMessage(2, 1.f, FColor::Orange, FString::Printf(TEXT("WarmupTime: %.3f"), WarmupTime));
@@ -478,6 +501,21 @@ void AWTRPlayerController::Debug_ShowHUDTime()
                     TEXT("MatchState::Cooldown time:\nWarmupTime + MatchTime + CooldownTime - GetServerTime() + TimeOfMapCreation\n"
                          "%.3f + %.3f + %.3f - %.3f + %.3f = %.3f\n\n"),
                     WarmupTime, MatchTime, CooldownTime, GetServerTime(), TimeOfMapCreation, TimeLeft));
+        }
+    }
+}
+
+void AWTRPlayerController::ShowFPS(float DeltaTime)
+{
+    FPS = 1.f / DeltaTime;
+
+    if (bShowFPS)
+    {
+        TimeToFPSUpdate += DeltaTime;
+        if (TimeToFPSUpdate >= TimeFPSUpdateFrequency)
+        {
+            SetHUD_FPS();
+            TimeToFPSUpdate = 0.f;
         }
     }
 }

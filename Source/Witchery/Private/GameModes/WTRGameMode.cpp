@@ -32,6 +32,7 @@ void AWTRGameMode::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    // Count GameMode time
     if (GetWorld() && MatchState == MatchState::WaitingToStart)
     {
         CountdownTime = WarmupTime - GetWorld()->GetTimeSeconds() + TimeOfMapCreation;
