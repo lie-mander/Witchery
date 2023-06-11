@@ -7,6 +7,8 @@
 #include "WTRProjectileRocket.generated.h"
 
 class UStaticMeshComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class WITCHERY_API AWTRProjectileRocket : public AWTRProjectile
@@ -17,12 +19,27 @@ public:
     AWTRProjectileRocket();
 
 protected:
+    virtual void BeginPlay() override;
     virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
         const FHitResult& Hit) override;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    USoundCue* ProjectileLoop;
+
+    UPROPERTY()
+    UAudioComponent* ProjectileLoopComponent;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    USoundAttenuation* ProjectileLoopAttenuation;
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "Rocket Mesh")
     UStaticMeshComponent* RocketMesh;
+
+    UPROPERTY(EditDefaultsOnly, Category = "FX")
+    UNiagaraSystem* TrailSystem;
+
+    UNiagaraComponent* TrailComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "Hit")
     float MinimumDamage = 10.f;

@@ -61,18 +61,21 @@ void AWTRProjectile::OnHit(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
     Multicast_OnDestroyed(OtherActor);
-    Destroy();
+    SetLifeSpan(DestroyDelay);
 }
 
 void AWTRProjectile::Multicast_OnDestroyed_Implementation(AActor* HitActor)
 {
+    FTransform CustomParticleTransform = GetActorTransform();
+    CustomParticleTransform.SetScale3D(FVector(ImpactParticleScale, ImpactParticleScale, ImpactParticleScale));
+
     // Different impacts for different actors
     if (HitActor->Implements<UInteractWithCrosshairInterface>() && PlayerImpactParticles)
     {
         UGameplayStatics::SpawnEmitterAtLocation(  //
             GetWorld(),                            //
             PlayerImpactParticles,                 //
-            GetActorTransform()                    //
+            CustomParticleTransform                //
         );
     }
     else if (DefaultImpactParticles)
@@ -80,7 +83,7 @@ void AWTRProjectile::Multicast_OnDestroyed_Implementation(AActor* HitActor)
         UGameplayStatics::SpawnEmitterAtLocation(  //
             GetWorld(),                            //
             DefaultImpactParticles,                //
-            GetActorTransform()                    //
+            CustomParticleTransform                //
         );
     }
 
@@ -91,5 +94,10 @@ void AWTRProjectile::Multicast_OnDestroyed_Implementation(AActor* HitActor)
             ImpactSound,                        //
             GetActorLocation()                  //
         );
+    }
+
+    if (ParticleSystemComponent)
+    {
+        ParticleSystemComponent->Deactivate();
     }
 }

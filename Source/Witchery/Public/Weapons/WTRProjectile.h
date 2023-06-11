@@ -22,19 +22,25 @@ public:
     virtual void Tick(float DeltaTime) override;
 
 protected:
+    UPROPERTY(VisibleAnywhere, Category = "Collision")
+    UBoxComponent* BoxCollision;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    float Damage = 20.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    float DestroyDelay = 0.01f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    float ImpactParticleScale = 1.f;
+
     virtual void BeginPlay() override;
 
     UFUNCTION()
     virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
         const FHitResult& Hit);
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
-    float Damage = 20.f;
-
 private:
-    UPROPERTY(VisibleAnywhere, Category = "Collision")
-    UBoxComponent* BoxCollision;
-
     UPROPERTY(VisibleAnywhere, Category = "Movement")
     UProjectileMovementComponent* ProjectileMovementComponent;
 
@@ -54,5 +60,5 @@ private:
     USoundCue* ImpactSound;
 
     UFUNCTION(NetMulticast, Reliable)
-    void Multicast_OnDestroyed(AActor* HitActor);
+    virtual void Multicast_OnDestroyed(AActor* HitActor);
 };
