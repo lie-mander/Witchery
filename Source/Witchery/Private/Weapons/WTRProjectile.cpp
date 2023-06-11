@@ -2,7 +2,6 @@
 
 #include "Weapons/WTRProjectile.h"
 #include "Components/BoxComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -24,9 +23,6 @@ AWTRProjectile::AWTRProjectile()
     BoxCollision->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECR_Block);
 
     SetRootComponent(BoxCollision);
-
-    ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-    ProjectileMovementComponent->bRotationFollowsVelocity = true;
 }
 
 void AWTRProjectile::Tick(float DeltaTime)

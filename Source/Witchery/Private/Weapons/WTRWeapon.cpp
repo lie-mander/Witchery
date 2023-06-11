@@ -16,6 +16,7 @@ AWTRWeapon::AWTRWeapon()
     PrimaryActorTick.bCanEverTick = false;
 
     bReplicates = true;
+    SetReplicateMovement(true);
 
     WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
     WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);

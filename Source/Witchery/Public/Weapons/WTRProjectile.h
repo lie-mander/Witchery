@@ -7,7 +7,6 @@
 #include "WTRProjectile.generated.h"
 
 class UBoxComponent;
-class UProjectileMovementComponent;
 class UParticleSystemComponent;
 class UParticleSystem;
 class USoundCue;
@@ -41,9 +40,6 @@ protected:
         const FHitResult& Hit);
 
 private:
-    UPROPERTY(VisibleAnywhere, Category = "Movement")
-    UProjectileMovementComponent* ProjectileMovementComponent;
-
     UPROPERTY()
     UParticleSystemComponent* ParticleSystemComponent;
 

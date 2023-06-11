@@ -6,6 +6,7 @@
 #include "NiagaraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/AudioComponent.h"
+#include "Components/WTRRocketMovementComponent.h"
 #include "Sound/SoundCue.h"
 
 AWTRProjectileRocket::AWTRProjectileRocket()
@@ -13,6 +14,10 @@ AWTRProjectileRocket::AWTRProjectileRocket()
     RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket Mesh"));
     RocketMesh->SetupAttachment(RootComponent);
     RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    RocketMovementComponent = CreateDefaultSubobject<UWTRRocketMovementComponent>(TEXT("RocketMovementComponent"));
+    RocketMovementComponent->bRotationFollowsVelocity = true;
+    RocketMovementComponent->SetIsReplicated(true);
 }
 
 void AWTRProjectileRocket::BeginPlay()
@@ -56,6 +61,12 @@ void AWTRProjectileRocket::BeginPlay()
 void AWTRProjectileRocket::OnHit(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+    if (OtherActor == GetOwner())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Hit self"));
+        return;
+    }
+
     // Calls on the server
     APawn* OwnerPawn = GetInstigator();
     if (OwnerPawn && HasAuthority())

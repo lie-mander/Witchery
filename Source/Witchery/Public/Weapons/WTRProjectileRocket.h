@@ -9,6 +9,7 @@
 class UStaticMeshComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
+class UWTRRocketMovementComponent;
 
 UCLASS()
 class WITCHERY_API AWTRProjectileRocket : public AWTRProjectile
@@ -35,6 +36,9 @@ protected:
 private:
     UPROPERTY(VisibleAnywhere, Category = "Rocket Mesh")
     UStaticMeshComponent* RocketMesh;
+
+    UPROPERTY(VisibleAnywhere, Category = "Movement")
+    UWTRRocketMovementComponent* RocketMovementComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "FX")
     UNiagaraSystem* TrailSystem;
