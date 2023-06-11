@@ -24,11 +24,17 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     UParticleSystem* ImpactParticles;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
+    UParticleSystem* BeamParticles;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
+    UParticleSystem* MuzzleParticles;
+
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     USoundCue* ImpactSound;
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
-    UParticleSystem* BeamParticles;
+    USoundCue* ShootSound;
 
     void ApplyDamageIfHasAuthority(FHitResult& HitResult, FVector& Beam);
     void HandleEffects(const FHitResult& HitResult, const FVector& Beam, const FTransform& Muzzle);

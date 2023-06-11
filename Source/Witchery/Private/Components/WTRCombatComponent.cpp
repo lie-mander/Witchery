@@ -68,6 +68,7 @@ void UWTRCombatComponent::InitCarriedAmmoMap()
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_AssaultRifle, AssaultRifleCarrAmmo);
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_RocketLauncher, RocketLauncherCarrAmmo);
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_Pistol, PistolCarrAmmo);
+    CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_SubmachineGun, SubmachineGunCarrAmmo);
 }
 
 void UWTRCombatComponent::DrawCrosshair(float DeltaTime)

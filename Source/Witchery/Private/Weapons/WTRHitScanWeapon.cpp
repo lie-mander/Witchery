@@ -30,13 +30,13 @@ void AWTRHitScanWeapon::Fire(const FVector& HitTarget)
 
             FVector BeamEnd = End;
 
-            ApplyDamageIfHasAuthority(FireHit, BeamEnd); 
+            ApplyDamageIfHasAuthority(FireHit, BeamEnd);
             HandleEffects(FireHit, BeamEnd, MuzzleTransform);
         }
     }
 }
 
-void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(FHitResult& HitResult, FVector& Beam) 
+void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(FHitResult& HitResult, FVector& Beam)
 {
     AController* InstigatorController = GetOwnerPlayerController();
     AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(HitResult.GetActor());
@@ -57,22 +57,22 @@ void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(FHitResult& HitResult, FVector
 
 void AWTRHitScanWeapon::HandleEffects(const FHitResult& HitResult, const FVector& Beam, const FTransform& Muzzle)
 {
-    if (ImpactParticles)
+    if (MuzzleParticles)
     {
         UGameplayStatics::SpawnEmitterAtLocation(  //
             GetWorld(),                            //
-            ImpactParticles,                       //
-            HitResult.ImpactPoint,                 //
-            HitResult.ImpactNormal.Rotation()      //
+            MuzzleParticles,                       //
+            Muzzle.GetLocation(),                  //
+            Muzzle.GetRotation().Rotator()         //
         );
     }
 
-    if (ImpactSound)
+    if (ShootSound)
     {
         UGameplayStatics::PlaySoundAtLocation(  //
             this,                               //
-            ImpactSound,                        //
-            HitResult.ImpactPoint               //
+            ShootSound,                         //
+            Muzzle.GetLocation()                //
         );
     }
 
@@ -87,6 +87,28 @@ void AWTRHitScanWeapon::HandleEffects(const FHitResult& HitResult, const FVector
         if (BeamSystemComponent)
         {
             BeamSystemComponent->SetVectorParameter(FName("Target"), Beam);
+        }
+    }
+
+    if (HitResult.bBlockingHit)
+    {
+        if (ImpactParticles)
+        {
+            UGameplayStatics::SpawnEmitterAtLocation(  //
+                GetWorld(),                            //
+                ImpactParticles,                       //
+                HitResult.ImpactPoint,                 //
+                HitResult.ImpactNormal.Rotation()      //
+            );
+        }
+
+        if (ImpactSound)
+        {
+            UGameplayStatics::PlaySoundAtLocation(  //
+                this,                               //
+                ImpactSound,                        //
+                HitResult.ImpactPoint               //
+            );
         }
     }
 }
