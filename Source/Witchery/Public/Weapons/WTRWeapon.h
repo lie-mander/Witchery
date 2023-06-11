@@ -49,80 +49,85 @@ public:
     //////////
     // Crosshairs textures
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     UTexture2D* CrosshairsCenter = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     UTexture2D* CrosshairsLeft = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     UTexture2D* CrosshairsRight = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     UTexture2D* CrosshairsTop = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     UTexture2D* CrosshairsBottom = nullptr;
 
     //////////
     // Sounds
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sound")
     USoundCue* PickupSound;
 
 protected:
-    virtual void BeginPlay() override;
-
     //////////
     // Socket`s names
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sockets")
     FName MuzzleSocketName = "MuzzleFlash";
 
-    UPROPERTY(EditDefaultsOnly, Category = "Sockets")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sockets")
     FName AmmoEjectSocketName = "AmmoEject";
 
     //////////
     // Automatic properties
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon Firing")
     float FireDelay = 0.25f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon Firing")
     bool bAutomaticWeapon = true;
+
+    //////////
+    // Functions
+    //
+    virtual void BeginPlay() override;
+
+    AController* GetOwnerPlayerController() const;
 
 private:
     //////////
     // Components
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Components")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Components")
     USkeletalMeshComponent* WeaponMesh;
 
-    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
     USphereComponent* AreaSphere;
 
-    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
     UWidgetComponent* PickupWidget;
 
     //////////
     // Weapon properties
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon Firing")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon Firing")
     UAnimSequence* FireAnimation;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Bullet Shells")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Bullet Shells")
     TSubclassOf<AWTRBulletShell> BulletShellClass;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Bullet Shells", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Bullet Shells", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float RandRollForShellsSpawn = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Bullet Shells", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Bullet Shells", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float RandPitchForShellsSpawn = 30.f;
 
-    UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "Weapon properties")
+    UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "WTR | Weapon properties")
     EWeaponState WeaponState;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Weapon properties")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")
     EWeaponType WeaponType;
 
     //////////
@@ -142,10 +147,10 @@ private:
     //////////
     // Zooming
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float ZoomedFOV = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float ZoomInterpSpeed = 20.f;
 
     //////////

@@ -18,12 +18,18 @@ public:
     virtual void Fire(const FVector& HitTarget);
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float Damage = 20.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     UParticleSystem* ImpactParticles;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     USoundCue* ImpactSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
+    UParticleSystem* BeamParticles;
+
+    void ApplyDamageIfHasAuthority(FHitResult& HitResult, FVector& Beam);
+    void HandleEffects(const FHitResult& HitResult, const FVector& Beam, const FTransform& Muzzle);
 };

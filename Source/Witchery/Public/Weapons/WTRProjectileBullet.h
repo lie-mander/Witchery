@@ -21,6 +21,6 @@ protected:
         const FHitResult& Hit) override;
 
 private:
-    UPROPERTY(VisibleAnywhere, Category = "Movement")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Movement")
     UProjectileMovementComponent* ProjectileMovementComponent;
 };

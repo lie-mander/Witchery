@@ -12,6 +12,6 @@ class WITCHERY_API UWTRGameInstance : public UGameInstance
     GENERATED_BODY()
 
 public:
-    UPROPERTY(BlueprintReadWrite, Category = "Lobby")
+    UPROPERTY(BlueprintReadWrite, Category = "WTR | Lobby")
     int32 LobbyPlayersToStart = 3;
 };

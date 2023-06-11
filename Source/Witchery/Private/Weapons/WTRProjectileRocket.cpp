@@ -55,7 +55,10 @@ void AWTRProjectileRocket::BeginPlay()
         );
     }
 
-    BoxCollision->OnComponentHit.AddDynamic(this, &AWTRProjectileRocket::OnHit);
+    if (BoxCollision)
+    {
+        BoxCollision->OnComponentHit.AddDynamic(this, &AWTRProjectileRocket::OnHit);
+    }
 }
 
 void AWTRProjectileRocket::OnHit(

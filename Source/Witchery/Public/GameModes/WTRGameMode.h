@@ -37,13 +37,13 @@ protected:
     virtual void OnMatchStateSet() override;
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "GameTime")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | GameTime")
     float WarmupTime = 10.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "GameTime")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | GameTime")
     float MatchTime = 10.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "GameTime")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | GameTime")
     float CooldownTime = 10.f;
 
     float CountdownTime = 0.f;

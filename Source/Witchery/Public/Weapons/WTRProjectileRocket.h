@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
 class UWTRRocketMovementComponent;
+class UParticleSystem;
 
 UCLASS()
 class WITCHERY_API AWTRProjectileRocket : public AWTRProjectile
@@ -24,33 +25,33 @@ protected:
     virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
         const FHitResult& Hit) override;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sound")
     USoundCue* ProjectileLoop;
 
     UPROPERTY()
     UAudioComponent* ProjectileLoopComponent;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sound")
     USoundAttenuation* ProjectileLoopAttenuation;
 
 private:
-    UPROPERTY(VisibleAnywhere, Category = "Rocket Mesh")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Rocket Mesh")
     UStaticMeshComponent* RocketMesh;
 
-    UPROPERTY(VisibleAnywhere, Category = "Movement")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Movement")
     UWTRRocketMovementComponent* RocketMovementComponent;
 
-    UPROPERTY(EditDefaultsOnly, Category = "FX")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | FX")
     UNiagaraSystem* TrailSystem;
 
     UNiagaraComponent* TrailComponent;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float MinimumDamage = 10.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float DamageInnerRadius = 200.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float DamageOutRadius = 500.f;
 };

@@ -25,10 +25,10 @@ public:
 
     FORCEINLINE void SetCrosshairHUDPackage(const FCrosshairHUDPackage& Package) { CrosshairHUDPackage = Package; }
 
-    UPROPERTY(EditAnywhere, Category = "Widgets")
+    UPROPERTY(EditAnywhere, Category = "WTR | Widgets")
     TSubclassOf<UUserWidget> CharacterOverlayWidgetClass;
 
-    UPROPERTY(EditAnywhere, Category = "Widgets")
+    UPROPERTY(EditAnywhere, Category = "WTR | Widgets")
     TSubclassOf<UUserWidget> AnnouncementWidgetClass;
 
     UPROPERTY()
@@ -41,7 +41,7 @@ protected:
     virtual void BeginPlay() override;
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     float CrosshairSpreadMultiplier = 16.f;
 
     FCrosshairHUDPackage CrosshairHUDPackage;

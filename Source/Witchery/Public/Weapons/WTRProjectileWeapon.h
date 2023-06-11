@@ -15,6 +15,6 @@ public:
     virtual void Fire(const FVector& HitTarget) override;
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "Projectile")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Projectile")
     TSubclassOf<class AWTRProjectile> ProjectileClass;
 };

@@ -60,10 +60,10 @@ private:
     UPROPERTY(ReplicatedUsing = OnRep_CombatState)
     ECombatState CombatState = ECombatState::ECS_Unoccupied;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Movement")
     float BaseWalkSpeed = 600.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Movement")
     float AimWalkSpeed = 300.f;
 
     UFUNCTION()
@@ -72,10 +72,10 @@ private:
     //////////
     // Shooting
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Shoot")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
     float TraceRange = 300.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Shoot")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
     FVector3d SpringArmOffsetWhileEquipped = FVector3d(0.f, 180.f, 0.f);
 
     UPROPERTY(Replicated)
@@ -91,13 +91,13 @@ private:
     //////////
     // Carried ammo
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Carried ammo")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
     int32 AssaultRifleCarrAmmo = 30;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Carried ammo")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
     int32 RocketLauncherCarrAmmo = 4;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Carried ammo")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
     int32 PistolCarrAmmo = 25;
 
     // Carried ammo for current equipped weapon
@@ -114,58 +114,58 @@ private:
     //////////
     // Crosshair
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Base")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Base")
     float CrosshairSpread = 0.6f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Air")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Air")
     float AirFactorSpread = 2.25f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Air")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Air")
     float AirFactorSpeedUp = 2.25f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Air")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Air")
     float AirFactorSpeedDown = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Aim")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Aim")
     float AimFactorSpread = 0.3f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Aim")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Aim")
     float AimFactorSpeedUp = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Aim")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Aim")
     float AimFactorSpeedDown = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Enemy")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Enemy")
     float HasEnemyFactorSpread = 0.2f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Enemy")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Enemy")
     float HasEnemyFactorSpeedUp = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Enemy")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Enemy")
     float HasEnemyFactorSpeedDown = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Aim")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Aim")
     float DistanceFromCamera = 100.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Shooting")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Shooting")
     float ShootingFactorSpread = 0.75f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Shooting")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Shooting")
     float ShootingFactorSpeedDown = 10.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Crouching")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Crouching")
     float CrouchingFactorSpread = 0.3f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Crouching")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Crouching")
     float CrouchingFactorSpeedUp = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Crouching")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Crouching")
     float CrouchingFactorSpeedDown = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Color")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Color")
     FLinearColor CrosshairColorWithTarget = FLinearColor::Red;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Crosshair | Color")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Color")
     FLinearColor CrosshairColorWithoutTarget = FLinearColor::White;
 
     float CrosshairVelocityFactor = 0.f;
@@ -180,10 +180,10 @@ private:
     //////////
     // Zooming
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float DefaultZoomFOV = 30.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float ZoomInterpSpeed = 20.f;
 
     float CurrentZoomFOV = 0.f;

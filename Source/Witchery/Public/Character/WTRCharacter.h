@@ -102,22 +102,22 @@ private:
     //////////
     // Components
     //
-    UPROPERTY(VisibleAnywhere, Category = "Camera")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Camera")
     USpringArmComponent* SpringArmComponent;
 
-    UPROPERTY(VisibleAnywhere, Category = "Camera")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Camera")
     UCameraComponent* CameraComponent;
 
-    UPROPERTY(VisibleAnywhere, Category = "Combat")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Combat")
     UWTRCombatComponent* Combat;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "OverheadWidget")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "WTR | OverheadWidget")
     UWidgetComponent* OverheadWidget;
 
-    UPROPERTY(VisibleAnywhere, Category = "OverheadText")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | OverheadText")
     UTextRenderComponent* OverheadText;
 
-    UPROPERTY(VisibleAnywhere, Category = "Elimination")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Elimination")
     UTimelineComponent* DissolveTimelineComponent;
 
     //////////
@@ -135,25 +135,25 @@ private:
     //////////
     // Animation
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
     UAnimMontage* FireWeaponMontage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
     UAnimMontage* ReloadMontage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
     UAnimMontage* EliminationMontage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Animation")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
     UAnimMontage* HitReactMontage;
 
     //////////
     // Movement
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Movement")
     float AngleToTurn = 80.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Movement", meta = (ClampMin = 0.0))
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Movement", meta = (ClampMin = 0.0))
     float SimProxyTurnThreshold = 10.f;
 
     float AO_Yaw = 0.f;
@@ -172,10 +172,10 @@ private:
     //////////
     // Health
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Player Stats")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Player Stats")
     float MaxHealth = 100.f;
 
-    UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "Player Stats")
+    UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "WTR | Player Stats")
     float Health = 100.f;
 
     void UpdateHUDHealth();
@@ -183,7 +183,7 @@ private:
     //////////
     // Eliminated
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Respawn")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Respawn")
     float EliminatedTimerDelay = 3.f;
 
     bool bElimmed = false;
@@ -194,16 +194,16 @@ private:
     //////////
     // Dissolve
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | Base")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Base")
     UCurveFloat* DissolveCurve;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | Base")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Base")
     UMaterialInstance* DissolveMaterialInst;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | Base")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Base")
     float DissolveMaterialGlow = 200.f;
 
-    UPROPERTY(VisibleAnywhere, Category = "Dissolve | Base")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Dissolve | Base")
     UMaterialInstanceDynamic* DissolveMaterialInstDynamic;
 
     FOnTimelineFloat OnDissolveTimelineFloat;
@@ -216,13 +216,13 @@ private:
     //////////
     // ElimBot
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | ElimBot")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | ElimBot")
     UParticleSystem* ElimBotParticleSys;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | ElimBot")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | ElimBot")
     USoundCue* ElimBotSound;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Dissolve | ElimBot")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | ElimBot")
     float ElimBotHeightAbovePlayer = 200.f;
 
     UPROPERTY()
@@ -237,7 +237,7 @@ private:
     //////////
     // Other variables
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Camera")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Camera")
     float DistanceForHidingCamera = 200.f;
 
     //////////

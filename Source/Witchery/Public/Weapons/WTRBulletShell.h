@@ -22,13 +22,13 @@ protected:
         const FHitResult& Hit);
 
 private:
-    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
     class UStaticMeshComponent* BulletMesh;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Sounds")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sounds")
     class USoundCue* GroundHitSound;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Speed", meta = (ClampMin = "0.0"))
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Speed", meta = (ClampMin = "0.0"))
     float EjectImpulse = 10.f;
 
     bool bSingleSound = true;

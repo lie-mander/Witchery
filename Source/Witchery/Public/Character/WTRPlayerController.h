@@ -61,10 +61,10 @@ private:
     UPROPERTY()
     UWTRAnnouncementWidget* AnnouncementWidget;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Debug")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Debug")
     bool bShowTime = false;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Debug")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Debug")
     bool bShowFPS = false;
 
     //////////
@@ -83,7 +83,7 @@ private:
     //////////
     // Sync client time to server
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Time")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Time")
     float TimeSyncUpdateFrequency = 5.f;
 
     float TimeToSyncUpdate = 0.f;
@@ -133,22 +133,22 @@ private:
     //////////
     // UI
     //
-    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
     FString AnnounCooldownText = "NEW GAME STARTS IN:";
 
-    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
     FString AnnounInfoText = "NO WINNER.";
 
-    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
     FString TextYouWinner = "YOU`RE A WINNER!";
 
-    UPROPERTY(EditDefaultsOnly, Category = "UI")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
     float BlinkStartTime = 30.f;
 
     //////////
     // FPS timer
     //
-    UPROPERTY(EditDefaultsOnly, Category = "Time")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Time")
     float TimeFPSUpdateFrequency = 2.f;
 
     float TimeToFPSUpdate = 0.f;

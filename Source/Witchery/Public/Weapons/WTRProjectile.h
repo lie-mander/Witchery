@@ -21,16 +21,16 @@ public:
     virtual void Tick(float DeltaTime) override;
 
 protected:
-    UPROPERTY(VisibleAnywhere, Category = "Collision")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Collision")
     UBoxComponent* BoxCollision;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float Damage = 20.f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float DestroyDelay = 0.01f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float ImpactParticleScale = 1.f;
 
     virtual void BeginPlay() override;
@@ -43,16 +43,16 @@ private:
     UPROPERTY()
     UParticleSystemComponent* ParticleSystemComponent;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Movement")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Movement")
     UParticleSystem* Tracer;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     UParticleSystem* DefaultImpactParticles;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     UParticleSystem* PlayerImpactParticles;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Hit")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     USoundCue* ImpactSound;
 
     UFUNCTION(NetMulticast, Reliable)

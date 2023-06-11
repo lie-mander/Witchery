@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Character/WTRCharacter.h"
 #include "Sound/SoundCue.h"
+#include "Particles/ParticleSystemComponent.h"
 
 void AWTRHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -17,13 +18,6 @@ void AWTRHitScanWeapon::Fire(const FVector& HitTarget)
         const FVector Start = MuzzleTransform.GetLocation();
         const FVector End = Start + (HitTarget - Start) * 1.25;
 
-        APawn* OwnerPawn = Cast<APawn>(GetOwner());
-        if (!OwnerPawn)
-        {
-            return;
-        }
-        AController* InstigatorController = OwnerPawn->GetController();
-
         if (GetWorld())
         {
             FHitResult FireHit;
@@ -34,37 +28,65 @@ void AWTRHitScanWeapon::Fire(const FVector& HitTarget)
                 ECC_Visibility                     //
             );
 
-            AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(FireHit.GetActor());
+            FVector BeamEnd = End;
 
-            if (HasAuthority() && FireHit.bBlockingHit && WTRCharacter && InstigatorController)
-            {
-                UGameplayStatics::ApplyDamage(  //
-                    FireHit.GetActor(),         //
-                    Damage,                     //
-                    InstigatorController,       //
-                    this,                       //
-                    UDamageType::StaticClass()  //
-                );
-            }
+            ApplyDamageIfHasAuthority(FireHit, BeamEnd); 
+            HandleEffects(FireHit, BeamEnd, MuzzleTransform);
+        }
+    }
+}
 
-            if (ImpactParticles)
-            {
-                UGameplayStatics::SpawnEmitterAtLocation(  //
-                    GetWorld(),                            //
-                    ImpactParticles,                       //
-                    FireHit.ImpactPoint,                    //
-                    FireHit.ImpactNormal.Rotation()        //
-                );
-            }
+void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(FHitResult& HitResult, FVector& Beam) 
+{
+    AController* InstigatorController = GetOwnerPlayerController();
+    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(HitResult.GetActor());
 
-            if (ImpactSound)
-            {
-                UGameplayStatics::PlaySoundAtLocation(  //
-                    this,                               //
-                    ImpactSound,                        //
-                    FireHit.ImpactPoint                 //
-                );
-            }
+    if (HasAuthority() && HitResult.bBlockingHit && WTRCharacter && InstigatorController)
+    {
+        Beam = HitResult.ImpactPoint;
+
+        UGameplayStatics::ApplyDamage(  //
+            HitResult.GetActor(),       //
+            Damage,                     //
+            InstigatorController,       //
+            this,                       //
+            UDamageType::StaticClass()  //
+        );
+    }
+}
+
+void AWTRHitScanWeapon::HandleEffects(const FHitResult& HitResult, const FVector& Beam, const FTransform& Muzzle)
+{
+    if (ImpactParticles)
+    {
+        UGameplayStatics::SpawnEmitterAtLocation(  //
+            GetWorld(),                            //
+            ImpactParticles,                       //
+            HitResult.ImpactPoint,                 //
+            HitResult.ImpactNormal.Rotation()      //
+        );
+    }
+
+    if (ImpactSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(  //
+            this,                               //
+            ImpactSound,                        //
+            HitResult.ImpactPoint               //
+        );
+    }
+
+    if (BeamParticles)
+    {
+        UParticleSystemComponent* BeamSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(  //
+            GetWorld(),                                                                            //
+            BeamParticles,                                                                         //
+            Muzzle                                                                                 //
+        );
+
+        if (BeamSystemComponent)
+        {
+            BeamSystemComponent->SetVectorParameter(FName("Target"), Beam);
         }
     }
 }
