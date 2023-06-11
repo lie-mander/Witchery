@@ -63,7 +63,6 @@ void AWTRProjectileRocket::OnHit(
 {
     if (OtherActor == GetOwner())
     {
-        UE_LOG(LogTemp, Warning, TEXT("Hit self"));
         return;
     }
 
