@@ -158,6 +158,8 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ThisClass::OnFireButtonReleased);
     PlayerInputComponent->BindAction("Pause", EInputEvent::IE_Pressed, this, &ThisClass::OnPauseButtonPressed);
     PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &ThisClass::OnReloadButtonPressed);
+    PlayerInputComponent->BindAction("AudioUp", EInputEvent::IE_Pressed, this, &ThisClass::OnAudioUpButtonPressed);
+    PlayerInputComponent->BindAction("AudioDown", EInputEvent::IE_Pressed, this, &ThisClass::OnAudioDownButtonPressed);
 
     PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ThisClass::MoveForward);
     PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ThisClass::MoveRight);
@@ -638,6 +640,24 @@ void AWTRCharacter::OnReloadButtonPressed()
     if (Combat)
     {
         Combat->Reload();
+    }
+}
+
+void AWTRCharacter::OnAudioUpButtonPressed() 
+{
+    WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
+    if (WTRPlayerController)
+    {
+        WTRPlayerController->VolumeUp();
+    }
+}
+
+void AWTRCharacter::OnAudioDownButtonPressed() 
+{
+    WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
+    if (WTRPlayerController)
+    {
+        WTRPlayerController->TurnDownTheVolume();
     }
 }
 

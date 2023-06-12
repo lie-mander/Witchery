@@ -19,35 +19,60 @@ void AWTRHitScanWeapon::Fire(const FVector& HitTarget)
     {
         const FTransform MuzzleTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
         const FVector Start = MuzzleTransform.GetLocation();
-        const FVector End = Start + (HitTarget - Start) * 1.25;
+        FHitResult FireHit;
 
         if (GetWorld())
         {
-            FHitResult FireHit;
-            GetWorld()->LineTraceSingleByChannel(  //
-                FireHit,                           //
-                Start,                             //
-                End,                               //
-                ECC_Visibility                     //
-            );
-
-            FVector BeamEnd = End;
-
-            ApplyDamageIfHasAuthority(FireHit, BeamEnd);
-            HandleEffects(FireHit, BeamEnd, MuzzleTransform);
+            WeaponTraceHit(Start, HitTarget, FireHit);
+            ApplyDamageIfHasAuthority(FireHit);
+            HandleEffects(FireHit, MuzzleTransform);
         }
     }
 }
 
-void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(FHitResult& HitResult, FVector& Beam)
+void AWTRHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit)
+{
+    // Do hit
+    const FVector End = bUseScatter ? TraceEndWithScatter(TraceStart, HitTarget) : TraceStart + (HitTarget - TraceStart) * 1.25;
+
+    GetWorld()->LineTraceSingleByChannel(  //
+        OutHit,                            //
+        TraceStart,                        //
+        End,                               //
+        ECC_Visibility                     //
+    );
+
+    // Spawn beam particles
+    FVector BeamEnd = End;
+    if (OutHit.bBlockingHit)
+    {
+        BeamEnd = OutHit.ImpactPoint;
+    }
+
+    if (BeamParticles)
+    {
+        UParticleSystemComponent* BeamSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(  //
+            GetWorld(),                                                                            //
+            BeamParticles,                                                                         //
+            TraceStart,                                                                            //
+            FRotator::ZeroRotator,                                                                 //
+            true                                                                                   //
+        );
+
+        if (BeamSystemComponent)
+        {
+            BeamSystemComponent->SetVectorParameter(FName("Target"), BeamEnd);
+        }
+    }
+}
+
+void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(const FHitResult& HitResult)
 {
     AController* InstigatorController = GetOwnerPlayerController();
     AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(HitResult.GetActor());
 
     if (HasAuthority() && HitResult.bBlockingHit && WTRCharacter && InstigatorController)
     {
-        Beam = HitResult.ImpactPoint;
-
         UGameplayStatics::ApplyDamage(  //
             HitResult.GetActor(),       //
             Damage,                     //
@@ -58,7 +83,7 @@ void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(FHitResult& HitResult, FVector
     }
 }
 
-void AWTRHitScanWeapon::HandleEffects(const FHitResult& HitResult, const FVector& Beam, const FTransform& Muzzle)
+void AWTRHitScanWeapon::HandleEffects(const FHitResult& HitResult, const FTransform& Muzzle)
 {
     if (MuzzleParticles)
     {
@@ -77,20 +102,6 @@ void AWTRHitScanWeapon::HandleEffects(const FHitResult& HitResult, const FVector
             ShootSound,                         //
             Muzzle.GetLocation()                //
         );
-    }
-
-    if (BeamParticles)
-    {
-        UParticleSystemComponent* BeamSystemComponent = UGameplayStatics::SpawnEmitterAtLocation(  //
-            GetWorld(),                                                                            //
-            BeamParticles,                                                                         //
-            Muzzle                                                                                 //
-        );
-
-        if (BeamSystemComponent)
-        {
-            BeamSystemComponent->SetVectorParameter(FName("Target"), Beam);
-        }
     }
 
     if (HitResult.bBlockingHit)
@@ -124,9 +135,9 @@ FVector AWTRHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const 
     FVector EndLocation = SphereCenter + RandVect;
     FVector ToEnd = (EndLocation - TraceStart);
 
-    DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Red, true);
+    /* DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Red, true);
     DrawDebugSphere(GetWorld(), EndLocation, 3.f, 12, FColor::Orange, true);
-    DrawDebugLine(GetWorld(), TraceStart, TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size(), FColor::Orange, true);
-    
+    DrawDebugLine(GetWorld(), TraceStart, TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size(), FColor::Orange, true);*/
+
     return FVector(TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size());
 }

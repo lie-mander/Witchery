@@ -92,6 +92,8 @@ protected:
     void OnFireButtonPressed();
     void OnFireButtonReleased();
     void OnReloadButtonPressed();
+    void OnAudioUpButtonPressed();
+    void OnAudioDownButtonPressed();
 
     //////////
     // Other functions

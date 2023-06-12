@@ -15,6 +15,7 @@
 #include "GameStates/WTRGameState.h"
 #include "TimerManager.h"
 #include "WTRPlayerState.h"
+#include "Sound/SoundClass.h"
 
 void AWTRPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -22,6 +23,7 @@ void AWTRPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
     DOREPLIFETIME(AWTRPlayerController, MatchState);
     DOREPLIFETIME(AWTRPlayerController, TimeOfMapCreation);
+    
 }
 
 void AWTRPlayerController::BeginPlay()
@@ -604,5 +606,21 @@ void AWTRPlayerController::HandleMatchCooldown()
         {
             OwnerCharacter->UnCrouch();
         }
+    }
+}
+
+void AWTRPlayerController::VolumeUp() 
+{
+    if (MasterSoundClass)
+    {
+        MasterSoundClass->Properties.Volume = FMath::Clamp(MasterSoundClass->Properties.Volume + 0.1f, 0, 1.f);
+    }
+}
+
+void AWTRPlayerController::TurnDownTheVolume() 
+{
+    if (MasterSoundClass)
+    {
+        MasterSoundClass->Properties.Volume = FMath::Clamp(MasterSoundClass->Properties.Volume - 0.1f, 0, 1.f);
     }
 }

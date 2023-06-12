@@ -15,5 +15,6 @@ public:
     virtual void Fire(const FVector& HitTarget);
 
 private:
-    uint32 NumberOfShotgunShells = 10;
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")
+    uint32 NumberOfShotgunShells = 12;
 };

@@ -12,6 +12,7 @@ class AWTRCharacter;
 class AWTRGameMode;
 class UWTRCharacterOverlayWidget;
 class UWTRAnnouncementWidget;
+class USoundClass;
 
 UCLASS()
 class WITCHERY_API AWTRPlayerController : public APlayerController
@@ -26,6 +27,9 @@ public:
     virtual void DelayInit();
 
     void SetMatchState(const FName& State);
+
+    void TurnDownTheVolume();
+    void VolumeUp();
 
     void SetHUDHealth(float CurrentHealth, float MaxHealth);
     void SetHUDScore(float ScoreAmount);
@@ -66,6 +70,12 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Debug")
     bool bShowFPS = false;
+
+    //////////
+    // Sound
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sound")
+    USoundClass* MasterSoundClass;
 
     //////////
     // Match states
