@@ -69,6 +69,7 @@ void UWTRCombatComponent::InitCarriedAmmoMap()
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_RocketLauncher, RocketLauncherCarrAmmo);
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_Pistol, PistolCarrAmmo);
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_SubmachineGun, SubmachineGunCarrAmmo);
+    CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_Shotgun, ShotgunCarrAmmo);
 }
 
 void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
@@ -472,7 +473,7 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
             Start += CrosshairWorldDirection * (DistanceToCharacter + DistanceFromCamera);
         }
 
-        FVector End = CrosshairWorldPosition + CrosshairWorldDirection * TraceRange;
+        FVector End = CrosshairWorldPosition + CrosshairWorldDirection * TRACE_RANGE;
 
         GetWorld()->LineTraceSingleByChannel(  //
             TraceFromScreenHitResult,          //
