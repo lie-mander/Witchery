@@ -133,10 +133,10 @@ private:
     //////////
     // Ammo
     //
-    UPROPERTY(ReplicatedUsing = OnRep_Ammo, EditDefaultsOnly)
+    UPROPERTY(ReplicatedUsing = OnRep_Ammo, EditDefaultsOnly, Category = "WTR | Weapon properties")
     int32 Ammo = 10;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")
     int32 MagazineCapacity = 10;
 
     UFUNCTION()

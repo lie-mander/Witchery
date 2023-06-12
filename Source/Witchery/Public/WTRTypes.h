@@ -4,16 +4,16 @@
 
 class UTexture2D;
 
-// Collision
+// Trace distance
+#define TRACE_RANGE 20000.f
 
+// Collision
 #define ECC_SkeletalMesh ECollisionChannel::ECC_GameTraceChannel1
 
 // Delegates
-
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotifyPlayed, class USkeletalMeshComponent*)
 
 // Animation
-
 UENUM(BlueprintType)
 enum class ETurningInPlace : uint8
 {
@@ -25,7 +25,6 @@ enum class ETurningInPlace : uint8
 };
 
 // Weapon
-
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
@@ -33,6 +32,7 @@ enum class EWeaponType : uint8
     EWT_RocketLauncher UMETA(DisplayName = "Rocket Launcher"),
     EWT_Pistol UMETA(DisplayName = "Pistol"),
     EWT_SubmachineGun UMETA(DisplayName = "SubmachineGun"),
+    EWT_Shotgun UMETA(DisplayName = "Shotgun"),
 
     EWT_MAX UMETA(DisplayName = "MAX")
 };

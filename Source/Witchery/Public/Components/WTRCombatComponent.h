@@ -73,9 +73,6 @@ private:
     // Shooting
     //
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
-    float TraceRange = 300.f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
     FVector3d SpringArmOffsetWhileEquipped = FVector3d(0.f, 180.f, 0.f);
 
     UPROPERTY(Replicated)
@@ -102,6 +99,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
     int32 SubmachineGunCarrAmmo = 35;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
+    int32 ShotgunCarrAmmo = 10;
 
     // Carried ammo for current equipped weapon
     UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo);
