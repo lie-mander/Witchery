@@ -23,7 +23,6 @@ void AWTRPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
     DOREPLIFETIME(AWTRPlayerController, MatchState);
     DOREPLIFETIME(AWTRPlayerController, TimeOfMapCreation);
-    
 }
 
 void AWTRPlayerController::BeginPlay()
@@ -54,6 +53,7 @@ void AWTRPlayerController::DelayInit()
         if (WTR_HUD)
         {
             CharacterOverlay = Cast<UWTRCharacterOverlayWidget>(WTR_HUD->CharacterOverlayWidget);
+
             if (CharacterOverlay)
             {
                 SetHUDHealth(DelayInit_CurrentHealth, DelayInit_MaxHealth);
@@ -76,7 +76,8 @@ void AWTRPlayerController::DelayInit()
     if (!AnnouncementWidget)
     {
         WTR_HUD = GetWTR_HUD();
-        if (IsLocalController() && WTR_HUD && MatchState == MatchState::WaitingToStart && !WTR_HUD->AnnouncementWidget)
+        if (IsLocalController() && WTR_HUD && (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown) &&
+            !WTR_HUD->AnnouncementWidget)
         {
             WTR_HUD->AddAnnouncement();
             AnnouncementWidget = Cast<UWTRAnnouncementWidget>(WTR_HUD->AnnouncementWidget);
@@ -115,9 +116,14 @@ void AWTRPlayerController::Client_ApplyMatchState_Implementation(
     CooldownTime = TimeOfCooldown;
     MatchState = State;
 
-    if (IsLocalController() && WTR_HUD && MatchState == MatchState::WaitingToStart && !WTR_HUD->AnnouncementWidget)
+    if (IsLocalController() && WTR_HUD && (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown) &&
+        !WTR_HUD->AnnouncementWidget)
     {
         WTR_HUD->AddAnnouncement();
+    }
+    else if (IsLocalController() && WTR_HUD && MatchState == MatchState::InProgress && !WTR_HUD->CharacterOverlayWidget)
+    {
+        WTR_HUD->AddCharacterOverlay();
     }
 }
 
@@ -609,7 +615,7 @@ void AWTRPlayerController::HandleMatchCooldown()
     }
 }
 
-void AWTRPlayerController::VolumeUp() 
+void AWTRPlayerController::VolumeUp()
 {
     if (MasterSoundClass)
     {
@@ -617,7 +623,7 @@ void AWTRPlayerController::VolumeUp()
     }
 }
 
-void AWTRPlayerController::TurnDownTheVolume() 
+void AWTRPlayerController::TurnDownTheVolume()
 {
     if (MasterSoundClass)
     {

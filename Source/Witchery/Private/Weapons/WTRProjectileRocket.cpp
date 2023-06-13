@@ -55,9 +55,9 @@ void AWTRProjectileRocket::BeginPlay()
         );
     }
 
-    if (BoxCollision)
+    if (HasAuthority() && BoxCollision)
     {
-        BoxCollision->OnComponentHit.AddDynamic(this, &AWTRProjectileRocket::OnHit);
+        BoxCollision->OnComponentHit.AddUniqueDynamic(this, &AWTRProjectileRocket::OnHit);
     }
 }
 
@@ -94,6 +94,11 @@ void AWTRProjectileRocket::OnHit(
         Super::OnHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit);
     }
 
+    Multicast_OnRocketDestroyed();
+}
+
+void AWTRProjectileRocket::Multicast_OnRocketDestroyed_Implementation()
+{
     // Calls on all machines
     if (RocketMesh)
     {

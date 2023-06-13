@@ -47,9 +47,9 @@ void AWTRProjectile::BeginPlay()
         );
     }
 
-    if (HasAuthority())
+    if (HasAuthority() && BoxCollision)
     {
-        BoxCollision->OnComponentHit.AddDynamic(this, &ThisClass::OnHit);
+        BoxCollision->OnComponentHit.AddUniqueDynamic(this, &ThisClass::OnHit);
     }
 }
 

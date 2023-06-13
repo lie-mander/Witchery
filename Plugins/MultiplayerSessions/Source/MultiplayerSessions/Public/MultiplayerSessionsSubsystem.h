@@ -93,4 +93,5 @@ private:
     //
 
     FUniqueNetIdRepl GetLocalPlayerPreferredUniqueNetId();
+    bool IsValidSessionInterface();
 };

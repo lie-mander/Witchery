@@ -56,5 +56,5 @@ private:
     USoundCue* ImpactSound;
 
     UFUNCTION(NetMulticast, Reliable)
-    virtual void Multicast_OnDestroyed(AActor* HitActor);
+    void Multicast_OnDestroyed(AActor* HitActor);
 };

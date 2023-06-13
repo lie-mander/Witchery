@@ -42,10 +42,14 @@ public:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_Elim();
 
+    UFUNCTION(BlueprintImplementableEvent)
+    void SetShowScopeAnimation(bool bShowScope);
+
     void Elim();
     virtual void Jump() override;
     void PlayFireMontage(bool bAiming);
     void PlayReloadMontage();
+    void StopReloadMontage();
     void PlayHitReactMontage();
     void PlayEliminationMontage();
 

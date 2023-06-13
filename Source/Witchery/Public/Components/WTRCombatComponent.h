@@ -209,6 +209,9 @@ private:
     UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
     AWTRWeapon* EquippedWeapon;
 
+    UPROPERTY()
+    AWTRWeapon* LastEquippedWeapon;
+
     FHitResult TraceHitResult;
 
     //////////
@@ -224,4 +227,5 @@ private:
     bool CanFire() const;
     int32 AmmoToReload();
     void ReloadWeaponAndSubCarriedAmmo();
+    void StopReloadWhileEquip();
 };

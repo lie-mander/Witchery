@@ -500,6 +500,22 @@ void AWTRCharacter::PlayReloadMontage()
     AnimInstance->Montage_JumpToSection(SectionName);
 }
 
+void AWTRCharacter::StopReloadMontage() 
+{
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !ReloadMontage)
+    {
+        return;
+    }
+
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance)
+    {
+        return;
+    }
+
+    AnimInstance->Montage_Stop(0.3f, ReloadMontage);
+}
+
 void AWTRCharacter::PlayHitReactMontage()
 {
     if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !HitReactMontage)
@@ -543,12 +559,17 @@ void AWTRCharacter::OnEquipButtonPressed()
 
     if (Combat)
     {
+        Combat->SetAiming(false);
+
         if (HasAuthority())
         {
             Combat->EquipWeapon(OverlappingWeapon);
         }
         else
         {
+            // Need to call on client for stopping reload montage, for server this logic calls in Combat->EquipWeapon()
+            Combat->StopReloadWhileEquip();
+
             Server_OnEquippedButtonPressed();
         }
     }
@@ -764,6 +785,13 @@ void AWTRCharacter::Multicast_Elim_Implementation()
             ElimBotSound,                       //
             GetActorLocation()                  //
         );
+    }
+
+    bool bHideScoup = IsLocallyControlled() && Combat && Combat->bIsAiming && Combat->EquippedWeapon &&
+                      Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+    if (bHideScoup)
+    {
+        Combat->SetAiming(false);
     }
 
     // Show DeathMessage (will hidden in WTRPlayerController.cpp in OnPossess() function)

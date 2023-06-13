@@ -165,11 +165,11 @@ void UWTRCombatComponent::InterpFOV(float DeltaTime)
         return;
     }
 
-    if (bIsAiming)
+    if (bIsAiming && CombatState != ECombatState::ECS_Reloading)
     {
         CurrentZoomFOV = FMath::FInterpTo(CurrentZoomFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
     }
-    else
+    else if (!bIsAiming)
     {
         CurrentZoomFOV = FMath::FInterpTo(CurrentZoomFOV, DefaultZoomFOV, DeltaTime, ZoomInterpSpeed);
     }
@@ -190,6 +190,20 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
     EquippedWeapon = WeaponToEquip;
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
     EquippedWeapon->SetOwner(Character);
+
+    if (CombatState == ECombatState::ECS_Reloading)
+    {
+        Character->StopReloadMontage();
+
+        CombatState = ECombatState::ECS_Unoccupied;
+
+        bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
+                          EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+        if (bShowScope)
+        {
+            Character->SetShowScopeAnimation(bShowScope);
+        }
+    }
 
     // Need to know weapon owner, must be set after SetOwner() function
     EquippedWeapon->SetHUDAmmo();
@@ -283,6 +297,14 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
     if (bFireButtonPressed)
     {
         Fire();
+
+        bool bHideScope = Character && Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
+                          EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+        if (bHideScope)
+        {
+            SetAiming(false);
+            Character->SetShowScopeAnimation(false);
+        }
     }
 }
 
@@ -300,10 +322,6 @@ void UWTRCombatComponent::Fire()
         }
 
         FireTimerStart();
-    }
-    else if (EquippedWeapon && EquippedWeapon->IsEmpty())
-    {
-        Reload();
     }
 }
 
@@ -343,6 +361,11 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
     {
         Character->PlayFireMontage(bIsAiming);
         EquippedWeapon->Fire(TraceHitTarget);
+
+        if (EquippedWeapon->IsEmpty())
+        {
+            Reload();
+        }
     }
 }
 
@@ -362,7 +385,23 @@ void UWTRCombatComponent::Server_Reload_Implementation()
     }
 
     CombatState = ECombatState::ECS_Reloading;
+    LastEquippedWeapon = EquippedWeapon;
     ReloadHandle();
+}
+
+void UWTRCombatComponent::StopReloadWhileEquip() 
+{
+    if (CombatState == ECombatState::ECS_Reloading && Character)
+    {
+        Character->StopReloadMontage();
+
+        bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
+                          EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+        if (bShowScope)
+        {
+            Character->SetShowScopeAnimation(bShowScope);
+        }
+    }
 }
 
 void UWTRCombatComponent::OnRep_CombatState()
@@ -373,6 +412,11 @@ void UWTRCombatComponent::OnRep_CombatState()
             if (bFireButtonPressed)
             {
                 Fire();
+            }
+            if (Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
+                EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
+            {
+                Character->SetShowScopeAnimation(true);
             }
             break;
 
@@ -408,7 +452,7 @@ int32 UWTRCombatComponent::AmmoToReload()
 
 void UWTRCombatComponent::ReloadWeaponAndSubCarriedAmmo()
 {
-    if (!EquippedWeapon)
+    if (!EquippedWeapon || LastEquippedWeapon != EquippedWeapon)
     {
         return;
     }
@@ -436,6 +480,13 @@ void UWTRCombatComponent::FinishReloading()
     if (Character->HasAuthority() && CombatState == ECombatState::ECS_Reloading)
     {
         CombatState = ECombatState::ECS_Unoccupied;
+
+        bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
+                          EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+        if (bShowScope)
+        {
+            Character->SetShowScopeAnimation(bShowScope);
+        }
 
         ReloadWeaponAndSubCarriedAmmo();
     }
@@ -500,11 +551,29 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
 
 void UWTRCombatComponent::SetAiming(bool bAiming)
 {
+    if (bIsAiming == bAiming)
+    {
+        return;
+    }
+
     bIsAiming = bAiming;
 
     if (Character)
     {
         Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+    }
+
+    if (Character->IsLocallyControlled() && EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
+    {
+        // We don`t want to scope if we are reloading at this time
+        if (bAiming && CombatState != ECombatState::ECS_Reloading)
+        {
+            Character->SetShowScopeAnimation(bAiming);
+        }
+        else if (!bAiming && CombatState != ECombatState::ECS_Reloading)
+        {
+            Character->SetShowScopeAnimation(bAiming);
+        }
     }
 
     Server_SetAiming(bAiming);
