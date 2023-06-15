@@ -6,11 +6,7 @@
 #include "Weapons/WTRProjectile.h"
 #include "WTRProjectileRocket.generated.h"
 
-class UStaticMeshComponent;
-class UNiagaraSystem;
-class UNiagaraComponent;
 class UWTRRocketMovementComponent;
-class UParticleSystem;
 
 UCLASS()
 class WITCHERY_API AWTRProjectileRocket : public AWTRProjectile
@@ -36,25 +32,8 @@ protected:
     USoundAttenuation* ProjectileLoopAttenuation;
 
 private:
-    UPROPERTY(VisibleAnywhere, Category = "WTR | Rocket Mesh")
-    UStaticMeshComponent* RocketMesh;
-
     UPROPERTY(VisibleAnywhere, Category = "WTR | Movement")
     UWTRRocketMovementComponent* RocketMovementComponent;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | FX")
-    UNiagaraSystem* TrailSystem;
-
-    UNiagaraComponent* TrailComponent;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
-    float MinimumDamage = 10.f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
-    float DamageInnerRadius = 200.f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
-    float DamageOutRadius = 500.f;
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_OnRocketDestroyed();

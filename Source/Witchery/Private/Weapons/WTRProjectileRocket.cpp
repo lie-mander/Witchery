@@ -2,8 +2,6 @@
 
 #include "Weapons/WTRProjectileRocket.h"
 #include "Kismet/GameplayStatics.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/AudioComponent.h"
 #include "Components/WTRRocketMovementComponent.h"
@@ -11,9 +9,9 @@
 
 AWTRProjectileRocket::AWTRProjectileRocket()
 {
-    RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket Mesh"));
-    RocketMesh->SetupAttachment(RootComponent);
-    RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket Mesh"));
+    ProjectileMesh->SetupAttachment(RootComponent);
+    ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     RocketMovementComponent = CreateDefaultSubobject<UWTRRocketMovementComponent>(TEXT("RocketMovementComponent"));
     RocketMovementComponent->bRotationFollowsVelocity = true;
@@ -24,18 +22,7 @@ void AWTRProjectileRocket::BeginPlay()
 {
     Super::BeginPlay();
 
-    if (TrailSystem)
-    {
-        TrailComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
-            TrailSystem,                                                //
-            GetRootComponent(),                                         //
-            FName(),                                                    //
-            GetActorLocation(),                                         //
-            GetActorRotation(),                                         //
-            EAttachLocation::KeepWorldPosition,                         //
-            false                                                       //
-        );
-    }
+    SpawnTrailSystem();
 
     if (ProjectileLoop && ProjectileLoopAttenuation)
     {
@@ -69,51 +56,19 @@ void AWTRProjectileRocket::OnHit(
         return;
     }
 
-    // Calls on the server
-    APawn* OwnerPawn = GetInstigator();
-    if (OwnerPawn && HasAuthority())
+    if (ExplodeDamage())
     {
-        AController* OwnerController = OwnerPawn->GetController();
-        if (OwnerController)
-        {
-            UGameplayStatics::ApplyRadialDamageWithFalloff(  //
-                this,                                        //
-                Damage,                                      // Max damage
-                MinimumDamage,                               // Min damage
-                GetActorLocation(),                          //
-                DamageInnerRadius,                           // In this radius will be max damage
-                DamageOutRadius,                             // To this radius damage will be linear down
-                1.f,                                         // Linear down falloff
-                UDamageType::StaticClass(),                  //
-                TArray<AActor*>(),                           // No ignore actors
-                this,                                        //
-                OwnerController                              //
-            );
-        }
-
         Super::OnHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit);
     }
 
+    // We on the server cause bind was in BeginPlay with HasAuthority()
     Multicast_OnRocketDestroyed();
 }
 
 void AWTRProjectileRocket::Multicast_OnRocketDestroyed_Implementation()
 {
     // Calls on all machines
-    if (RocketMesh)
-    {
-        RocketMesh->SetVisibility(false);
-    }
-
-    if (BoxCollision)
-    {
-        BoxCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    }
-
-    if (TrailComponent)
-    {
-        TrailComponent->Deactivate();
-    }
+    DestroyCosmetic();
 
     if (ProjectileLoopComponent && ProjectileLoopComponent->IsPlaying())
     {

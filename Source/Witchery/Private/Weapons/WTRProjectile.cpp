@@ -8,6 +8,8 @@
 #include "Sound/SoundCue.h"
 #include "Character/WTRCharacter.h"
 #include "WTRTypes.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 AWTRProjectile::AWTRProjectile()
 {
@@ -57,16 +59,70 @@ void AWTRProjectile::OnHit(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
     Multicast_OnDestroyed(OtherActor);
-    SetLifeSpan(DestroyDelay);
+    StartDestroyTimer();
 }
 
 void AWTRProjectile::Multicast_OnDestroyed_Implementation(AActor* HitActor)
+{
+    PlayImpact(HitActor);
+
+    if (ParticleSystemComponent)
+    {
+        ParticleSystemComponent->Deactivate();
+    }
+}
+
+void AWTRProjectile::SpawnTrailSystem()
+{
+    if (TrailSystem)
+    {
+        TrailComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
+            TrailSystem,                                                //
+            GetRootComponent(),                                         //
+            FName(),                                                    //
+            GetActorLocation(),                                         //
+            GetActorRotation(),                                         //
+            EAttachLocation::KeepWorldPosition,                         //
+            false                                                       //
+        );
+    }
+}
+
+void AWTRProjectile::StartDestroyTimer() 
+{
+    SetLifeSpan(DestroyDelay);
+}
+
+void AWTRProjectile::LifeSpanExpired()
+{
+    Super::LifeSpanExpired();
+}
+
+void AWTRProjectile::DestroyCosmetic() 
+{
+    if (ProjectileMesh)
+    {
+        ProjectileMesh->SetVisibility(false);
+    }
+
+    if (BoxCollision)
+    {
+        BoxCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+
+    if (TrailComponent)
+    {
+        TrailComponent->Deactivate();
+    }
+}
+
+void AWTRProjectile::PlayImpact(AActor* HitActor)
 {
     FTransform CustomParticleTransform = GetActorTransform();
     CustomParticleTransform.SetScale3D(FVector(ImpactParticleScale, ImpactParticleScale, ImpactParticleScale));
 
     // Different impacts for different actors
-    if (HitActor->Implements<UInteractWithCrosshairInterface>() && PlayerImpactParticles)
+    if (HitActor && HitActor->Implements<UInteractWithCrosshairInterface>() && PlayerImpactParticles)
     {
         UGameplayStatics::SpawnEmitterAtLocation(  //
             GetWorld(),                            //
@@ -91,9 +147,38 @@ void AWTRProjectile::Multicast_OnDestroyed_Implementation(AActor* HitActor)
             GetActorLocation()                  //
         );
     }
+}
 
-    if (ParticleSystemComponent)
+bool AWTRProjectile::ExplodeDamage() 
+{
+    // Calls on the server
+    APawn* OwnerPawn = GetInstigator();
+    if (OwnerPawn && HasAuthority())
     {
-        ParticleSystemComponent->Deactivate();
+        AController* OwnerController = OwnerPawn->GetController();
+        if (OwnerController)
+        {
+            UGameplayStatics::ApplyRadialDamageWithFalloff(  //
+                this,                                        //
+                Damage,                                      // Max damage
+                MinimumDamage,                               // Min damage
+                GetActorLocation(),                          //
+                DamageInnerRadius,                           // In this radius will be max damage
+                DamageOutRadius,                             // To this radius damage will be linear down
+                1.f,                                         // Linear down falloff
+                UDamageType::StaticClass(),                  //
+                TArray<AActor*>(),                           // No ignore actors
+                this,                                        //
+                OwnerController                              //
+            );
+        }
+
+        if (DebugSphere && GetWorld())
+        {
+            DrawDebugSphere(GetWorld(), GetActorLocation(), DamageInnerRadius, 12, FColor::Red, true);
+            DrawDebugSphere(GetWorld(), GetActorLocation(), DamageOutRadius, 12, FColor::Orange, true);
+        }
+        return true;
     }
+    return false;
 }

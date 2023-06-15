@@ -27,7 +27,7 @@ AWTRWeapon::AWTRWeapon()
     AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
     AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
     AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    AreaSphere->SetSphereRadius(60.f);
+    AreaSphere->SetSphereRadius(80.f);
     AreaSphere->SetupAttachment(RootComponent);
 
     PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));

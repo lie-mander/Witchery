@@ -10,6 +10,10 @@ class UBoxComponent;
 class UParticleSystemComponent;
 class UParticleSystem;
 class USoundCue;
+class UNiagaraSystem;
+class UNiagaraComponent;
+class UStaticMeshComponent;
+class UProjectileMovementComponent;
 
 UCLASS()
 class WITCHERY_API AWTRProjectile : public AActor
@@ -19,10 +23,22 @@ class WITCHERY_API AWTRProjectile : public AActor
 public:
     AWTRProjectile();
     virtual void Tick(float DeltaTime) override;
+    virtual void LifeSpanExpired() override;
 
 protected:
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Movement")
+    UProjectileMovementComponent* ProjectileMovementComponent;
+
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Projectile Mesh")
+    UStaticMeshComponent* ProjectileMesh;
+
     UPROPERTY(VisibleAnywhere, Category = "WTR | Collision")
     UBoxComponent* BoxCollision;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | FX")
+    UNiagaraSystem* TrailSystem;
+
+    UNiagaraComponent* TrailComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float Damage = 20.f;
@@ -33,11 +49,28 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float ImpactParticleScale = 1.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Radial hit")
+    float MinimumDamage = 10.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Radial hit")
+    float DamageInnerRadius = 200.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Radial hit")
+    float DamageOutRadius = 500.f;
+
     virtual void BeginPlay() override;
+    virtual void SpawnTrailSystem();
+    virtual void StartDestroyTimer();
+    void DestroyCosmetic();
+    void PlayImpact(AActor* HitActor);
+    bool ExplodeDamage();
 
     UFUNCTION()
     virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
         const FHitResult& Hit);
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_OnDestroyed(AActor* HitActor);
 
 private:
     UPROPERTY()
@@ -55,6 +88,6 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     USoundCue* ImpactSound;
 
-    UFUNCTION(NetMulticast, Reliable)
-    void Multicast_OnDestroyed(AActor* HitActor);
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Debug")
+    bool DebugSphere = false;
 };

@@ -6,8 +6,6 @@
 #include "Weapons/WTRProjectile.h"
 #include "WTRProjectileBullet.generated.h"
 
-class UProjectileMovementComponent;
-
 UCLASS()
 class WITCHERY_API AWTRProjectileBullet : public AWTRProjectile
 {
@@ -21,6 +19,4 @@ protected:
         const FHitResult& Hit) override;
 
 private:
-    UPROPERTY(VisibleAnywhere, Category = "WTR | Movement")
-    UProjectileMovementComponent* ProjectileMovementComponent;
 };
