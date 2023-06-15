@@ -135,12 +135,14 @@ void AWTRCharacter::BeginPlay()
     // Set callbacks for anim notifies
     if (ReloadMontage)
     {
-        UWTRReloadFinishedAnimNotify* WTRReloadFinishedAnimNotify =
-            UWTRTools::FindNotifyByClass<UWTRReloadFinishedAnimNotify>(ReloadMontage);
-
-        if (WTRReloadFinishedAnimNotify)
+        const auto NotifyEvents = ReloadMontage->Notifies;
+        for (const auto WTRReloadFinishedStructs : NotifyEvents)
         {
-            WTRReloadFinishedAnimNotify->OnNotifyPlayed.AddUObject(this, &ThisClass::OnReloadFinishedNotifyPlayed);
+            const auto WTRReloadFinishedAnimNotify = Cast<UWTRReloadFinishedAnimNotify>(WTRReloadFinishedStructs.Notify);
+            if (WTRReloadFinishedAnimNotify)
+            {
+                WTRReloadFinishedAnimNotify->OnNotifyPlayed.AddUObject(this, &ThisClass::OnReloadFinishedNotifyPlayed);
+            }
         }
     }
 }
@@ -490,18 +492,19 @@ void AWTRCharacter::PlayReloadMontage()
     switch (Combat->EquippedWeapon->GetWeaponType())
     {
         case EWeaponType::EWT_AssaultRifle: SectionName = FName("Rifle"); break;
-        case EWeaponType::EWT_RocketLauncher: SectionName = FName("Rifle"); break;
-        case EWeaponType::EWT_Pistol: SectionName = FName("Rifle"); break;
-        case EWeaponType::EWT_SubmachineGun: SectionName = FName("Rifle"); break;
-        case EWeaponType::EWT_Shotgun: SectionName = FName("Rifle"); break;
-        case EWeaponType::EWT_SniperRifle: SectionName = FName("Rifle"); break;
-        case EWeaponType::EWT_GrenadeLauncher: SectionName = FName("Rifle"); break;
+        case EWeaponType::EWT_RocketLauncher: SectionName = FName("RocketLauncher"); break;
+        case EWeaponType::EWT_Pistol: SectionName = FName("Pistol"); break;
+        case EWeaponType::EWT_SubmachineGun: SectionName = FName("Pistol"); break;
+        case EWeaponType::EWT_Shotgun: SectionName = FName("Shotgun"); break;
+        case EWeaponType::EWT_SniperRifle: SectionName = FName("SniperRifle"); break;
+        case EWeaponType::EWT_GrenadeLauncher: SectionName = FName("RocketLauncher"); break;
     }
 
+    UE_LOG(LogTemp, Display, TEXT("%s"), *SectionName.ToString());
     AnimInstance->Montage_JumpToSection(SectionName);
 }
 
-void AWTRCharacter::StopReloadMontage() 
+void AWTRCharacter::StopReloadMontage()
 {
     if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !ReloadMontage)
     {
@@ -666,7 +669,7 @@ void AWTRCharacter::OnReloadButtonPressed()
     }
 }
 
-void AWTRCharacter::OnAudioUpButtonPressed() 
+void AWTRCharacter::OnAudioUpButtonPressed()
 {
     WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
     if (WTRPlayerController)
@@ -675,7 +678,7 @@ void AWTRCharacter::OnAudioUpButtonPressed()
     }
 }
 
-void AWTRCharacter::OnAudioDownButtonPressed() 
+void AWTRCharacter::OnAudioDownButtonPressed()
 {
     WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
     if (WTRPlayerController)

@@ -24,6 +24,19 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Bounce")
     USoundCue* BounceSound;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Signal")
+    USoundCue* SignalSound;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Signal")
+    float LenghtOfSignalInSeconds = 0.f;
+
+    float LifeTime = 0.f;
+    bool bPlaySoundOneTime = true;
+
+    FTimerHandle PlaySignalTimer;
+
+    void PlaySignal();
+
     UFUNCTION()
     void OnBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity);
 

@@ -25,6 +25,9 @@ void AWTRProjectileGrenade::BeginPlay()
     StartDestroyTimer();
 
     ProjectileMovementComponent->OnProjectileBounce.AddDynamic(this, &AWTRProjectileGrenade::OnBounce);
+
+    GetWorld()->GetTimerManager().SetTimer(
+        PlaySignalTimer, this, &AWTRProjectileGrenade::PlaySignal, 1.f, false, DestroyDelay - LenghtOfSignalInSeconds);
 }
 
 void AWTRProjectileGrenade::LifeSpanExpired()
@@ -38,10 +41,24 @@ void AWTRProjectileGrenade::LifeSpanExpired()
     Super::LifeSpanExpired();
 }
 
-void AWTRProjectileGrenade::Multicast_OnGrenadeDestroyed_Implementation() 
+void AWTRProjectileGrenade::Multicast_OnGrenadeDestroyed_Implementation()
 {
     // We want play DefaultImpactParticles
     PlayImpact(nullptr);
+}
+
+void AWTRProjectileGrenade::PlaySignal() 
+{
+    if (SignalSound)
+    {
+        UGameplayStatics::SpawnSoundAttached(   //
+            SignalSound,                        //
+            GetRootComponent(),                 //
+            FName(),                            //
+            GetActorLocation(),                 //
+            EAttachLocation::KeepWorldPosition  //
+        );
+    }
 }
 
 void AWTRProjectileGrenade::OnBounce(const FHitResult& ImpactResult, const FVector& ImpactVelocity)
