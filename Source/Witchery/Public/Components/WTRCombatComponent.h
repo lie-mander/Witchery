@@ -106,6 +106,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
     int32 SniperRifleCarrAmmo = 6;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
+    int32 GrenadeLauncherCarrAmmo = 5;
+
     // Carried ammo for current equipped weapon
     UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo);
     int32 CarriedAmmo;
