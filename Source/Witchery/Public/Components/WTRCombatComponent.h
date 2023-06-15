@@ -28,6 +28,10 @@ public:
     void OnFireButtonPressed(bool bPressed);
     void SetAiming(bool bAiming);
     void FinishReloading();
+    void JumpToShotgunEnd();
+
+    UFUNCTION(BlueprintCallable)
+    void ShotgunShellReload();
 
 protected:
     virtual void BeginPlay() override;
@@ -230,5 +234,6 @@ private:
     bool CanFire() const;
     int32 AmmoToReload();
     void ReloadWeaponAndSubCarriedAmmo();
+    void ReloadShotgunAndSubCarriedAmmo();
     void StopReloadWhileEquip();
 };

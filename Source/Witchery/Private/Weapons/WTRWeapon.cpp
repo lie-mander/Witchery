@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/WTRCombatComponent.h"
 #include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "WTRTools.h"
@@ -117,12 +118,23 @@ void AWTRWeapon::DecreaseAmmo()
 {
     Ammo = FMath::Clamp(Ammo - 1, 0, MagazineCapacity);
 
+    WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
     SetHUDAmmo();
 }
 
 void AWTRWeapon::OnRep_Ammo()
 {
     SetHUDAmmo();
+
+    WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
+    bool bNeedToJump = IsFull() &&                                 //
+                       WTROwnerCharacter &&                        //
+                       WTROwnerCharacter->GetCombatComponent() &&  //
+                       WeaponType == EWeaponType::EWT_Shotgun;
+    if (bNeedToJump)
+    {
+        WTROwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
+    }
 }
 
 void AWTRWeapon::SetWeaponState(EWeaponState NewState)
@@ -203,6 +215,7 @@ void AWTRWeapon::OnRep_Owner()
     if (!Owner)
     {
         WTROwnerPlayerController = nullptr;
+        WTROwnerCharacter = nullptr;
     }
     else
     {
@@ -218,6 +231,7 @@ void AWTRWeapon::Dropped()
 
     SetOwner(nullptr);
     WTROwnerPlayerController = nullptr;
+    WTROwnerCharacter = nullptr;
 }
 
 void AWTRWeapon::AddAmmo(int32 AmmoToAdd)

@@ -136,9 +136,9 @@ void AWTRCharacter::BeginPlay()
     if (ReloadMontage)
     {
         const auto NotifyEvents = ReloadMontage->Notifies;
-        for (const auto WTRReloadFinishedStructs : NotifyEvents)
+        for (const auto NotifyStructs : NotifyEvents)
         {
-            const auto WTRReloadFinishedAnimNotify = Cast<UWTRReloadFinishedAnimNotify>(WTRReloadFinishedStructs.Notify);
+            const auto WTRReloadFinishedAnimNotify = Cast<UWTRReloadFinishedAnimNotify>(NotifyStructs.Notify);
             if (WTRReloadFinishedAnimNotify)
             {
                 WTRReloadFinishedAnimNotify->OnNotifyPlayed.AddUObject(this, &ThisClass::OnReloadFinishedNotifyPlayed);
@@ -867,6 +867,12 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
 
             WTRGameMode->PlayerEliminated(this, WTRPlayerController, AttackerController);
         }
+    }
+
+    if (Combat&& Combat->CombatState == ECombatState::ECS_Reloading)
+    {
+        StopReloadMontage();
+        Combat->CombatState = ECombatState::ECS_Unoccupied;
     }
 }
 

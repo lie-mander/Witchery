@@ -71,10 +71,13 @@ public:
     FORCEINLINE ETurningInPlace GetTurningState() const { return TurningInPlace; }
     FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArmComponent; }
     FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
-    FORCEINLINE UWTRCombatComponent* GetCombatComponent() const { return Combat; }
+    FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
     ECombatState GetCombatState() const;
     AWTRWeapon* GetEquippedWeapon() const;
     FVector GetHitTarget() const;
+
+    UFUNCTION(BlueprintCallable)
+    FORCEINLINE UWTRCombatComponent* GetCombatComponent() const { return Combat; }
 
 protected:
     //////////

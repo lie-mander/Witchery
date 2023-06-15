@@ -78,9 +78,6 @@ void AWTRShotgun::Fire(const FVector& HitTarget)
                     this,                       //
                     UDamageType::StaticClass()  //
                 );
-
-                GEngine->AddOnScreenDebugMessage(
-                    0, 2, FColor::Green, FString::Printf(TEXT("For %s damage: %f"), *Pair.Key->GetName(), Damage * Pair.Value));
             }
         }
     }

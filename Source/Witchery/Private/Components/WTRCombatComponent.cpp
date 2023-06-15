@@ -278,6 +278,12 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
 void UWTRCombatComponent::OnRep_CarriedAmmo()
 {
     SetHUDCarriedAmmo();
+
+    if (CarriedAmmo == 0 && EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
+        CombatState == ECombatState::ECS_Reloading)
+    {
+        JumpToShotgunEnd();
+    }
 }
 
 void UWTRCombatComponent::SetHUDCarriedAmmo()
@@ -324,6 +330,10 @@ void UWTRCombatComponent::Fire()
 
         FireTimerStart();
     }
+    else if (EquippedWeapon && EquippedWeapon->IsEmpty())
+    {
+        Reload();
+    }
 }
 
 void UWTRCombatComponent::FireTimerStart()
@@ -358,15 +368,24 @@ void UWTRCombatComponent::Server_Fire_Implementation(const FVector_NetQuantize& 
 
 void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
+    if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
+        CombatState == ECombatState::ECS_Reloading)
+    {
+        Character->PlayFireMontage(bIsAiming);
+        EquippedWeapon->Fire(TraceHitTarget);
+        CombatState = ECombatState::ECS_Unoccupied;
+        return;
+    }
+
     if (Character && EquippedWeapon && CombatState == ECombatState::ECS_Unoccupied)
     {
         Character->PlayFireMontage(bIsAiming);
         EquippedWeapon->Fire(TraceHitTarget);
+    }
 
-        if (EquippedWeapon->IsEmpty())
-        {
-            Reload();
-        }
+    if (EquippedWeapon->IsEmpty())
+    {
+        Reload();
     }
 }
 
@@ -390,7 +409,7 @@ void UWTRCombatComponent::Server_Reload_Implementation()
     ReloadHandle();
 }
 
-void UWTRCombatComponent::StopReloadWhileEquip() 
+void UWTRCombatComponent::StopReloadWhileEquip()
 {
     if (CombatState == ECombatState::ECS_Reloading && Character)
     {
@@ -414,10 +433,14 @@ void UWTRCombatComponent::OnRep_CombatState()
             {
                 Fire();
             }
-            if (Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
+            if (Character && Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
                 EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
             {
                 Character->SetShowScopeAnimation(true);
+            }
+            if (Character)
+            {
+                Character->StopReloadMontage();
             }
             break;
 
@@ -471,6 +494,40 @@ void UWTRCombatComponent::ReloadWeaponAndSubCarriedAmmo()
     SetHUDCarriedAmmo();
 }
 
+void UWTRCombatComponent::ReloadShotgunAndSubCarriedAmmo()
+{
+    if (!EquippedWeapon || LastEquippedWeapon != EquippedWeapon || EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Shotgun)
+    {
+        return;
+    }
+
+    // Reloading shotgun and subtract 1 ammo
+    if (CarriedAmmoByWeaponTypeMap.Contains(EWeaponType::EWT_Shotgun))
+    {
+        CarriedAmmoByWeaponTypeMap[EWeaponType::EWT_Shotgun] -= 1;
+        CarriedAmmo = CarriedAmmoByWeaponTypeMap[EWeaponType::EWT_Shotgun];
+    }
+    EquippedWeapon->AddAmmo(1);
+
+    // Need to update for the server
+    SetHUDCarriedAmmo();
+
+    bCanFire = true;
+
+    if (EquippedWeapon->IsFull() || CarriedAmmo == 0)
+    {
+        JumpToShotgunEnd();
+    }
+}
+
+void UWTRCombatComponent::ShotgunShellReload()
+{
+    if (Character && Character->HasAuthority())
+    {
+        ReloadShotgunAndSubCarriedAmmo();
+    }
+}
+
 void UWTRCombatComponent::FinishReloading()
 {
     if (!Character)
@@ -495,6 +552,18 @@ void UWTRCombatComponent::FinishReloading()
     if (bFireButtonPressed)
     {
         Fire();
+    }
+}
+
+void UWTRCombatComponent::JumpToShotgunEnd()
+{
+    if (Character && Character->GetMesh() && Character->GetReloadMontage())
+    {
+        UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+        if (AnimInstance)
+        {
+            AnimInstance->Montage_JumpToSection(FName("ShotgunEnd"), Character->GetReloadMontage());
+        }
     }
 }
 
@@ -592,5 +661,11 @@ void UWTRCombatComponent::Server_SetAiming_Implementation(bool bAiming)
 
 bool UWTRCombatComponent::CanFire() const
 {
+    bool bIsShotgunCanFire = EquippedWeapon && !EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
+                             bCanFire && CombatState == ECombatState::ECS_Reloading;
+    if (bIsShotgunCanFire)
+    {
+        return true;
+    }
     return EquippedWeapon && !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }

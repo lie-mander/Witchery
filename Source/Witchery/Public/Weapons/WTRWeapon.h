@@ -157,6 +157,9 @@ private:
     // Base variables
     //
     UPROPERTY()
+    AWTRCharacter* WTROwnerCharacter;
+
+    UPROPERTY()
     AWTRPlayerController* WTROwnerPlayerController;
 
     //////////

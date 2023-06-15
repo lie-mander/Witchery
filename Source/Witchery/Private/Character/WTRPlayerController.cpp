@@ -362,6 +362,30 @@ void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
                 WeaponTypeText = FString("Rifle");  //
                 break;
 
+            case EWeaponType::EWT_GrenadeLauncher:  //
+                WeaponTypeText = FString("Grenade launcher");  //
+                break;
+
+            case EWeaponType::EWT_Pistol:           //
+                WeaponTypeText = FString("Pistol");  //
+                break;
+
+            case EWeaponType::EWT_RocketLauncher:   //
+                WeaponTypeText = FString("Rocket launcher");  //
+                break;
+
+            case EWeaponType::EWT_Shotgun:          //
+                WeaponTypeText = FString("Shotgun");  //
+                break;
+
+            case EWeaponType::EWT_SniperRifle:      //
+                WeaponTypeText = FString("Sniper rifle");  //
+                break;
+
+            case EWeaponType::EWT_SubmachineGun:    //
+                WeaponTypeText = FString("Submachine gun");  //
+                break;
+
             case EWeaponType::EWT_MAX:         //
                 WeaponTypeText = FString("");  //
                 break;
