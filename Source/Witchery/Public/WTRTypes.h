@@ -7,6 +7,11 @@ class UTexture2D;
 // Trace distance
 #define TRACE_RANGE 20000.f
 
+// Depth colors
+#define CUSTOM_DEPTH_PURPLE 250
+#define CUSTOM_DEPTH_BLUE 251
+#define CUSTOM_DEPTH_TAN 252
+
 // Collision
 #define ECC_SkeletalMesh ECollisionChannel::ECC_GameTraceChannel1
 

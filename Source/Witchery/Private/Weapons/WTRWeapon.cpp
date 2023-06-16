@@ -25,6 +25,10 @@ AWTRWeapon::AWTRWeapon()
     WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     SetRootComponent(WeaponMesh);
 
+    WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+    WeaponMesh->MarkRenderStateDirty();
+    EnableCustomDepth(true);
+
     AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
     AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
     AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -157,6 +161,7 @@ void AWTRWeapon::SetWeaponState(EWeaponState NewState)
                 WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
             }
             SetShowWidget(false);
+            EnableCustomDepth(false);
             break;
 
         case EWeaponState::EWS_Dropped:
@@ -170,6 +175,10 @@ void AWTRWeapon::SetWeaponState(EWeaponState NewState)
             WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
             WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
             WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap);
+
+            WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+            WeaponMesh->MarkRenderStateDirty();
+            EnableCustomDepth(true);
             break;
 
         case EWeaponState::EWS_MAX: break;
@@ -193,6 +202,7 @@ void AWTRWeapon::OnRep_WeaponState()
                 WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
             }
             SetShowWidget(false);
+            EnableCustomDepth(false);
             break;
 
         case EWeaponState::EWS_Dropped:
@@ -202,6 +212,10 @@ void AWTRWeapon::OnRep_WeaponState()
             WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
             WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
             WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap);
+
+            WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+            WeaponMesh->MarkRenderStateDirty();
+            EnableCustomDepth(true);
             break;
 
         case EWeaponState::EWS_MAX: break;
@@ -277,5 +291,13 @@ void AWTRWeapon::SetHUDAmmo()
     if (WTROwnerPlayerController)
     {
         WTROwnerPlayerController->SetHUDWeaponAmmo(Ammo);
+    }
+}
+
+void AWTRWeapon::EnableCustomDepth(bool bEnable) 
+{
+    if (WeaponMesh)
+    {
+        WeaponMesh->SetRenderCustomDepth(bEnable);
     }
 }
