@@ -63,14 +63,14 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     // Sets to true when character is dead
     bElimmed = Character->IsElimmed();
 
-    // When character is reloading, he doesn`t need to use FABRIK to left hand. Will be more condition
-    bUseFABRIK = Character->GetCombatState() != ECombatState::ECS_Reloading;
+    // When character is reloading or throwing grenade, he doesn`t need to use FABRIK to left hand. Will be more condition
+    bUseFABRIK = Character->GetCombatState() == ECombatState::ECS_Unoccupied;
 
-    // When character is reloading, he doesn`t need to use Offsets, cause reload animation will broke (hands). Will be more condition
-    bUseAimOffsets = Character->GetCombatState() != ECombatState::ECS_Reloading && !Character->IsDisableGameplay();
+    // When character is reloading or throwing grenade, he doesn`t need to use Offsets, cause reload animation will broke (hands). Will be more condition
+    bUseAimOffsets = Character->GetCombatState() == ECombatState::ECS_Unoccupied && !Character->IsDisableGameplay();
 
-    // When character is reloading, he doesn`t need to transform right hand, cause weapon will continue rotating while reloading. Will be more condition
-    bTransformRightHand = Character->GetCombatState() != ECombatState::ECS_Reloading && !Character->IsDisableGameplay();
+    // When character is reloading or throwing grenade, he doesn`t need to transform right hand, cause weapon will continue rotating while reloading. Will be more condition
+    bTransformRightHand = Character->GetCombatState() == ECombatState::ECS_Unoccupied && !Character->IsDisableGameplay();
 
     // Set offset yaw for strafing
     FRotator AimRotation = Character->GetBaseAimRotation();

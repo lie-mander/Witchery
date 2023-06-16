@@ -162,6 +162,7 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &ThisClass::OnReloadButtonPressed);
     PlayerInputComponent->BindAction("AudioUp", EInputEvent::IE_Pressed, this, &ThisClass::OnAudioUpButtonPressed);
     PlayerInputComponent->BindAction("AudioDown", EInputEvent::IE_Pressed, this, &ThisClass::OnAudioDownButtonPressed);
+    PlayerInputComponent->BindAction("Grenade", EInputEvent::IE_Pressed, this, &ThisClass::OnGrenadeButtonPressed);
 
     PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ThisClass::MoveForward);
     PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ThisClass::MoveRight);
@@ -554,6 +555,22 @@ void AWTRCharacter::PlayEliminationMontage()
     AnimInstance->Montage_Play(EliminationMontage);
 }
 
+void AWTRCharacter::PlayThrowGrenadeMontage() 
+{
+    if (!GetMesh() || !ThrowGrenadeMontage)
+    {
+        return;
+    }
+
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance)
+    {
+        return;
+    }
+
+    AnimInstance->Montage_Play(ThrowGrenadeMontage);
+}
+
 void AWTRCharacter::OnEquipButtonPressed()
 {
     if (bDisableGameplay)
@@ -684,6 +701,14 @@ void AWTRCharacter::OnAudioDownButtonPressed()
     if (WTRPlayerController)
     {
         WTRPlayerController->TurnDownTheVolume();
+    }
+}
+
+void AWTRCharacter::OnGrenadeButtonPressed() 
+{
+    if (Combat)
+    {
+        Combat->ThrowGrenade();
     }
 }
 

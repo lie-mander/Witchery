@@ -166,7 +166,7 @@ void UWTRCombatComponent::InterpFOV(float DeltaTime)
         return;
     }
 
-    if (bIsAiming && CombatState != ECombatState::ECS_Reloading)
+    if (bIsAiming && CombatState == ECombatState::ECS_Unoccupied)
     {
         CurrentZoomFOV = FMath::FInterpTo(CurrentZoomFOV, EquippedWeapon->GetZoomedFOV(), DeltaTime, EquippedWeapon->GetZoomInterpSpeed());
     }
@@ -391,7 +391,7 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
 
 void UWTRCombatComponent::Reload()
 {
-    if (CarriedAmmo > 0 && EquippedWeapon && !EquippedWeapon->IsFull() && CombatState != ECombatState::ECS_Reloading)
+    if (CarriedAmmo > 0 && EquippedWeapon && !EquippedWeapon->IsFull() && CombatState == ECombatState::ECS_Unoccupied)
     {
         Server_Reload();
     }
@@ -424,6 +424,40 @@ void UWTRCombatComponent::StopReloadWhileEquip()
     }
 }
 
+void UWTRCombatComponent::ThrowGrenade()
+{
+    if (CombatState != ECombatState::ECS_Unoccupied || !EquippedWeapon)
+    {
+        return;
+    }
+
+    CombatState = ECombatState::ECS_ThrowingGrenade;
+
+    if (Character)
+    {
+        Character->PlayThrowGrenadeMontage();
+    }
+
+    if (Character && !Character->HasAuthority())
+    {
+        Server_ThrowGrenade();
+    }
+}
+
+void UWTRCombatComponent::Server_ThrowGrenade_Implementation()
+{
+    if (Character)
+    {
+        CombatState = ECombatState::ECS_ThrowingGrenade;
+        Character->PlayThrowGrenadeMontage();
+    }
+}
+
+void UWTRCombatComponent::ThrowGrenadeFinished() 
+{
+    CombatState = ECombatState::ECS_Unoccupied;
+}
+
 void UWTRCombatComponent::OnRep_CombatState()
 {
     switch (CombatState)
@@ -446,6 +480,13 @@ void UWTRCombatComponent::OnRep_CombatState()
 
         case ECombatState::ECS_Reloading:  //
             ReloadHandle();
+            break;
+
+        case ECombatState::ECS_ThrowingGrenade:  //
+            if (Character && !Character->IsLocallyControlled())
+            {
+                Character->PlayThrowGrenadeMontage();
+            }
             break;
     }
 }
@@ -635,12 +676,12 @@ void UWTRCombatComponent::SetAiming(bool bAiming)
 
     if (Character->IsLocallyControlled() && EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
     {
-        // We don`t want to scope if we are reloading at this time
-        if (bAiming && CombatState != ECombatState::ECS_Reloading)
+        // We don`t want to scope if we are not Unoccupied at this time
+        if (bAiming && CombatState == ECombatState::ECS_Unoccupied)
         {
             Character->SetShowScopeAnimation(bAiming);
         }
-        else if (!bAiming && CombatState != ECombatState::ECS_Reloading)
+        else if (!bAiming && CombatState == ECombatState::ECS_Unoccupied)
         {
             Character->SetShowScopeAnimation(bAiming);
         }

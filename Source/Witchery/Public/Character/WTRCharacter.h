@@ -52,6 +52,7 @@ public:
     void StopReloadMontage();
     void PlayHitReactMontage();
     void PlayEliminationMontage();
+    void PlayThrowGrenadeMontage();
 
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
@@ -101,6 +102,7 @@ protected:
     void OnReloadButtonPressed();
     void OnAudioUpButtonPressed();
     void OnAudioDownButtonPressed();
+    void OnGrenadeButtonPressed();
 
     //////////
     // Other functions
@@ -155,6 +157,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
     UAnimMontage* HitReactMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
+    UAnimMontage* ThrowGrenadeMontage;
 
     //////////
     // Movement

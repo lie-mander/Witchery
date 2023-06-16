@@ -33,6 +33,9 @@ public:
     UFUNCTION(BlueprintCallable)
     void ShotgunShellReload();
 
+    UFUNCTION(BlueprintCallable)
+    void ThrowGrenadeFinished();
+
 protected:
     virtual void BeginPlay() override;
 
@@ -56,6 +59,9 @@ protected:
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_Fire(const FVector_NetQuantize& TraceHitTarget);
+
+    UFUNCTION(Server, Reliable)
+    void Server_ThrowGrenade();
 
 private:
     //////////
@@ -236,4 +242,5 @@ private:
     void ReloadWeaponAndSubCarriedAmmo();
     void ReloadShotgunAndSubCarriedAmmo();
     void StopReloadWhileEquip();
+    void ThrowGrenade();
 };
