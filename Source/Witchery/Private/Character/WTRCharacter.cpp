@@ -250,10 +250,7 @@ void AWTRCharacter::OnPossessHandle(AWTRPlayerController* NewController, AWTR_HU
 
 void AWTRCharacter::MoveForward(float Amount)
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (Controller && Amount != 0.f)
     {
@@ -265,10 +262,7 @@ void AWTRCharacter::MoveForward(float Amount)
 
 void AWTRCharacter::MoveRight(float Amount)
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (Controller && Amount != 0.f)
     {
@@ -348,10 +342,7 @@ void AWTRCharacter::OnRep_ReplicateMovement()
 
 void AWTRCharacter::SimProxiesTurn()
 {
-    if (!Combat || !Combat->EquippedWeapon)
-    {
-        return;
-    }
+    if (!Combat || !Combat->EquippedWeapon) return;
 
     bRotateRootBone = false;
 
@@ -440,10 +431,7 @@ float AWTRCharacter::CalculateSpeed() const
 
 void AWTRCharacter::Jump()
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (bIsCrouched)
     {
@@ -457,16 +445,10 @@ void AWTRCharacter::Jump()
 
 void AWTRCharacter::PlayFireMontage(bool bAiming)
 {
-    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !FireWeaponMontage)
-    {
-        return;
-    }
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !FireWeaponMontage) return;
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance)
-    {
-        return;
-    }
+    if (!AnimInstance) return;
 
     AnimInstance->Montage_Play(FireWeaponMontage);
     const FName SectionName = bAiming ? FName("RifleHip") : FName("RifleAim");
@@ -475,16 +457,10 @@ void AWTRCharacter::PlayFireMontage(bool bAiming)
 
 void AWTRCharacter::PlayReloadMontage()
 {
-    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !ReloadMontage)
-    {
-        return;
-    }
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !ReloadMontage) return;
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance)
-    {
-        return;
-    }
+    if (!AnimInstance) return;
 
     AnimInstance->Montage_Play(ReloadMontage);
 
@@ -507,32 +483,20 @@ void AWTRCharacter::PlayReloadMontage()
 
 void AWTRCharacter::StopReloadMontage()
 {
-    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !ReloadMontage)
-    {
-        return;
-    }
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !ReloadMontage) return;
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance)
-    {
-        return;
-    }
+    if (!AnimInstance) return;
 
     AnimInstance->Montage_Stop(0.3f, ReloadMontage);
 }
 
 void AWTRCharacter::PlayHitReactMontage()
 {
-    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !HitReactMontage)
-    {
-        return;
-    }
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !HitReactMontage) return;
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance)
-    {
-        return;
-    }
+    if (!AnimInstance) return;
 
     AnimInstance->Montage_Play(HitReactMontage);
     const FName SectionName("FromFront");
@@ -541,42 +505,27 @@ void AWTRCharacter::PlayHitReactMontage()
 
 void AWTRCharacter::PlayEliminationMontage()
 {
-    if (!GetMesh() || !EliminationMontage)
-    {
-        return;
-    }
+    if (!GetMesh() || !EliminationMontage) return;
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance)
-    {
-        return;
-    }
+    if (!AnimInstance) return;
 
     AnimInstance->Montage_Play(EliminationMontage);
 }
 
-void AWTRCharacter::PlayThrowGrenadeMontage() 
+void AWTRCharacter::PlayThrowGrenadeMontage()
 {
-    if (!GetMesh() || !ThrowGrenadeMontage)
-    {
-        return;
-    }
+    if (!GetMesh() || !ThrowGrenadeMontage) return;
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    if (!AnimInstance)
-    {
-        return;
-    }
+    if (!AnimInstance) return;
 
     AnimInstance->Montage_Play(ThrowGrenadeMontage);
 }
 
 void AWTRCharacter::OnEquipButtonPressed()
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (Combat)
     {
@@ -606,10 +555,7 @@ void AWTRCharacter::Server_OnEquippedButtonPressed_Implementation()
 
 void AWTRCharacter::OnCrouchButtonPressed()
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (bIsCrouched)
     {
@@ -623,10 +569,7 @@ void AWTRCharacter::OnCrouchButtonPressed()
 
 void AWTRCharacter::OnAimButtonPressed()
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (Combat && Combat->EquippedWeapon)
     {
@@ -636,10 +579,7 @@ void AWTRCharacter::OnAimButtonPressed()
 
 void AWTRCharacter::OnAimButtonReleased()
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (Combat && Combat->EquippedWeapon)
     {
@@ -649,10 +589,7 @@ void AWTRCharacter::OnAimButtonReleased()
 
 void AWTRCharacter::OnFireButtonPressed()
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (Combat)
     {
@@ -662,10 +599,7 @@ void AWTRCharacter::OnFireButtonPressed()
 
 void AWTRCharacter::OnFireButtonReleased()
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (Combat)
     {
@@ -675,10 +609,7 @@ void AWTRCharacter::OnFireButtonReleased()
 
 void AWTRCharacter::OnReloadButtonPressed()
 {
-    if (bDisableGameplay)
-    {
-        return;
-    }
+    if (bDisableGameplay) return;
 
     if (Combat)
     {
@@ -704,7 +635,7 @@ void AWTRCharacter::OnAudioDownButtonPressed()
     }
 }
 
-void AWTRCharacter::OnGrenadeButtonPressed() 
+void AWTRCharacter::OnGrenadeButtonPressed()
 {
     if (Combat)
     {
@@ -894,7 +825,7 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
         }
     }
 
-    if (Combat&& Combat->CombatState == ECombatState::ECS_Reloading)
+    if (Combat && Combat->CombatState == ECombatState::ECS_Reloading)
     {
         StopReloadMontage();
         Combat->CombatState = ECombatState::ECS_Unoccupied;
@@ -968,10 +899,7 @@ bool AWTRCharacter::IsAiming() const
 
 void AWTRCharacter::HideCharacterWithWeaponIfCameraClose()
 {
-    if (!IsLocallyControlled())
-    {
-        return;
-    }
+    if (!IsLocallyControlled()) return;
 
     if (CameraComponent && (CameraComponent->GetComponentLocation() - GetActorLocation()).Size() < DistanceForHidingCamera)
     {

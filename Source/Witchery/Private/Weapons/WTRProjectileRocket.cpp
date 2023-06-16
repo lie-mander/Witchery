@@ -51,10 +51,7 @@ void AWTRProjectileRocket::BeginPlay()
 void AWTRProjectileRocket::OnHit(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    if (OtherActor == GetOwner())
-    {
-        return;
-    }
+    if (OtherActor == GetOwner()) return;
 
     if (ExplodeDamage())
     {

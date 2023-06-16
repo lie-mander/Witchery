@@ -13,10 +13,7 @@ void AWTRGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 void AWTRGameState::UpdateTopPlayers(AWTRPlayerState* PlayerState) 
 {
-    if (!PlayerState)
-    {
-        return;
-    }
+    if (!PlayerState) return;
 
     if (TopPlayers.IsEmpty())
     {

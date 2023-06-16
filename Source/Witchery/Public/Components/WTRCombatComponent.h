@@ -243,4 +243,13 @@ private:
     void ReloadShotgunAndSubCarriedAmmo();
     void StopReloadWhileEquip();
     void ThrowGrenade();
+    void DroppedEquippedWeapon();
+    void UpdateCarriedAmmoAndHUD();
+    void PlayPickupSound();
+    void ReloadEmptyWeapon();
+    void SetCharacterSettingsWhenEquip();
+    void AttachActorToRightHand(AActor* ActorToAttach);
+    void AttachActorToLeftHand(AActor* ActorToAttach);
+    void UpdateHUDWeaponType();
+    void UpdateHUDAmmo();
 };

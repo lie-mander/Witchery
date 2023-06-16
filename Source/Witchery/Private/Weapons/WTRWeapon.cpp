@@ -70,10 +70,7 @@ void AWTRWeapon::BeginPlay()
 AController* AWTRWeapon::GetOwnerPlayerController() const
 {
     APawn* OwnerPawn = Cast<APawn>(GetOwner());
-    if (!OwnerPawn)
-    {
-        return nullptr;
-    }
+    if (!OwnerPawn) return nullptr;
 
     return OwnerPawn->GetController();
 }

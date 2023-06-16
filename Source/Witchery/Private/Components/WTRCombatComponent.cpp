@@ -161,10 +161,7 @@ void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
 
 void UWTRCombatComponent::InterpFOV(float DeltaTime)
 {
-    if (!EquippedWeapon || !Character->GetCameraComponent())
-    {
-        return;
-    }
+    if (!EquippedWeapon || !Character->GetCameraComponent()) return;
 
     if (bIsAiming && CombatState == ECombatState::ECS_Unoccupied)
     {
@@ -182,32 +179,44 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
 {
     if (!Character || !WeaponToEquip) return;
 
-    if (EquippedWeapon)
-    {
-        EquippedWeapon->Dropped();
-        EquippedWeapon = nullptr;
-    }
+    DroppedEquippedWeapon();
 
     EquippedWeapon = WeaponToEquip;
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
     EquippedWeapon->SetOwner(Character);
 
-    if (CombatState == ECombatState::ECS_Reloading)
+    StopReloadWhileEquip();
+    UpdateCarriedAmmoAndHUD();
+    PlayPickupSound();
+    ReloadEmptyWeapon();
+    SetCharacterSettingsWhenEquip();
+    AttachActorToRightHand(EquippedWeapon);
+    UpdateHUDAmmo();
+}
+
+void UWTRCombatComponent::OnRep_EquippedWeapon()
+{
+    if (!Character || !EquippedWeapon) return;
+
+    EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+    PlayPickupSound();
+    SetCharacterSettingsWhenEquip();
+    AttachActorToRightHand(EquippedWeapon);
+    UpdateHUDWeaponType();
+}
+
+void UWTRCombatComponent::DroppedEquippedWeapon()
+{
+    if (EquippedWeapon)
     {
-        Character->StopReloadMontage();
-
-        CombatState = ECombatState::ECS_Unoccupied;
-
-        bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
-                          EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
-        if (bShowScope)
-        {
-            Character->SetShowScopeAnimation(bShowScope);
-        }
+        EquippedWeapon->Dropped();
+        EquippedWeapon = nullptr;
     }
+}
 
-    // Need to know weapon owner, must be set after SetOwner() function
-    EquippedWeapon->SetHUDAmmo();
+void UWTRCombatComponent::UpdateCarriedAmmoAndHUD()
+{
+    if (!EquippedWeapon) return;
 
     // Set CarriedAmmo and WeaponType on HUD by EquippedWeapon weapon type
     if (CarriedAmmoByWeaponTypeMap.Contains(EquippedWeapon->GetWeaponType()))
@@ -221,58 +230,83 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
             Controller->SetHUDWeaponType(EquippedWeapon->GetWeaponType());
         }
     }
+}
+
+void UWTRCombatComponent::PlayPickupSound()
+{
+    if (!EquippedWeapon || !EquippedWeapon->PickupSound || !Character) return;
 
     // Play pickup sound (for server, for client will play in OnRep_EquippedWeapon)
     UGameplayStatics::PlaySoundAtLocation(  //
         this,                               //
         EquippedWeapon->PickupSound,        //
-        Character->GetActorLocation());
+        Character->GetActorLocation()       //
+    );
+}
+
+void UWTRCombatComponent::ReloadEmptyWeapon()
+{
+    if (!EquippedWeapon) return;
 
     // Want to reload if equipped weapon is empty
     if (EquippedWeapon->IsEmpty())
     {
         Reload();
     }
+}
+
+void UWTRCombatComponent::SetCharacterSettingsWhenEquip()
+{
+    if (!Character || !Character->GetCharacterMovement() || !Character->GetSpringArm()) return;
 
     Character->GetCharacterMovement()->bOrientRotationToMovement = false;
     Character->bUseControllerRotationYaw = true;
     Character->GetSpringArm()->SocketOffset = SpringArmOffsetWhileEquipped;
-    // Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
+}
+
+void UWTRCombatComponent::AttachActorToRightHand(AActor* ActorToAttach)
+{
+    if (!Character || !Character->GetMesh()) return;
 
     const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
     if (HandSocket)
     {
-        HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+        HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
     }
 }
 
-void UWTRCombatComponent::OnRep_EquippedWeapon()
+void UWTRCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
 {
-    if (Character && EquippedWeapon)
+    if (!Character || !Character->GetMesh() || !EquippedWeapon) return;
+
+    bool bUsePistolSocket =                                            //
+        EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Pistol ||  //
+        EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SubmachineGun;
+
+    FName SocketName = bUsePistolSocket ? FName("PistolSocket") : FName("LeftHandSocket");
+
+    const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(SocketName);
+    if (HandSocket)
     {
-        EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-        const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
-        if (HandSocket)
-        {
-            HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
-        }
-        Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-        Character->bUseControllerRotationYaw = true;
-        Character->GetSpringArm()->SocketOffset = SpringArmOffsetWhileEquipped;
-        // Character->GetSpringArm()->SetRelativeTransform(FTransform(FQuat4d(FRotator::ZeroRotator), SpringArmOffsetWhileEquipped));
-
-        // Play pickup sound
-        UGameplayStatics::PlaySoundAtLocation(  //
-            this,                               //
-            EquippedWeapon->PickupSound,        //
-            Character->GetActorLocation());
-
-        Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Character->Controller) : Controller;
-        if (Controller)
-        {
-            Controller->SetHUDWeaponType(EquippedWeapon->GetWeaponType());
-        }
+        HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
     }
+}
+
+void UWTRCombatComponent::UpdateHUDWeaponType()
+{
+    Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Character->Controller) : Controller;
+    if (Controller)
+    {
+        Controller->SetHUDWeaponType(EquippedWeapon->GetWeaponType());
+    }
+}
+
+void UWTRCombatComponent::UpdateHUDAmmo()
+{
+    if (!EquippedWeapon) return;
+
+    // Need to know weapon owner, must be set after SetOwner() function
+    EquippedWeapon->SetHUDAmmo();
 }
 
 void UWTRCombatComponent::OnRep_CarriedAmmo()
@@ -338,10 +372,7 @@ void UWTRCombatComponent::Fire()
 
 void UWTRCombatComponent::FireTimerStart()
 {
-    if (!Character || !EquippedWeapon)
-    {
-        return;
-    }
+    if (!Character || !EquippedWeapon) return;
 
     Character->GetWorldTimerManager().SetTimer(  //
         FireTimerHandle,                         //
@@ -399,10 +430,7 @@ void UWTRCombatComponent::Reload()
 
 void UWTRCombatComponent::Server_Reload_Implementation()
 {
-    if (!Character)
-    {
-        return;
-    }
+    if (!Character) return;
 
     CombatState = ECombatState::ECS_Reloading;
     LastEquippedWeapon = EquippedWeapon;
@@ -413,6 +441,7 @@ void UWTRCombatComponent::StopReloadWhileEquip()
 {
     if (CombatState == ECombatState::ECS_Reloading && Character)
     {
+        CombatState = ECombatState::ECS_Unoccupied;
         Character->StopReloadMontage();
 
         bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
@@ -426,16 +455,14 @@ void UWTRCombatComponent::StopReloadWhileEquip()
 
 void UWTRCombatComponent::ThrowGrenade()
 {
-    if (CombatState != ECombatState::ECS_Unoccupied || !EquippedWeapon)
-    {
-        return;
-    }
+    if (CombatState != ECombatState::ECS_Unoccupied || !EquippedWeapon) return;
 
     CombatState = ECombatState::ECS_ThrowingGrenade;
 
     if (Character)
     {
         Character->PlayThrowGrenadeMontage();
+        AttachActorToLeftHand(EquippedWeapon);
     }
 
     if (Character && !Character->HasAuthority())
@@ -446,16 +473,22 @@ void UWTRCombatComponent::ThrowGrenade()
 
 void UWTRCombatComponent::Server_ThrowGrenade_Implementation()
 {
-    if (Character)
+    if (Character && EquippedWeapon)
     {
         CombatState = ECombatState::ECS_ThrowingGrenade;
         Character->PlayThrowGrenadeMontage();
+        AttachActorToLeftHand(EquippedWeapon);
     }
 }
 
-void UWTRCombatComponent::ThrowGrenadeFinished() 
+void UWTRCombatComponent::ThrowGrenadeFinished()
 {
     CombatState = ECombatState::ECS_Unoccupied;
+
+    if (EquippedWeapon)
+    {
+        AttachActorToRightHand(EquippedWeapon);
+    }
 }
 
 void UWTRCombatComponent::OnRep_CombatState()
@@ -483,9 +516,10 @@ void UWTRCombatComponent::OnRep_CombatState()
             break;
 
         case ECombatState::ECS_ThrowingGrenade:  //
-            if (Character && !Character->IsLocallyControlled())
+            if (Character && !Character->IsLocallyControlled() && EquippedWeapon)
             {
                 Character->PlayThrowGrenadeMontage();
+                AttachActorToLeftHand(EquippedWeapon);
             }
             break;
     }
@@ -498,10 +532,7 @@ void UWTRCombatComponent::ReloadHandle()
 
 int32 UWTRCombatComponent::AmmoToReload()
 {
-    if (!EquippedWeapon)
-    {
-        return 0;
-    }
+    if (!EquippedWeapon) return 0;
 
     int32 EmplyPlaceInMag = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
     if (CarriedAmmoByWeaponTypeMap.Contains(EquippedWeapon->GetWeaponType()))
@@ -517,10 +548,7 @@ int32 UWTRCombatComponent::AmmoToReload()
 
 void UWTRCombatComponent::ReloadWeaponAndSubCarriedAmmo()
 {
-    if (!EquippedWeapon || LastEquippedWeapon != EquippedWeapon)
-    {
-        return;
-    }
+    if (!EquippedWeapon || LastEquippedWeapon != EquippedWeapon) return;
 
     // Reloading weapon and subtract carried ammo for this weapon type
     int32 ReloadAmmo = AmmoToReload();
@@ -537,10 +565,7 @@ void UWTRCombatComponent::ReloadWeaponAndSubCarriedAmmo()
 
 void UWTRCombatComponent::ReloadShotgunAndSubCarriedAmmo()
 {
-    if (!EquippedWeapon || LastEquippedWeapon != EquippedWeapon || EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Shotgun)
-    {
-        return;
-    }
+    if (!EquippedWeapon || LastEquippedWeapon != EquippedWeapon || EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Shotgun) return;
 
     // Reloading shotgun and subtract 1 ammo
     if (CarriedAmmoByWeaponTypeMap.Contains(EWeaponType::EWT_Shotgun))
@@ -571,10 +596,7 @@ void UWTRCombatComponent::ShotgunShellReload()
 
 void UWTRCombatComponent::FinishReloading()
 {
-    if (!Character)
-    {
-        return;
-    }
+    if (!Character) return;
 
     if (Character->HasAuthority() && CombatState == ECombatState::ECS_Reloading)
     {
@@ -662,10 +684,7 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
 
 void UWTRCombatComponent::SetAiming(bool bAiming)
 {
-    if (bIsAiming == bAiming)
-    {
-        return;
-    }
+    if (bIsAiming == bAiming) return;
 
     bIsAiming = bAiming;
 
