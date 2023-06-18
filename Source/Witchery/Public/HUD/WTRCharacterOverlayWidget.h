@@ -44,6 +44,9 @@ public:
     UTextBlock* MatchCountdownText;
 
     UPROPERTY(meta = (BindWidget))
+    UTextBlock* GrenadeText;
+
+    UPROPERTY(meta = (BindWidget))
     UTextBlock* FPS_Text;
 
     UPROPERTY(meta = (BindWidget))

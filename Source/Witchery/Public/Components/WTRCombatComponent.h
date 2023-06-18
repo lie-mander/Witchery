@@ -31,6 +31,8 @@ public:
     void FinishReloading();
     void JumpToShotgunEnd();
 
+    FORCEINLINE int32 GetCurrentGrenades() const { return Grenades; }
+
     UFUNCTION(BlueprintCallable)
     void ShotgunShellReload();
 
@@ -215,10 +217,19 @@ private:
     float CurrentZoomFOV = 0.f;
 
     //////////
-    // Grenade
+    // Grenades
     //
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Grenade")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Grenades")
     TSubclassOf<AWTRProjectile> GrenadeClass;
+
+    UPROPERTY(ReplicatedUsing = OnRep_Grenades, EditDefaultsOnly, Category = "WTR | Grenades")
+    int32 Grenades = 4;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Grenades")
+    int32 MaxGrenades = 4;
+
+    UFUNCTION()
+    void OnRep_Grenades();
 
     //////////
     // Base variables
@@ -265,5 +276,6 @@ private:
     void AttachActorToLeftHand(AActor* ActorToAttach);
     void UpdateHUDWeaponType();
     void UpdateHUDAmmo();
+    void UpdateHUDGrenades();
     void SetShowGrenadeMesh(bool bShow);
 };

@@ -41,6 +41,7 @@ public:
     void SetHUDMatchCountdownTime(float Time);
     void SetHUDWarmupTime(float Time);
     void SetHUD_FPS();
+    void SetHUDGrenades(int32 Grenades);
 
 protected:
     virtual void BeginPlay() override;

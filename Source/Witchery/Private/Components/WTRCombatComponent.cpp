@@ -29,6 +29,7 @@ void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
     DOREPLIFETIME(UWTRCombatComponent, EquippedWeapon);
     DOREPLIFETIME(UWTRCombatComponent, bIsAiming);
     DOREPLIFETIME(UWTRCombatComponent, CombatState);
+    DOREPLIFETIME(UWTRCombatComponent, Grenades);
     DOREPLIFETIME_CONDITION(UWTRCombatComponent, CarriedAmmo, COND_OwnerOnly);
 }
 
@@ -46,6 +47,8 @@ void UWTRCombatComponent::BeginPlay()
             InitCarriedAmmoMap();
         }
     }
+
+    UpdateHUDGrenades();
 
     bCanFire = true;
 }
@@ -310,6 +313,15 @@ void UWTRCombatComponent::UpdateHUDAmmo()
     EquippedWeapon->SetHUDAmmo();
 }
 
+void UWTRCombatComponent::UpdateHUDGrenades()
+{
+    Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Character->Controller) : Controller;
+    if (Controller)
+    {
+        Controller->SetHUDGrenades(Grenades);
+    }
+}
+
 void UWTRCombatComponent::OnRep_CarriedAmmo()
 {
     SetHUDCarriedAmmo();
@@ -456,7 +468,7 @@ void UWTRCombatComponent::StopReloadWhileEquip()
 
 void UWTRCombatComponent::ThrowGrenade()
 {
-    if (CombatState != ECombatState::ECS_Unoccupied || !EquippedWeapon) return;
+    if (Grenades <= 0 || CombatState != ECombatState::ECS_Unoccupied || !EquippedWeapon) return;
 
     CombatState = ECombatState::ECS_ThrowingGrenade;
 
@@ -475,6 +487,8 @@ void UWTRCombatComponent::ThrowGrenade()
 
 void UWTRCombatComponent::Server_ThrowGrenade_Implementation()
 {
+    if (Grenades <= 0) return;
+
     if (Character && EquippedWeapon)
     {
         CombatState = ECombatState::ECS_ThrowingGrenade;
@@ -494,10 +508,10 @@ void UWTRCombatComponent::ThrowGrenadeFinished()
     }
 }
 
-void UWTRCombatComponent::LaunchGrenade() 
+void UWTRCombatComponent::LaunchGrenade()
 {
     SetShowGrenadeMesh(false);
-    
+
     if (Character && Character->IsLocallyControlled())
     {
         Server_LaunchGrenade(HitTarget);
@@ -525,15 +539,23 @@ void UWTRCombatComponent::Server_LaunchGrenade_Implementation(const FVector_NetQ
                 SpawnParams                          //
             );
         }
+
+        Grenades = FMath::Clamp(Grenades - 1, 0, MaxGrenades);
+        UpdateHUDGrenades();
     }
 }
 
-void UWTRCombatComponent::SetShowGrenadeMesh(bool bShow) 
+void UWTRCombatComponent::SetShowGrenadeMesh(bool bShow)
 {
     if (Character && Character->GetGrenadeMesh())
     {
         Character->GetGrenadeMesh()->SetVisibility(bShow);
     }
+}
+
+void UWTRCombatComponent::OnRep_Grenades()
+{
+    UpdateHUDGrenades();
 }
 
 void UWTRCombatComponent::OnRep_CombatState()
@@ -545,15 +567,19 @@ void UWTRCombatComponent::OnRep_CombatState()
             {
                 Fire();
             }
+
             if (Character && Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
                 EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
             {
                 Character->SetShowScopeAnimation(true);
             }
+
             if (Character)
             {
                 Character->StopReloadMontage();
             }
+
+            SetShowGrenadeMesh(false);
             break;
 
         case ECombatState::ECS_Reloading:  //

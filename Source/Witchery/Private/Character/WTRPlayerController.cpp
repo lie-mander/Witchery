@@ -60,6 +60,12 @@ void AWTRPlayerController::DelayInit()
                 SetHUDScore(DelayInit_ScoreAmount);
                 SetHUDDefeats(DelayInit_DefeatsAmount);
 
+                WTRCharacter = Cast<AWTRCharacter>(GetPawn());
+                if (WTRCharacter && WTRCharacter->GetCombatComponent())
+                {
+                    SetHUDGrenades(WTRCharacter->GetCombatComponent()->GetCurrentGrenades());
+                }
+
                 if (!bShowFPS)
                 {
                     CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Hidden);
@@ -230,6 +236,11 @@ void AWTRPlayerController::OnPossess(APawn* InPawn)
     {
         WTRCharacter->OnPossessHandle(this, WTR_HUD);
         SetHUDHealth(WTRCharacter->GetHealth(), WTRCharacter->GetMaxHealth());
+
+        if (WTRCharacter && WTRCharacter->GetCombatComponent())
+        {
+            SetHUDGrenades(WTRCharacter->GetCombatComponent()->GetCurrentGrenades());
+        }
     }
 }
 
@@ -362,27 +373,27 @@ void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
                 WeaponTypeText = FString("Rifle");  //
                 break;
 
-            case EWeaponType::EWT_GrenadeLauncher:  //
+            case EWeaponType::EWT_GrenadeLauncher:             //
                 WeaponTypeText = FString("Grenade launcher");  //
                 break;
 
-            case EWeaponType::EWT_Pistol:           //
+            case EWeaponType::EWT_Pistol:            //
                 WeaponTypeText = FString("Pistol");  //
                 break;
 
-            case EWeaponType::EWT_RocketLauncher:   //
+            case EWeaponType::EWT_RocketLauncher:             //
                 WeaponTypeText = FString("Rocket launcher");  //
                 break;
 
-            case EWeaponType::EWT_Shotgun:          //
+            case EWeaponType::EWT_Shotgun:            //
                 WeaponTypeText = FString("Shotgun");  //
                 break;
 
-            case EWeaponType::EWT_SniperRifle:      //
+            case EWeaponType::EWT_SniperRifle:             //
                 WeaponTypeText = FString("Sniper rifle");  //
                 break;
 
-            case EWeaponType::EWT_SubmachineGun:    //
+            case EWeaponType::EWT_SubmachineGun:             //
                 WeaponTypeText = FString("Submachine gun");  //
                 break;
 
@@ -461,6 +472,21 @@ void AWTRPlayerController::SetHUD_FPS()
     {
         const FString FPS_Text = FString::Printf(TEXT("%d"), FMath::FloorToInt(FPS));
         WTR_HUD->CharacterOverlayWidget->FPS_Text->SetText(FText::FromString(FPS_Text));
+    }
+}
+
+void AWTRPlayerController::SetHUDGrenades(int32 Grenades)
+{
+    WTR_HUD = GetWTR_HUD();
+
+    bool bHUDValid = WTR_HUD &&                                     //
+                     WTR_HUD->CharacterOverlayWidget &&             //
+                     WTR_HUD->CharacterOverlayWidget->GrenadeText;  // GrenadeText
+
+    if (bHUDValid)
+    {
+        const FString GrenadeText = FString::Printf(TEXT("%d"), Grenades);
+        WTR_HUD->CharacterOverlayWidget->GrenadeText->SetText(FText::FromString(GrenadeText));
     }
 }
 

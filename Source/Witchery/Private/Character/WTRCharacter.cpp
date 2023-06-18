@@ -533,6 +533,16 @@ void AWTRCharacter::PlayThrowGrenadeMontage()
     AnimInstance->Montage_Play(ThrowGrenadeMontage);
 }
 
+void AWTRCharacter::StopThrowGrenadeMontage()
+{
+    if (!Combat || !Combat->EquippedWeapon || !GetMesh() || !ThrowGrenadeMontage) return;
+
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance) return;
+
+    AnimInstance->Montage_Stop(0.3f, ThrowGrenadeMontage);
+}
+
 void AWTRCharacter::OnEquipButtonPressed()
 {
     if (bDisableGameplay) return;
@@ -773,6 +783,11 @@ void AWTRCharacter::Multicast_Elim_Implementation()
         WTRPlayerController->SetHUDWeaponAmmo(0);
         WTRPlayerController->SetHUDWeaponType(EWeaponType::EWT_MAX);
     }
+
+    if (GrenadeMesh)
+    {
+        GrenadeMesh->SetVisibility(false);
+    }
 }
 
 void AWTRCharacter::OnEliminatedTimerFinished()
@@ -818,6 +833,8 @@ void AWTRCharacter::UpdateHUDHealth()
 void AWTRCharacter::OnTakeAnyDamageCallback(
     AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+    if (bElimmed) return;
+
     Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 
     UpdateHUDHealth();
@@ -839,6 +856,13 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
     {
         StopReloadMontage();
         Combat->CombatState = ECombatState::ECS_Unoccupied;
+    }
+
+    if (Combat && Combat->CombatState == ECombatState::ECS_ThrowingGrenade && GrenadeMesh)
+    {
+        StopThrowGrenadeMontage();
+        Combat->ThrowGrenadeFinished();
+        GrenadeMesh->SetVisibility(false);
     }
 }
 

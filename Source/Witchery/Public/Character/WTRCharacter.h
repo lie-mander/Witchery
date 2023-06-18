@@ -53,6 +53,7 @@ public:
     void PlayHitReactMontage();
     void PlayEliminationMontage();
     void PlayThrowGrenadeMontage();
+    void StopThrowGrenadeMontage();
 
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
