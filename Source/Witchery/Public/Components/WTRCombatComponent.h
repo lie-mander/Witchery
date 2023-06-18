@@ -67,6 +67,9 @@ protected:
     UFUNCTION(Server, Reliable)
     void Server_ThrowGrenade();
 
+    UFUNCTION(Server, Reliable)
+    void Server_LaunchGrenade(const FVector_NetQuantize& Target);
+
 private:
     //////////
     // Movement

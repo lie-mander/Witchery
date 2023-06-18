@@ -497,10 +497,19 @@ void UWTRCombatComponent::ThrowGrenadeFinished()
 void UWTRCombatComponent::LaunchGrenade() 
 {
     SetShowGrenadeMesh(false);
+    
+    if (Character && Character->IsLocallyControlled())
+    {
+        Server_LaunchGrenade(HitTarget);
+    }
+}
+
+void UWTRCombatComponent::Server_LaunchGrenade_Implementation(const FVector_NetQuantize& Target)
+{
     if (Character && Character->HasAuthority() && GrenadeClass && Character->GetGrenadeMesh())
     {
         const FVector StartLocation = Character->GetGrenadeMesh()->GetComponentLocation();
-        const FVector ToTarget = HitTarget - StartLocation;
+        const FVector ToTarget = Target - StartLocation;
         const FRotator Rotation = ToTarget.Rotation();
 
         FActorSpawnParameters SpawnParams;
