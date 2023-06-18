@@ -463,6 +463,7 @@ void UWTRCombatComponent::ThrowGrenade()
     {
         Character->PlayThrowGrenadeMontage();
         AttachActorToLeftHand(EquippedWeapon);
+        SetShowGrenadeMesh(true);
     }
 
     if (Character && !Character->HasAuthority())
@@ -478,6 +479,7 @@ void UWTRCombatComponent::Server_ThrowGrenade_Implementation()
         CombatState = ECombatState::ECS_ThrowingGrenade;
         Character->PlayThrowGrenadeMontage();
         AttachActorToLeftHand(EquippedWeapon);
+        SetShowGrenadeMesh(true);
     }
 }
 
@@ -488,6 +490,19 @@ void UWTRCombatComponent::ThrowGrenadeFinished()
     if (EquippedWeapon)
     {
         AttachActorToRightHand(EquippedWeapon);
+    }
+}
+
+void UWTRCombatComponent::LaunchGrenade() 
+{
+    SetShowGrenadeMesh(false);
+}
+
+void UWTRCombatComponent::SetShowGrenadeMesh(bool bShow) 
+{
+    if (Character && Character->GetGrenadeMesh())
+    {
+        Character->GetGrenadeMesh()->SetVisibility(bShow);
     }
 }
 
@@ -520,6 +535,7 @@ void UWTRCombatComponent::OnRep_CombatState()
             {
                 Character->PlayThrowGrenadeMontage();
                 AttachActorToLeftHand(EquippedWeapon);
+                SetShowGrenadeMesh(true);
             }
             break;
     }

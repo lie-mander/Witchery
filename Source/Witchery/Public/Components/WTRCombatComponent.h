@@ -36,6 +36,9 @@ public:
     UFUNCTION(BlueprintCallable)
     void ThrowGrenadeFinished();
 
+    UFUNCTION(BlueprintCallable)
+    void LaunchGrenade();
+
 protected:
     virtual void BeginPlay() override;
 
@@ -252,4 +255,5 @@ private:
     void AttachActorToLeftHand(AActor* ActorToAttach);
     void UpdateHUDWeaponType();
     void UpdateHUDAmmo();
+    void SetShowGrenadeMesh(bool bShow);
 };

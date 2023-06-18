@@ -149,6 +149,12 @@ void AWTRCharacter::BeginPlay()
             }
         }
     }
+
+    // Need to hide grenade mesh when player spawned
+    if (GrenadeMesh)
+    {
+        GrenadeMesh->SetVisibility(false);
+    }
 }
 
 void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

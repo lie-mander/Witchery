@@ -73,6 +73,7 @@ public:
     FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArmComponent; }
     FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
     FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
+    FORCEINLINE UStaticMeshComponent* GetGrenadeMesh() const { return GrenadeMesh; }
     ECombatState GetCombatState() const;
     AWTRWeapon* GetEquippedWeapon() const;
     FVector GetHitTarget() const;
