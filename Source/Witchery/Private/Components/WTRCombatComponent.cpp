@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Weapons/WTRWeapon.h"
+#include "Weapons/WTRProjectile.h"
 #include "Character/WTRCharacter.h"
 #include "Character/WTRPlayerController.h"
 #include "Engine/SkeletalMeshSocket.h"
@@ -496,6 +497,26 @@ void UWTRCombatComponent::ThrowGrenadeFinished()
 void UWTRCombatComponent::LaunchGrenade() 
 {
     SetShowGrenadeMesh(false);
+    if (Character && Character->HasAuthority() && GrenadeClass && Character->GetGrenadeMesh())
+    {
+        const FVector StartLocation = Character->GetGrenadeMesh()->GetComponentLocation();
+        const FVector ToTarget = HitTarget - StartLocation;
+        const FRotator Rotation = ToTarget.Rotation();
+
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.Owner = Character;
+        SpawnParams.Instigator = Character;
+
+        if (GetWorld())
+        {
+            GetWorld()->SpawnActor<AWTRProjectile>(  //
+                GrenadeClass,                        //
+                StartLocation,                       //
+                Rotation,                            //
+                SpawnParams                          //
+            );
+        }
+    }
 }
 
 void UWTRCombatComponent::SetShowGrenadeMesh(bool bShow) 

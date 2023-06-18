@@ -11,6 +11,7 @@ class AWTRCharacter;
 class AWTRWeapon;
 class AWTRPlayerController;
 class AWTR_HUD;
+class AWTRProjectile;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class WITCHERY_API UWTRCombatComponent : public UActorComponent
@@ -209,6 +210,12 @@ private:
     float ZoomInterpSpeed = 20.f;
 
     float CurrentZoomFOV = 0.f;
+
+    //////////
+    // Grenade
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Grenade")
+    TSubclassOf<AWTRProjectile> GrenadeClass;
 
     //////////
     // Base variables
