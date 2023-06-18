@@ -67,6 +67,10 @@ AWTRCharacter::AWTRCharacter()
     GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECollisionResponse::ECR_Ignore);
     GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECollisionResponse::ECR_Block);
 
+    GrenadeMesh = CreateDefaultSubobject<UStaticMeshComponent>("GrenadeMesh");
+    GrenadeMesh->SetupAttachment(GetMesh(), FName("GrenadeSocket"));
+    GrenadeMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
     TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 
     NetUpdateFrequency = 66.f;

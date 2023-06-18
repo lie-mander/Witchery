@@ -243,6 +243,12 @@ private:
     UParticleSystemComponent* ElimBotParticleSysComponent;
 
     //////////
+    // Grenade
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Grenade")
+    UStaticMeshComponent* GrenadeMesh;
+
+    //////////
     // Base variables
     //
     AWTRPlayerController* WTRPlayerController;
