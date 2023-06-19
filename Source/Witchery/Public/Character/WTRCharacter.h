@@ -20,6 +20,7 @@ class AWTRPlayerController;
 class AWTRPlayerState;
 class USoundCue;
 class AWTR_HUD;
+class AWTRGameMode;
 
 UCLASS()
 class WITCHERY_API AWTRCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -288,6 +289,7 @@ private:
     void UpdateIfIsNotStanding();
     void HideCharacterWithWeaponIfCameraClose();
     float CalculateSpeed() const;
+    AWTRGameMode* GetWTRGameMode() const;
 
     //////////
     // Callbacks

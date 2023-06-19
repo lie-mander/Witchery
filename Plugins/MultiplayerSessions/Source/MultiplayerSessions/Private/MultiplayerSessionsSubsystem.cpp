@@ -18,11 +18,10 @@ bool UMultiplayerSessionsSubsystem::IsValidSessionInterface()
 {
     if (!SessionInterface)
     {
-        IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-
-        if (Subsystem)
+        OnlineSubSystem = (OnlineSubSystem == nullptr) ? IOnlineSubsystem::Get() : OnlineSubSystem;
+        if (OnlineSubSystem)
         {
-            SessionInterface = Subsystem->GetSessionInterface();
+            SessionInterface = (!SessionInterface.IsValid()) ? OnlineSubSystem->GetSessionInterface() : SessionInterface;
         }
     }
     return SessionInterface.IsValid();

@@ -650,6 +650,7 @@ void UWTRCombatComponent::ReloadShotgunAndSubCarriedAmmo()
     // Need to update for the server
     SetHUDCarriedAmmo();
 
+    // TODO minus value of carried weapon on clients 
     bCanFire = true;
 
     if (EquippedWeapon->IsFull() || CarriedAmmo == 0)

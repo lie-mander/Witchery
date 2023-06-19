@@ -155,6 +155,12 @@ void AWTRCharacter::BeginPlay()
     {
         GrenadeMesh->SetVisibility(false);
     }
+
+    // Need to disable input if match state == cooldown
+    if (GetWTRGameMode() && GetWTRGameMode()->GetMatchState() == MatchState::Cooldown)
+    {
+        bDisableGameplay = true;
+    }
 }
 
 void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -194,7 +200,7 @@ void AWTRCharacter::Destroyed()
 {
     Super::Destroyed();
 
-    const AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
+    const AWTRGameMode* WTRGameMode = GetWTRGameMode();
     bool bMatchIsNotInProgress = WTRGameMode && WTRGameMode->GetMatchState() != MatchState::InProgress;
 
     if (Combat && Combat->EquippedWeapon && bMatchIsNotInProgress)
@@ -657,6 +663,8 @@ void AWTRCharacter::OnAudioDownButtonPressed()
 
 void AWTRCharacter::OnGrenadeButtonPressed()
 {
+    if (bDisableGameplay) return;
+
     if (Combat)
     {
         Combat->ThrowGrenade();
@@ -740,11 +748,22 @@ void AWTRCharacter::Multicast_Elim_Implementation()
         Combat->OnFireButtonPressed(false);
     }
 
-    if (WTRPlayerController && GetCapsuleComponent() && GetMesh())
+    if (WTRPlayerController)
     {
         DisableInput(WTRPlayerController);
+    }
+
+    // Disable collision
+    if (GetCapsuleComponent() && GetMesh())
+    {
         GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+
+    // Fix drop through the ground
+    if (GetCharacterMovement())
+    {
+        GetCharacterMovement()->GravityScale = 0.f;
     }
 
     // Spawn ElimBot
@@ -758,6 +777,7 @@ void AWTRCharacter::Multicast_Elim_Implementation()
             GetActorRotation()                                                   //
         );
     }
+
     if (ElimBotSound)
     {
         UGameplayStatics::PlaySoundAtLocation(  //
@@ -788,14 +808,18 @@ void AWTRCharacter::Multicast_Elim_Implementation()
     {
         GrenadeMesh->SetVisibility(false);
     }
+
+    if (OverheadText)
+    {
+        OverheadText->SetVisibility(false);
+    }
 }
 
 void AWTRCharacter::OnEliminatedTimerFinished()
 {
-    AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(GetWorld()->GetAuthGameMode());
-    if (WTRGameMode)
+    if (GetWTRGameMode())
     {
-        WTRGameMode->RequestRespawn(this, Controller);
+        GetWTRGameMode()->RequestRespawn(this, Controller);
     }
 
     Multicast_OnDestroyed();
@@ -835,6 +859,9 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
 {
     if (bElimmed) return;
 
+    const AWTRGameMode* WTRGameMode = GetWTRGameMode();
+    if (WTRGameMode && WTRGameMode->GetMatchState() == MatchState::Cooldown) return;
+
     Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 
     UpdateHUDHealth();
@@ -842,13 +869,12 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
 
     if (Health <= 0.f && GetWorld())
     {
-        AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(GetWorld()->GetAuthGameMode());
-        if (WTRGameMode)
+        if (GetWTRGameMode())
         {
             WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
             AWTRPlayerController* AttackerController = Cast<AWTRPlayerController>(InstigatedBy);
 
-            WTRGameMode->PlayerEliminated(this, WTRPlayerController, AttackerController);
+            GetWTRGameMode()->PlayerEliminated(this, WTRPlayerController, AttackerController);
         }
     }
 
@@ -951,4 +977,10 @@ void AWTRCharacter::HideCharacterWithWeaponIfCameraClose()
             Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
         }
     }
+}
+
+AWTRGameMode* AWTRCharacter::GetWTRGameMode() const
+{
+    AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
+    return WTRGameMode;
 }
