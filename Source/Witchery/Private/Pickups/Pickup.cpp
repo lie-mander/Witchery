@@ -4,6 +4,7 @@
 #include "Components/SphereComponent.h"
 #include "Sound/SoundCue.h"
 #include "WTRTypes.h"
+#include "Kismet/GameplayStatics.h"
 
 APickup::APickup()
 {
@@ -40,6 +41,11 @@ void APickup::BeginPlay()
 
 void APickup::Destroyed() 
 {
+    if (PickupSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
+    }
+
     Super::Destroyed();
 }
 
@@ -51,6 +57,11 @@ void APickup::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 void APickup::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+    if (PickupMesh)
+    {
+        PickupMesh->AddWorldRotation(FRotator(0.f, BaseTurnRate * DeltaTime, 0.f));
+    }
 }
 
 void APickup::EnableCustomDepth(bool bEnable)

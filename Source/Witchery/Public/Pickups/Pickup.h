@@ -37,5 +37,8 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Sound")
     USoundCue* PickupSound;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Movement")
+    float BaseTurnRate = 45.f;
+
     void EnableCustomDepth(bool bEnable);
 };

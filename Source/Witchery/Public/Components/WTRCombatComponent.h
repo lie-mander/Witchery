@@ -30,6 +30,7 @@ public:
     void SetAiming(bool bAiming);
     void FinishReloading();
     void JumpToShotgunEnd();
+    void AddPickupAmmo(EWeaponType Type, int32 Ammo);
 
     FORCEINLINE int32 GetCurrentGrenades() const { return Grenades; }
 
@@ -127,6 +128,27 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
     int32 GrenadeLauncherCarrAmmo = 5;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
+    int32 Max_AssaultRifleCarrAmmo = 90;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
+    int32 Max_RocketLauncherCarrAmmo = 9;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
+    int32 Max_PistolCarrAmmo = 70;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
+    int32 Max_SubmachineGunCarrAmmo = 90;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
+    int32 Max_ShotgunCarrAmmo = 30;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
+    int32 Max_SniperRifleCarrAmmo = 12;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
+    int32 Max_GrenadeLauncherCarrAmmo = 10;
 
     // Carried ammo for current equipped weapon
     UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo);

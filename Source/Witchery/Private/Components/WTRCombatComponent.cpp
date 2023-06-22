@@ -703,6 +703,34 @@ void UWTRCombatComponent::JumpToShotgunEnd()
     }
 }
 
+void UWTRCombatComponent::AddPickupAmmo(EWeaponType Type, int32 Ammo) 
+{
+    if (CarriedAmmoByWeaponTypeMap.Contains(Type))
+    {
+        int32 MaxCarriedAmmoForType = 0;
+        switch (Type)
+        {
+            case EWeaponType::EWT_AssaultRifle: MaxCarriedAmmoForType = Max_AssaultRifleCarrAmmo; break;
+            case EWeaponType::EWT_RocketLauncher: MaxCarriedAmmoForType = Max_RocketLauncherCarrAmmo; break;
+            case EWeaponType::EWT_Pistol: MaxCarriedAmmoForType = Max_PistolCarrAmmo; break;
+            case EWeaponType::EWT_SubmachineGun: MaxCarriedAmmoForType = Max_SubmachineGunCarrAmmo; break;
+            case EWeaponType::EWT_Shotgun: MaxCarriedAmmoForType = Max_ShotgunCarrAmmo; break;
+            case EWeaponType::EWT_SniperRifle: MaxCarriedAmmoForType = Max_SniperRifleCarrAmmo; break;
+            case EWeaponType::EWT_GrenadeLauncher: MaxCarriedAmmoForType = Max_GrenadeLauncherCarrAmmo; break;
+        }
+
+        CarriedAmmoByWeaponTypeMap[Type] =
+            FMath::Clamp(CarriedAmmoByWeaponTypeMap[Type] + Ammo, 0, MaxCarriedAmmoForType);
+
+        UpdateCarriedAmmoAndHUD();
+    }
+
+    if (EquippedWeapon && EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == Type)
+    {
+        Reload();
+    }
+}
+
 void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
 {
     FVector2D ViewportSize;
