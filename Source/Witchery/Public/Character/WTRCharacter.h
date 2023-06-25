@@ -12,6 +12,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UWTRCombatComponent;
+class UWTRBuffComponent;
 class UAnimMontage;
 class UWidgetComponent;
 class UTextRenderComponent;
@@ -124,6 +125,9 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category = "WTR | Combat")
     UWTRCombatComponent* Combat;
+
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Buff")
+    UWTRBuffComponent* Buff;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "WTR | OverheadWidget")
     UWidgetComponent* OverheadWidget;

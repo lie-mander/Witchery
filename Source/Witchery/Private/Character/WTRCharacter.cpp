@@ -11,6 +11,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/WTRCombatComponent.h"
+#include "Components/WTRBuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -52,6 +53,9 @@ AWTRCharacter::AWTRCharacter()
 
     Combat = CreateDefaultSubobject<UWTRCombatComponent>("Combat");
     Combat->SetIsReplicated(true);
+
+    Buff = CreateDefaultSubobject<UWTRBuffComponent>("Buff");
+    Buff->SetIsReplicated(true);
 
     DissolveTimelineComponent = CreateDefaultSubobject<UTimelineComponent>("DissolveTimelineComponent");
 
@@ -193,6 +197,11 @@ void AWTRCharacter::PostInitializeComponents()
     if (Combat)
     {
         Combat->Character = this;
+    }
+
+    if (Buff)
+    {
+        Buff->Character = this;
     }
 }
 
