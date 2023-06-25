@@ -901,11 +901,11 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
     }
 }
 
-void AWTRCharacter::OnRep_Health()
+void AWTRCharacter::OnRep_Health(float LastHealth)
 {
     UpdateHUDHealth();
 
-    if (Health > 0.f)
+    if (Health > 0.f && Health < LastHealth)
     {
         PlayHitReactMontage();
     }

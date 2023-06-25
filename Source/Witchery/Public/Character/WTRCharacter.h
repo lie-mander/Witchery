@@ -35,20 +35,14 @@ public:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     virtual void PostInitializeComponents() override;
     virtual void Destroyed() override;
+    virtual void OnRep_ReplicateMovement() override;
+    virtual void Jump() override;
 
     // Try to declare variables in Tick that can`t be declare in BeginPlay
     void PullInit();
 
-    virtual void OnRep_ReplicateMovement() override;
-
-    UFUNCTION(NetMulticast, Reliable)
-    void Multicast_Elim();
-
-    UFUNCTION(BlueprintImplementableEvent)
-    void SetShowScopeAnimation(bool bShowScope);
-
+    void UpdateHUDHealth();
     void Elim();
-    virtual void Jump() override;
     void PlayFireMontage(bool bAiming);
     void PlayReloadMontage();
     void StopReloadMontage();
@@ -62,7 +56,9 @@ public:
     FORCEINLINE bool IsElimmed() const { return bElimmed; }
     FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
     FORCEINLINE bool IsDisableGameplay() const { return bDisableGameplay; }
+    FORCEINLINE bool IsFullHealth() const { return Health >= MaxHealth; }
 
+    FORCEINLINE void SetHealth(float NewHealth) { Health = NewHealth; }
     FORCEINLINE void SetDisableGameplay(bool bDisable) { bDisableGameplay = bDisable; }
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
     void OnPossessHandle(AWTRPlayerController* NewController, AWTR_HUD* NewHUD);
@@ -77,12 +73,19 @@ public:
     FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
     FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
     FORCEINLINE UStaticMeshComponent* GetGrenadeMesh() const { return GrenadeMesh; }
+    FORCEINLINE UWTRBuffComponent* GetBuffComponent() const { return Buff; }
     ECombatState GetCombatState() const;
     AWTRWeapon* GetEquippedWeapon() const;
     FVector GetHitTarget() const;
 
     UFUNCTION(BlueprintCallable)
     FORCEINLINE UWTRCombatComponent* GetCombatComponent() const { return Combat; }
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_Elim();
+
+    UFUNCTION(BlueprintImplementableEvent)
+    void SetShowScopeAnimation(bool bShowScope);
 
 protected:
     //////////
@@ -199,8 +202,6 @@ private:
     UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "WTR | Player Stats")
     float Health = 100.f;
 
-    void UpdateHUDHealth();
-
     //////////
     // Eliminated
     //
@@ -271,7 +272,7 @@ private:
     // Multiplayer functions
     //
     UFUNCTION()
-    void OnRep_Health();
+    void OnRep_Health(float LastHealth);
 
     UFUNCTION()
     void OnRep_Username();

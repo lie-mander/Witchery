@@ -20,12 +20,15 @@ void AWTRHealthPickup::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompo
     Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
     AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(OtherActor);
-    if (WTRCharacter)
+    if (WTRCharacter && !WTRCharacter->IsFullHealth())
     {
-
+        UWTRBuffComponent* WTRBuffComponent = WTRCharacter->GetBuffComponent();
+        if (WTRBuffComponent)
+        {
+            WTRBuffComponent->Heal(HealAmount, HealTime);
+        }
+        Destroy();
     }
-
-    Destroy();
 }
 
 void AWTRHealthPickup::Destroyed()
