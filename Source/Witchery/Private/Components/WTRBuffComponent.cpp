@@ -79,3 +79,35 @@ void UWTRBuffComponent::Multicast_SpeedBuff_Implementation(float BaseSpeed, floa
     Character->GetCharacterMovement()->MaxWalkSpeed = BaseSpeed;
     Character->GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
 }
+
+void UWTRBuffComponent::JumpBuff(float BuffJumpZVelocity, float BuffTime)
+{
+    if (!Character || !Character->GetCharacterMovement()) return;
+
+    Character->GetCharacterMovement()->JumpZVelocity = BuffJumpZVelocity;
+
+    Character->GetWorldTimerManager().SetTimer(  //
+        JumpBuffTimerHandle,                     //
+        this,                                    //
+        &UWTRBuffComponent::ResetJump,           //
+        BuffTime                                 //
+    );
+
+    Multicast_JumpBuff(BuffJumpZVelocity);
+}
+
+void UWTRBuffComponent::ResetJump()
+{
+    if (!Character || !Character->GetCharacterMovement()) return;
+
+    Character->GetCharacterMovement()->JumpZVelocity = InitialJumpZVelocity;
+
+    Multicast_JumpBuff(InitialJumpZVelocity);
+}
+
+void UWTRBuffComponent::Multicast_JumpBuff_Implementation(float JumpVelocity) 
+{
+    if (!Character || !Character->GetCharacterMovement()) return;
+
+    Character->GetCharacterMovement()->JumpZVelocity = JumpVelocity;
+}

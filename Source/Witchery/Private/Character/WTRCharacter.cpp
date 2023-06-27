@@ -206,6 +206,7 @@ void AWTRCharacter::PostInitializeComponents()
         {
             Buff->InitialBaseSpeed = GetCharacterMovement()->MaxWalkSpeed;
             Buff->InitialCrouchSpeed = GetCharacterMovement()->MaxWalkSpeedCrouched;
+            Buff->InitialJumpZVelocity = GetCharacterMovement()->JumpZVelocity;
         }
     }
 }
