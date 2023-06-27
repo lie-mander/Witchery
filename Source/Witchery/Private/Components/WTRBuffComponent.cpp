@@ -2,6 +2,7 @@
 
 #include "Components/WTRBuffComponent.h"
 #include "Character/WTRCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UWTRBuffComponent::UWTRBuffComponent()
 {
@@ -20,7 +21,7 @@ void UWTRBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
     HealInTick(DeltaTime);
 }
 
-void UWTRBuffComponent::Heal(float HealAmount, float HealTime) 
+void UWTRBuffComponent::Heal(float HealAmount, float HealTime)
 {
     HealRate = HealAmount / HealTime;
     AmountToHeal += HealAmount;
@@ -42,4 +43,39 @@ void UWTRBuffComponent::HealInTick(float DeltaTime)
         AmountToHeal = 0.f;
         bIsHealing = false;
     }
+}
+
+void UWTRBuffComponent::SpeedBuff(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime)
+{
+    if (!Character || !Character->GetCharacterMovement()) return;
+
+    Character->GetCharacterMovement()->MaxWalkSpeed = BuffBaseSpeed;
+    Character->GetCharacterMovement()->MaxWalkSpeedCrouched = BuffCrouchSpeed;
+
+    Character->GetWorldTimerManager().SetTimer(  //
+        SpeedBuffTimerHandle,                    //
+        this,                                    //
+        &UWTRBuffComponent::ResetSpeed,          //
+        BuffTime                                 //
+    );
+
+    Multicast_SpeedBuff(BuffBaseSpeed, BuffCrouchSpeed);
+}
+
+void UWTRBuffComponent::ResetSpeed()
+{
+    if (!Character || !Character->GetCharacterMovement()) return;
+
+    Character->GetCharacterMovement()->MaxWalkSpeed = InitialBaseSpeed;
+    Character->GetCharacterMovement()->MaxWalkSpeedCrouched = InitialCrouchSpeed;
+
+    Multicast_SpeedBuff(InitialBaseSpeed, InitialCrouchSpeed);
+}
+
+void UWTRBuffComponent::Multicast_SpeedBuff_Implementation(float BaseSpeed, float CrouchSpeed)
+{
+    if (!Character || !Character->GetCharacterMovement()) return;
+
+    Character->GetCharacterMovement()->MaxWalkSpeed = BaseSpeed;
+    Character->GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
 }

@@ -202,6 +202,11 @@ void AWTRCharacter::PostInitializeComponents()
     if (Buff)
     {
         Buff->Character = this;
+        if (GetCharacterMovement())
+        {
+            Buff->InitialBaseSpeed = GetCharacterMovement()->MaxWalkSpeed;
+            Buff->InitialCrouchSpeed = GetCharacterMovement()->MaxWalkSpeedCrouched;
+        }
     }
 }
 

@@ -9,6 +9,8 @@
 class USphereComponent;
 class USoundCue;
 class UStaticMeshComponent;
+class UNiagaraComponent;
+class UNiagaraSystem;
 
 UCLASS()
 class WITCHERY_API APickup : public AActor
@@ -34,11 +36,17 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
     UStaticMeshComponent* PickupMesh;
 
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
+    UNiagaraComponent* NiagaraComponent;
+
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Sound")
     USoundCue* PickupSound;
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Movement")
     float BaseTurnRate = 45.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | FX")
+    UNiagaraSystem* PickupFX;
 
     void EnableCustomDepth(bool bEnable);
 };
