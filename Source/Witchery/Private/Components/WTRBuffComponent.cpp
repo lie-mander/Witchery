@@ -19,6 +19,7 @@ void UWTRBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     HealInTick(DeltaTime);
+    ShieldAddInTick(DeltaTime);
 }
 
 void UWTRBuffComponent::Heal(float HealAmount, float HealTime)
@@ -34,6 +35,8 @@ void UWTRBuffComponent::HealInTick(float DeltaTime)
 
     const float HealthAmountInTick = HealRate * DeltaTime;
     const float NewHealthAmount = FMath::Clamp(Character->GetHealth() + HealthAmountInTick, 0.f, Character->GetMaxHealth());
+
+    AmountToHeal -= HealthAmountInTick;
 
     Character->SetHealth(NewHealthAmount);
     Character->UpdateHUDHealth();
@@ -110,4 +113,30 @@ void UWTRBuffComponent::Multicast_JumpBuff_Implementation(float JumpVelocity)
     if (!Character || !Character->GetCharacterMovement()) return;
 
     Character->GetCharacterMovement()->JumpZVelocity = JumpVelocity;
+}
+
+void UWTRBuffComponent::ShieldBuff(float ShieldAmount, float BuffTime) 
+{
+    ShieldRate = ShieldAmount / BuffTime;
+    ShieldToAdd += ShieldAmount;
+    bIsShieldAdding = true;
+}
+
+void UWTRBuffComponent::ShieldAddInTick(float DeltaTime) 
+{
+    if (!bIsShieldAdding || !Character || Character->IsElimmed()) return;
+
+    const float ShieldAmountInTick = ShieldRate * DeltaTime;
+    const float NewShieldAmount = FMath::Clamp(Character->GetShield() + ShieldAmountInTick, 0.f, Character->GetMaxShield());
+
+    Character->SetShield(NewShieldAmount);
+    Character->UpdateHUDShield();
+
+    ShieldToAdd -= ShieldAmountInTick;
+
+    if (ShieldToAdd <= 0.f || Character->IsFullShield())
+    {
+        ShieldToAdd = 0.f;
+        bIsShieldAdding = false;
+    }
 }

@@ -58,8 +58,10 @@ public:
     FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
     FORCEINLINE bool IsDisableGameplay() const { return bDisableGameplay; }
     FORCEINLINE bool IsFullHealth() const { return Health >= MaxHealth; }
+    FORCEINLINE bool IsFullShield() const { return Shield >= MaxShield; }
 
     FORCEINLINE void SetHealth(float NewHealth) { Health = NewHealth; }
+    FORCEINLINE void SetShield(float NewShield) { Shield = NewShield; }
     FORCEINLINE void SetDisableGameplay(bool bDisable) { bDisableGameplay = bDisable; }
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
     void OnPossessHandle(AWTRPlayerController* NewController, AWTR_HUD* NewHUD);

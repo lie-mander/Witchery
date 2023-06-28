@@ -20,6 +20,7 @@ public:
     void Heal(float HealAmount, float HealTime);
     void SpeedBuff(float BuffBaseSpeed, float BuffCrouchSpeed, float BuffTime);
     void JumpBuff(float BuffJumpZVelocity, float BuffTime);
+    void ShieldBuff(float ShieldAmount, float BuffTime);
 
 protected:
     virtual void BeginPlay() override;
@@ -61,4 +62,13 @@ private:
     void Multicast_JumpBuff(float JumpVelocity);
 
     void ResetJump();
+
+    /*
+    * Shield buff
+    */
+    bool bIsShieldAdding = false;
+    float ShieldToAdd = 0.f;
+    float ShieldRate = 0.f;
+
+    void ShieldAddInTick(float DeltaTime);
 };
