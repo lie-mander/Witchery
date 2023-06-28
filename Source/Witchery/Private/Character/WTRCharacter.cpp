@@ -888,9 +888,25 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
     const AWTRGameMode* WTRGameMode = GetWTRGameMode();
     if (WTRGameMode && WTRGameMode->GetMatchState() == MatchState::Cooldown) return;
 
-    Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+    float DamageThroughShield = Damage;
+    if (Shield > 0.f)
+    {
+        if (Shield >= Damage)
+        {
+            Shield = FMath::Clamp(Shield - Damage, 0.f, MaxShield);
+            DamageThroughShield = 0.f;
+        }
+        else
+        {
+            DamageThroughShield = FMath::Clamp(Damage - Shield, 0.f, Damage);
+            Shield = 0.f;
+        }
+    }
+
+    Health = FMath::Clamp(Health - DamageThroughShield, 0.f, MaxHealth);
 
     UpdateHUDHealth();
+    UpdateHUDShield();
     PlayHitReactMontage();
 
     if (Health <= 0.f && GetWorld())
