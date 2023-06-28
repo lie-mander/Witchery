@@ -90,6 +90,7 @@ void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
     DOREPLIFETIME_CONDITION(AWTRCharacter, OverlappingWeapon, COND_OwnerOnly);
     DOREPLIFETIME(AWTRCharacter, Username);
     DOREPLIFETIME(AWTRCharacter, Health);
+    DOREPLIFETIME(AWTRCharacter, Shield);
     DOREPLIFETIME(AWTRCharacter, bDisableGameplay);
 }
 
@@ -128,10 +129,11 @@ void AWTRCharacter::BeginPlay()
         }
     }
 
-    // Set current health at start
+    // Set current health and shield at start
     if (WTRPlayerController)
     {
         WTRPlayerController->SetHUDHealth(Health, MaxHealth);
+        WTRPlayerController->SetHUDShield(Shield, MaxShield);
     }
 
     // Set callbacks for authority character
@@ -869,6 +871,15 @@ void AWTRCharacter::UpdateHUDHealth()
     }
 }
 
+void AWTRCharacter::UpdateHUDShield() 
+{
+    WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
+    if (WTRPlayerController)
+    {
+        WTRPlayerController->SetHUDShield(Shield, MaxShield);
+    }
+}
+
 void AWTRCharacter::OnTakeAnyDamageCallback(
     AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
@@ -912,6 +923,16 @@ void AWTRCharacter::OnRep_Health(float LastHealth)
     UpdateHUDHealth();
 
     if (Health > 0.f && Health < LastHealth)
+    {
+        PlayHitReactMontage();
+    }
+}
+
+void AWTRCharacter::OnRep_Shield(float LastShield) 
+{
+    UpdateHUDShield();
+
+    if (Shield > 0.f && Shield < LastShield)
     {
         PlayHitReactMontage();
     }

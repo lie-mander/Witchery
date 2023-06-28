@@ -57,6 +57,7 @@ void AWTRPlayerController::DelayInit()
             if (CharacterOverlay)
             {
                 SetHUDHealth(DelayInit_CurrentHealth, DelayInit_MaxHealth);
+                SetHUDShield(DelayInit_CurrentShield, DelayInit_MaxShield);
                 SetHUDScore(DelayInit_ScoreAmount);
                 SetHUDDefeats(DelayInit_DefeatsAmount);
 
@@ -236,6 +237,7 @@ void AWTRPlayerController::OnPossess(APawn* InPawn)
     {
         WTRCharacter->OnPossessHandle(this, WTR_HUD);
         SetHUDHealth(WTRCharacter->GetHealth(), WTRCharacter->GetMaxHealth());
+        SetHUDShield(WTRCharacter->GetShield(), WTRCharacter->GetMaxShield());
 
         if (WTRCharacter && WTRCharacter->GetCombatComponent())
         {
@@ -270,6 +272,30 @@ void AWTRPlayerController::SetHUDHealth(float CurrentHealth, float MaxHealth)
     {
         DelayInit_CurrentHealth = CurrentHealth;
         DelayInit_MaxHealth = MaxHealth;
+    }
+}
+
+void AWTRPlayerController::SetHUDShield(float CurrentShield, float MaxShield) 
+{
+    WTR_HUD = GetWTR_HUD();
+
+    bool bHUDValid = WTR_HUD &&                                     //
+                     WTR_HUD->CharacterOverlayWidget &&             //
+                     WTR_HUD->CharacterOverlayWidget->ShieldBar &&  // ShieldBar
+                     WTR_HUD->CharacterOverlayWidget->ShieldText;   // ShieldText
+
+    if (bHUDValid)
+    {
+        const float ShieldPercent = CurrentShield / MaxShield;
+        WTR_HUD->CharacterOverlayWidget->ShieldBar->SetPercent(ShieldPercent);
+
+        const FString ShieldText = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(CurrentShield), FMath::CeilToInt(MaxShield));
+        WTR_HUD->CharacterOverlayWidget->ShieldText->SetText(FText::FromString(ShieldText));
+    }
+    else
+    {
+        DelayInit_CurrentShield = CurrentShield;
+        DelayInit_MaxShield = MaxShield;
     }
 }
 

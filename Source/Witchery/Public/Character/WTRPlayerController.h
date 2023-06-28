@@ -32,6 +32,7 @@ public:
     void VolumeUp();
 
     void SetHUDHealth(float CurrentHealth, float MaxHealth);
+    void SetHUDShield(float CurrentShield, float MaxShield);
     void SetHUDScore(float ScoreAmount);
     void SetHUDDefeats(int32 DefeatsAmount);
     void SetHUDDeathMessage(bool bVisible);
@@ -118,6 +119,8 @@ private:
     //
     float DelayInit_CurrentHealth = 0.f;
     float DelayInit_MaxHealth = 0.f;
+    float DelayInit_CurrentShield = 0.f;
+    float DelayInit_MaxShield = 0.f;
     float DelayInit_ScoreAmount = 0.f;
     int32 DelayInit_DefeatsAmount = 0;
 

@@ -42,6 +42,7 @@ public:
     void PullInit();
 
     void UpdateHUDHealth();
+    void UpdateHUDShield();
     void Elim();
     void PlayFireMontage(bool bAiming);
     void PlayReloadMontage();
@@ -66,6 +67,8 @@ public:
     FORCEINLINE int32 GetCarriedAmmo() const;
     FORCEINLINE float GetHealth() const { return Health; }
     FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+    FORCEINLINE float GetShield() const { return Shield; }
+    FORCEINLINE float GetMaxShield() const { return MaxShield; }
     FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
     FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
     FORCEINLINE ETurningInPlace GetTurningState() const { return TurningInPlace; }
@@ -203,6 +206,15 @@ private:
     float Health = 100.f;
 
     //////////
+    // Shield
+    //
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Player Stats")
+    float MaxShield = 100.f;
+
+    UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "WTR | Player Stats")
+    float Shield = 100.f;
+
+    //////////
     // Eliminated
     //
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Respawn")
@@ -273,6 +285,9 @@ private:
     //
     UFUNCTION()
     void OnRep_Health(float LastHealth);
+    
+    UFUNCTION()
+    void OnRep_Shield(float LastShield);
 
     UFUNCTION()
     void OnRep_Username();
