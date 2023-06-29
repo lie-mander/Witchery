@@ -48,5 +48,10 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | FX")
     UNiagaraSystem* PickupFX;
 
+    FTimerHandle BindOverlapTimerHandle;
+    float BindOverlapDelay = 0.25f;
+
+    void BindOverlapTimerStart();
+    void BindOverlapTimerFinished();
     void EnableCustomDepth(bool bEnable);
 };

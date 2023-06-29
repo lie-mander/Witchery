@@ -40,6 +40,27 @@ void APickup::BeginPlay()
 
     if (HasAuthority())
     {
+        BindOverlapTimerStart();
+    }
+}
+
+void APickup::BindOverlapTimerStart() 
+{
+    if (HasAuthority())
+    {
+        GetWorldTimerManager().SetTimer(         //
+            BindOverlapTimerHandle,              //
+            this,                                //
+            &APickup::BindOverlapTimerFinished,  //
+            BindOverlapDelay                     //
+        );
+    }
+}
+
+void APickup::BindOverlapTimerFinished() 
+{
+    if (HasAuthority())
+    {
         AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnSphereBeginOverlap);
     }
 }
