@@ -722,7 +722,14 @@ void AWTRCharacter::Elim()
 {
     if (Combat && Combat->EquippedWeapon)
     {
-        Combat->EquippedWeapon->Dropped();
+        if (Combat->EquippedWeapon->bNeedDestroy)
+        {
+            Combat->EquippedWeapon->Destroy();
+        }
+        else
+        {
+            Combat->EquippedWeapon->Dropped();
+        }
     }
     if (Combat && WTRPlayerController)
     {

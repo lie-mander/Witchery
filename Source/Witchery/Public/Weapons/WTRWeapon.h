@@ -47,9 +47,14 @@ public:
     FORCEINLINE int32 GetAmmo() const { return Ammo; }
     FORCEINLINE int32 GetMagazineCapacity() const { return MagazineCapacity; }
 
-    //////////
-    // Crosshairs textures
-    //
+    /*
+    * If weapon needs destroy when owner elim or weapon dropped
+    */
+    bool bNeedDestroy = false;
+
+    /*
+     * Crosshairs textures
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     UTexture2D* CrosshairsCenter = nullptr;
 
@@ -65,42 +70,42 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     UTexture2D* CrosshairsBottom = nullptr;
 
-    //////////
-    // Sounds
-    //
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sound")
+    /*
+     * Sounds
+     */
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sounds")
     USoundCue* PickupSound;
 
 protected:
-    //////////
-    // Socket`s names
-    //
+    /*
+     * Socket`s names
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Sockets")
     FName MuzzleSocketName = "MuzzleFlash";
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Sockets")
     FName AmmoEjectSocketName = "AmmoEject";
 
-    //////////
-    // Automatic properties
-    //
+    /*
+     * Automatic properties
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon Firing")
     float FireDelay = 0.25f;
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon Firing")
     bool bAutomaticWeapon = true;
 
-    //////////
-    // Functions
-    //
+    /*
+     * Functions
+     */
     virtual void BeginPlay() override;
 
     AController* GetOwnerPlayerController() const;
 
 private:
-    //////////
-    // Components
-    //
+    /*
+     * Components
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Components")
     USkeletalMeshComponent* WeaponMesh;
 
@@ -110,9 +115,9 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
     UWidgetComponent* PickupWidget;
 
-    //////////
-    // Weapon properties
-    //
+    /*
+     * Weapon properties
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon Firing")
     UAnimSequence* FireAnimation;
 
@@ -131,9 +136,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")
     EWeaponType WeaponType;
 
-    //////////
-    // Ammo
-    //
+    /*
+     * Ammo
+     */
     UPROPERTY(ReplicatedUsing = OnRep_Ammo, EditDefaultsOnly, Category = "WTR | Weapon properties")
     int32 Ammo = 10;
 
@@ -145,31 +150,28 @@ private:
 
     void DecreaseAmmo();
 
-    //////////
-    // Zooming
-    //
+    /*
+     * Zooming
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float ZoomedFOV = 30.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float ZoomInterpSpeed = 20.f;
 
-    //////////
-    // Base variables
-    //
+    /*
+     * Base variables
+     */
+
     UPROPERTY()
     AWTRCharacter* WTROwnerCharacter;
 
     UPROPERTY()
     AWTRPlayerController* WTROwnerPlayerController;
 
-    //////////
-    // Functions
-    //
-
-    //////////
-    // Callbacks
-    //
+    /*
+     * Callbacks
+     */
     UFUNCTION()
     void OnRep_WeaponState();
 

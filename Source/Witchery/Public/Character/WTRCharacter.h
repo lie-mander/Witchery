@@ -93,9 +93,9 @@ public:
     void SetShowScopeAnimation(bool bShowScope);
 
 protected:
-    //////////
-    // Input functions and callbacks
-    //
+    /*
+     * Input functions and callbacks
+     */
     void MoveForward(float Amount);
     void MoveRight(float Amount);
     void Turn(float Amount);
@@ -116,15 +116,16 @@ protected:
     void OnAudioDownButtonPressed();
     void OnGrenadeButtonPressed();
 
-    //////////
-    // Other functions
-    //
+    /*
+     * Other functions
+     */
     virtual void BeginPlay() override;
 
 private:
-    //////////
-    // Components
-    //
+    /*
+     * Components
+     */
+
     UPROPERTY(VisibleAnywhere, Category = "WTR | Camera")
     USpringArmComponent* SpringArmComponent;
 
@@ -146,9 +147,9 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "WTR | Elimination")
     UTimelineComponent* DissolveTimelineComponent;
 
-    //////////
-    // Multiplayer variables
-    //
+    /*
+     * Multiplayer variables
+     */
     UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
     AWTRWeapon* OverlappingWeapon;
 
@@ -158,9 +159,9 @@ private:
     UPROPERTY(Replicated)
     bool bDisableGameplay = false;
 
-    //////////
-    // Animation
-    //
+    /*
+     * Animation
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
     UAnimMontage* FireWeaponMontage;
 
@@ -176,9 +177,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
     UAnimMontage* ThrowGrenadeMontage;
 
-    //////////
-    // Movement
-    //
+    /*
+     * Movement
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Movement")
     float AngleToTurn = 80.f;
 
@@ -198,27 +199,27 @@ private:
     FRotator SimProxyLastFrameRotation;
     FRotator SimProxyRotation;
 
-    //////////
-    // Health
-    //
+    /*
+     * Health
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Player Stats")
     float MaxHealth = 100.f;
 
     UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "WTR | Player Stats")
     float Health = 100.f;
 
-    //////////
-    // Shield
-    //
+    /*
+     * Shield
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Player Stats")
     float MaxShield = 100.f;
 
     UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "WTR | Player Stats")
     float Shield = 100.f;
 
-    //////////
-    // Eliminated
-    //
+    /*
+     * Eliminated
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Respawn")
     float EliminatedTimerDelay = 3.f;
 
@@ -227,9 +228,9 @@ private:
 
     void OnEliminatedTimerFinished();
 
-    //////////
-    // Dissolve
-    //
+    /*
+     * Dissolve
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Base")
     UCurveFloat* DissolveCurve;
 
@@ -249,9 +250,9 @@ private:
 
     void StartDissolve();
 
-    //////////
-    // ElimBot
-    //
+    /*
+     * ElimBot
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | ElimBot")
     UParticleSystem* ElimBotParticleSys;
 
@@ -264,30 +265,30 @@ private:
     UPROPERTY()
     UParticleSystemComponent* ElimBotParticleSysComponent;
 
-    //////////
-    // Grenade
-    //
+    /*
+     * Grenade
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Grenade")
     UStaticMeshComponent* GrenadeMesh;
 
-    //////////
-    // Base variables
-    //
+    /*
+     * Base variables
+     */
     AWTRPlayerController* WTRPlayerController;
     AWTRPlayerState* WTRPlayerState;
 
-    //////////
-    // Other variables
-    //
+    /*
+     * Other variables
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Camera")
     float DistanceForHidingCamera = 200.f;
 
-    //////////
-    // Multiplayer functions
-    //
+    /*
+     * Multiplayer functions
+     */
     UFUNCTION()
     void OnRep_Health(float LastHealth);
-    
+
     UFUNCTION()
     void OnRep_Shield(float LastShield);
 
@@ -303,9 +304,9 @@ private:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_OnDestroyed();
 
-    //////////
-    // Functions
-    //
+    /*
+     * Functions
+     */
     void RotateInPlace(float DeltaTime);
     void SetTurningInPlace(float DeltaTime);
     void UpdateIfIsNotStanding();
@@ -313,9 +314,9 @@ private:
     float CalculateSpeed() const;
     AWTRGameMode* GetWTRGameMode() const;
 
-    //////////
-    // Callbacks
-    //
+    /*
+     * Callbacks
+     */
     UFUNCTION()
     void OnTakeAnyDamageCallback(
         AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);

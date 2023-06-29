@@ -49,9 +49,9 @@ protected:
     virtual float GetServerTime();
 
 private:
-    //////////
-    // Base variables
-    //
+    /*
+     * Base variables
+     */
     UPROPERTY()
     AWTR_HUD* WTR_HUD;
 
@@ -73,15 +73,15 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Debug")
     bool bShowFPS = false;
 
-    //////////
-    // Sound
-    //
+    /*
+     * Sound
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Sound")
     USoundClass* MasterSoundClass;
 
-    //////////
-    // Match states
-    //
+    /*
+     * Match states
+     */
     UPROPERTY(ReplicatedUsing = OnRep_MatchState)
     FName MatchState;
 
@@ -92,9 +92,9 @@ private:
     void HandleMatchStateInProgress();
     void HandleMatchCooldown();
 
-    //////////
-    // Sync client time to server
-    //
+    /*
+     * Sync client time to server
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Time")
     float TimeSyncUpdateFrequency = 5.f;
 
@@ -114,19 +114,22 @@ private:
     UFUNCTION(Client, Reliable)
     void Client_SendServerTime(float ClientTimeOfSending, float ServerTimeResponse);
 
-    //////////
-    // Delay Init variables (need to be CharacterOverlay was created, and after that variables can set)
-    //
+    /*
+     * Delay Init variables (need to be CharacterOverlay was created, and after that variables can set)
+     */
     float DelayInit_CurrentHealth = 0.f;
     float DelayInit_MaxHealth = 0.f;
     float DelayInit_CurrentShield = 0.f;
     float DelayInit_MaxShield = 0.f;
     float DelayInit_ScoreAmount = 0.f;
     int32 DelayInit_DefeatsAmount = 0;
+    int32 DelayInit_WeaponAmmo = 0;
+    int32 DelayInit_CarriedAmmo = 0;
+    EWeaponType DelayInit_WeaponType = EWeaponType::EWT_MAX;
 
-    //////////
-    // MatchType timers
-    //
+    /*
+     * MatchType timers
+     */
     UFUNCTION(Server, Reliable)
     void Server_CheckMatchState();
 
@@ -144,9 +147,9 @@ private:
     int Previous = 0;
     int SecondsInteger = 0;
 
-    //////////
-    // UI
-    //
+    /*
+     * UI
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
     FString AnnounCooldownText = "NEW GAME STARTS IN:";
 
@@ -159,9 +162,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
     float BlinkStartTime = 30.f;
 
-    //////////
-    // FPS timer
-    //
+    /*
+     * FPS timer
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Time")
     float TimeFPSUpdateFrequency = 2.f;
 
@@ -169,9 +172,9 @@ private:
 
     float FPS = 0.f;
 
-    //////////
-    // Functions
-    //
+    /*
+     * Functions
+     */
     UFUNCTION(Client, Reliable)
     void Client_OnPossess();
 

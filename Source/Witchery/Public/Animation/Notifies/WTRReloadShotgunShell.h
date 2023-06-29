@@ -10,5 +10,4 @@ UCLASS()
 class WITCHERY_API UWTRReloadShotgunShell : public UWTRAnimNotify
 {
 	GENERATED_BODY()
-	
 };

@@ -10,5 +10,4 @@ UCLASS()
 class WITCHERY_API UWTRReloadFinishedAnimNotify : public UWTRAnimNotify
 {
 	GENERATED_BODY()
-	
 };

@@ -16,6 +16,7 @@
 #include "Camera/CameraComponent.h"
 #include "TimerManager.h"
 #include "Sound/SoundCue.h"
+#include "GameModes/WTRGameMode.h"
 
 UWTRCombatComponent::UWTRCombatComponent()
 {
@@ -48,6 +49,7 @@ void UWTRCombatComponent::BeginPlay()
         }
     }
 
+    SpawnAndEquipDefaultWeapon();
     UpdateHUDGrenades();
 
     bCanFire = true;
@@ -183,7 +185,14 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
 {
     if (!Character || !WeaponToEquip) return;
 
-    DroppedEquippedWeapon();
+    if (EquippedWeapon && EquippedWeapon->bNeedDestroy)
+    {
+        EquippedWeapon->Destroy();
+    }
+    else
+    {
+        DroppedEquippedWeapon();
+    }
 
     EquippedWeapon = WeaponToEquip;
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
@@ -296,6 +305,17 @@ void UWTRCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
     }
 }
 
+void UWTRCombatComponent::SpawnAndEquipDefaultWeapon()
+{
+    AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
+    if (WTRGameMode && GetWorld() && DefautlWeaponClass && Character && !Character->IsElimmed())
+    {
+        AWTRWeapon* StartWeapon = GetWorld()->SpawnActor<AWTRWeapon>(DefautlWeaponClass);
+        EquipWeapon(StartWeapon);
+        StartWeapon->bNeedDestroy = true;
+    }
+}
+
 void UWTRCombatComponent::UpdateHUDWeaponType()
 {
     Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Character->Controller) : Controller;
@@ -377,6 +397,10 @@ void UWTRCombatComponent::Fire()
 
         FireTimerStart();
     }
+    else if (EquippedWeapon && EquippedWeapon->IsEmpty() && CarriedAmmo == 0)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, EmptyWeapon, EquippedWeapon->GetActorLocation());
+    }
     else if (EquippedWeapon && EquippedWeapon->IsEmpty())
     {
         Reload();
@@ -427,7 +451,7 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
         EquippedWeapon->Fire(TraceHitTarget);
     }
 
-    if (EquippedWeapon->IsEmpty())
+    if (EquippedWeapon && EquippedWeapon->IsEmpty())
     {
         Reload();
     }
@@ -650,7 +674,7 @@ void UWTRCombatComponent::ReloadShotgunAndSubCarriedAmmo()
     // Need to update for the server
     SetHUDCarriedAmmo();
 
-    // TODO minus value of carried weapon on clients 
+    // TODO minus value of carried weapon on clients
     bCanFire = true;
 
     if (EquippedWeapon->IsFull() || CarriedAmmo == 0)
@@ -703,7 +727,7 @@ void UWTRCombatComponent::JumpToShotgunEnd()
     }
 }
 
-void UWTRCombatComponent::AddPickupAmmo(EWeaponType Type, int32 Ammo) 
+void UWTRCombatComponent::AddPickupAmmo(EWeaponType Type, int32 Ammo)
 {
     if (CarriedAmmoByWeaponTypeMap.Contains(Type))
     {
@@ -719,8 +743,7 @@ void UWTRCombatComponent::AddPickupAmmo(EWeaponType Type, int32 Ammo)
             case EWeaponType::EWT_GrenadeLauncher: MaxCarriedAmmoForType = Max_GrenadeLauncherCarrAmmo; break;
         }
 
-        CarriedAmmoByWeaponTypeMap[Type] =
-            FMath::Clamp(CarriedAmmoByWeaponTypeMap[Type] + Ammo, 0, MaxCarriedAmmoForType);
+        CarriedAmmoByWeaponTypeMap[Type] = FMath::Clamp(CarriedAmmoByWeaponTypeMap[Type] + Ammo, 0, MaxCarriedAmmoForType);
 
         UpdateCarriedAmmoAndHUD();
     }
@@ -829,4 +852,22 @@ bool UWTRCombatComponent::CanFire() const
         return true;
     }
     return EquippedWeapon && !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
+}
+
+EWeaponType UWTRCombatComponent::GetEquippedWeaponType() const
+{
+    if (EquippedWeapon)
+    {
+        return EquippedWeapon->GetWeaponType();
+    }
+    return EWeaponType::EWT_MAX;
+}
+
+int32 UWTRCombatComponent::GetEquippedWeaponAmmo() const
+{
+    if (EquippedWeapon)
+    {
+        return EquippedWeapon->GetAmmo();
+    }
+    return 0;
 }

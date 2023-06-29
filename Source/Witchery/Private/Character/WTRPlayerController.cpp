@@ -60,6 +60,9 @@ void AWTRPlayerController::DelayInit()
                 SetHUDShield(DelayInit_CurrentShield, DelayInit_MaxShield);
                 SetHUDScore(DelayInit_ScoreAmount);
                 SetHUDDefeats(DelayInit_DefeatsAmount);
+                SetHUDWeaponAmmo(DelayInit_WeaponAmmo);
+                SetHUDCarriedAmmo(DelayInit_CarriedAmmo);
+                SetHUDWeaponType(DelayInit_WeaponType);
 
                 WTRCharacter = Cast<AWTRCharacter>(GetPawn());
                 if (WTRCharacter && WTRCharacter->GetCombatComponent())
@@ -242,6 +245,9 @@ void AWTRPlayerController::OnPossess(APawn* InPawn)
         if (WTRCharacter && WTRCharacter->GetCombatComponent())
         {
             SetHUDGrenades(WTRCharacter->GetCombatComponent()->GetCurrentGrenades());
+            SetHUDWeaponAmmo(WTRCharacter->GetCombatComponent()->GetEquippedWeaponAmmo());
+            SetHUDCarriedAmmo(WTRCharacter->GetCombatComponent()->GetCarriedAmmo());
+            SetHUDWeaponType(WTRCharacter->GetCombatComponent()->GetEquippedWeaponType());
         }
     }
 }
@@ -365,6 +371,10 @@ void AWTRPlayerController::SetHUDWeaponAmmo(int32 AmmoAmount)
         const FString AmmoText = FString::Printf(TEXT("%d"), AmmoAmount);
         WTR_HUD->CharacterOverlayWidget->WeaponAmmoText->SetText(FText::FromString(AmmoText));
     }
+    else
+    {
+        DelayInit_WeaponAmmo = AmmoAmount;
+    }
 }
 
 void AWTRPlayerController::SetHUDCarriedAmmo(int32 AmmoAmount)
@@ -379,6 +389,10 @@ void AWTRPlayerController::SetHUDCarriedAmmo(int32 AmmoAmount)
     {
         const FString AmmoText = FString::Printf(TEXT("%d"), AmmoAmount);
         WTR_HUD->CharacterOverlayWidget->CarriedAmmoText->SetText(FText::FromString(AmmoText));
+    }
+    else
+    {
+        DelayInit_CarriedAmmo = AmmoAmount;
     }
 }
 
@@ -429,6 +443,10 @@ void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
         }
 
         WTR_HUD->CharacterOverlayWidget->WeaponTypeText->SetText(FText::FromString(WeaponTypeText));
+    }
+    else
+    {
+        DelayInit_WeaponType = Type;
     }
 }
 

@@ -12,6 +12,7 @@ class AWTRWeapon;
 class AWTRPlayerController;
 class AWTR_HUD;
 class AWTRProjectile;
+class USoundCue;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class WITCHERY_API UWTRCombatComponent : public UActorComponent
@@ -33,6 +34,9 @@ public:
     void AddPickupAmmo(EWeaponType Type, int32 Ammo);
 
     FORCEINLINE int32 GetCurrentGrenades() const { return Grenades; }
+    FORCEINLINE int32 GetCarriedAmmo() const { return CarriedAmmo; }
+    EWeaponType GetEquippedWeaponType() const;
+    int32 GetEquippedWeaponAmmo() const;
 
     UFUNCTION(BlueprintCallable)
     void ShotgunShellReload();
@@ -49,9 +53,9 @@ protected:
     void Reload();
     void Fire();
 
-    //////////
-    // Multiplayer functions and callbacks
-    //
+    /*
+     * Multiplayer functions and callbacks
+     */
     UFUNCTION()
     void OnRep_EquippedWeapon();
 
@@ -74,9 +78,9 @@ protected:
     void Server_LaunchGrenade(const FVector_NetQuantize& Target);
 
 private:
-    //////////
-    // Movement
-    //
+    /*
+     * Movement
+     */
     UPROPERTY(ReplicatedUsing = OnRep_CombatState)
     ECombatState CombatState = ECombatState::ECS_Unoccupied;
 
@@ -89,9 +93,9 @@ private:
     UFUNCTION()
     void OnRep_CombatState();
 
-    //////////
-    // Shooting
-    //
+    /*
+     * Shooting
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
     FVector3d SpringArmOffsetWhileEquipped = FVector3d(0.f, 180.f, 0.f);
 
@@ -105,9 +109,9 @@ private:
 
     FTimerHandle FireTimerHandle;
 
-    //////////
-    // Carried ammo
-    //
+    /*
+     * Carried ammo
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
     int32 AssaultRifleCarrAmmo = 30;
 
@@ -161,9 +165,9 @@ private:
 
     void InitCarriedAmmoMap();
 
-    //////////
-    // Crosshair
-    //
+    /*
+     * Crosshair
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair | Base")
     float CrosshairSpread = 0.6f;
 
@@ -227,9 +231,9 @@ private:
 
     FCrosshairHUDPackage HUDPackage;
 
-    //////////
-    // Zooming
-    //
+    /*
+     * Zooming
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float DefaultZoomFOV = 30.f;
 
@@ -238,9 +242,9 @@ private:
 
     float CurrentZoomFOV = 0.f;
 
-    //////////
-    // Grenades
-    //
+    /*
+     * Grenades
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Grenades")
     TSubclassOf<AWTRProjectile> GrenadeClass;
 
@@ -253,9 +257,15 @@ private:
     UFUNCTION()
     void OnRep_Grenades();
 
-    //////////
-    // Base variables
-    //
+    /*
+    * Sounds
+    */
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Sounds")
+    USoundCue* EmptyWeapon;
+
+    /*
+     * Base variables
+     */
     UPROPERTY()
     AWTRCharacter* Character;
 
@@ -271,11 +281,14 @@ private:
     UPROPERTY()
     AWTRWeapon* LastEquippedWeapon;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Default weapon")
+    TSubclassOf<AWTRWeapon> DefautlWeaponClass;
+
     FHitResult TraceHitResult;
 
-    //////////
-    // Functions
-    //
+    /*
+    * Functions
+    */
     void TraceFromScreen(FHitResult& TraceHitResult);
     void DrawCrosshair(float DeltaTime);
     void InterpFOV(float DeltaTime);
@@ -300,4 +313,5 @@ private:
     void UpdateHUDAmmo();
     void UpdateHUDGrenades();
     void SetShowGrenadeMesh(bool bShow);
+    void SpawnAndEquipDefaultWeapon();
 };
