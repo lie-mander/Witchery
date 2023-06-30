@@ -220,7 +220,7 @@ void UWTRCombatComponent::EquipSecondWeapon(AWTRWeapon* WeaponToEquip)
     if (!WeaponToEquip) return;
 
     SecondWeapon = WeaponToEquip;
-    SecondWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+    SecondWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecond);
     SecondWeapon->SetOwner(Character);
 
     StopReloadWhileEquip();
@@ -244,7 +244,7 @@ void UWTRCombatComponent::OnRep_SecondWeapon()
 {
     if (!Character || !SecondWeapon) return;
 
-    SecondWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+    SecondWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecond);
     PlayPickupSound(SecondWeapon);
     AttachActorToBackpack(SecondWeapon);
 }
@@ -368,6 +368,31 @@ void UWTRCombatComponent::DropOrDestroyFirstWeapon()
     {
         DroppedEquippedWeapon();
     }
+}
+
+void UWTRCombatComponent::SwapWeapon() 
+{
+    if (!CanSwapWeapon()) return;
+
+    AWTRWeapon* TempPtr = EquippedWeapon;
+    EquippedWeapon = SecondWeapon;
+    SecondWeapon = TempPtr;
+
+    HandleSwapWeapon();
+}
+
+void UWTRCombatComponent::HandleSwapWeapon() 
+{
+    EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+    StopReloadWhileEquip();
+    UpdateCarriedAmmoAndHUD();
+    PlayPickupSound(EquippedWeapon);
+    ReloadEmptyWeapon();
+    AttachActorToRightHand(EquippedWeapon);
+    UpdateHUDAmmo();
+
+    SecondWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecond);
+    AttachActorToBackpack(SecondWeapon);
 }
 
 void UWTRCombatComponent::UpdateHUDWeaponType()
@@ -906,6 +931,11 @@ bool UWTRCombatComponent::CanFire() const
         return true;
     }
     return EquippedWeapon && !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
+}
+
+bool UWTRCombatComponent::CanSwapWeapon() const
+{
+    return EquippedWeapon && SecondWeapon;
 }
 
 EWeaponType UWTRCombatComponent::GetEquippedWeaponType() const

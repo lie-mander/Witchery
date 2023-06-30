@@ -99,6 +99,10 @@ protected:
      * Functions
      */
     virtual void BeginPlay() override;
+    virtual void OnWeaponStateChanged();
+    virtual void HandleStateEquipped();
+    virtual void HandleStateEquippedSecond();
+    virtual void HandleStateDropped();
 
     AController* GetOwnerPlayerController() const;
 

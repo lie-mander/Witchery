@@ -115,6 +115,7 @@ protected:
     void OnAudioUpButtonPressed();
     void OnAudioDownButtonPressed();
     void OnGrenadeButtonPressed();
+    void OnWeaponSwapButtonPressed();
 
     /*
      * Other functions
@@ -283,6 +284,15 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Camera")
     float DistanceForHidingCamera = 200.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Spam")
+    float DelaySwapButton = 0.4f;
+
+    bool bCanSwap = true;
+
+    FTimerHandle SwapButtonTimerHandle;
+
+    void SwapButtonTimerFinished();
+
     /*
      * Multiplayer functions
      */
@@ -300,6 +310,9 @@ private:
 
     UFUNCTION(Server, Reliable)
     void Server_OnEquippedButtonPressed();
+
+    UFUNCTION(Server, Reliable)
+    void Server_OnWeaponSwapButtonPressed();
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_OnDestroyed();

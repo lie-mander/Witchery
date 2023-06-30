@@ -305,8 +305,6 @@ private:
     void FireTimerUpdate();
     void ReloadHandle();
     void SetHUDCarriedAmmo();
-    bool CanFire() const;
-    int32 AmmoToReload();
     void ReloadWeaponAndSubCarriedAmmo();
     void ReloadShotgunAndSubCarriedAmmo();
     void StopReloadWhileEquip();
@@ -325,4 +323,9 @@ private:
     void SetShowGrenadeMesh(bool bShow);
     void SpawnAndEquipDefaultWeapon();
     void DropOrDestroyFirstWeapon();
+    void SwapWeapon();
+    void HandleSwapWeapon();
+    bool CanFire() const;
+    bool CanSwapWeapon() const;
+    int32 AmmoToReload();
 };

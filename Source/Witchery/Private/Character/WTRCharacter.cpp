@@ -185,6 +185,7 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAction("AudioUp", EInputEvent::IE_Pressed, this, &ThisClass::OnAudioUpButtonPressed);
     PlayerInputComponent->BindAction("AudioDown", EInputEvent::IE_Pressed, this, &ThisClass::OnAudioDownButtonPressed);
     PlayerInputComponent->BindAction("Grenade", EInputEvent::IE_Pressed, this, &ThisClass::OnGrenadeButtonPressed);
+    PlayerInputComponent->BindAction("WeaponSwap", EInputEvent::IE_Pressed, this, &ThisClass::OnWeaponSwapButtonPressed);
 
     PlayerInputComponent->BindAxis(FName("MoveForward"), this, &ThisClass::MoveForward);
     PlayerInputComponent->BindAxis(FName("MoveRight"), this, &ThisClass::MoveRight);
@@ -688,6 +689,42 @@ void AWTRCharacter::OnGrenadeButtonPressed()
     }
 }
 
+void AWTRCharacter::OnWeaponSwapButtonPressed()
+{
+    if (bDisableGameplay || !bCanSwap) return;
+
+    GetWorldTimerManager().SetTimer(              //
+        SwapButtonTimerHandle,                    //
+        this,                                     //
+        &AWTRCharacter::SwapButtonTimerFinished,  //
+        DelaySwapButton                           //
+    );
+
+    if (Combat && HasAuthority())
+    {
+        Combat->SwapWeapon();
+    }
+    else
+    {
+        Server_OnWeaponSwapButtonPressed();
+    }
+
+    bCanSwap = false;
+}
+
+void AWTRCharacter::Server_OnWeaponSwapButtonPressed_Implementation()
+{
+    if (Combat)
+    {
+        Combat->SwapWeapon();
+    }
+}
+
+void AWTRCharacter::SwapButtonTimerFinished() 
+{
+    bCanSwap = true;
+}
+
 void AWTRCharacter::OnPauseButtonPressed()
 {
     const auto PlayerController = Cast<APlayerController>(Controller);
@@ -878,7 +915,7 @@ void AWTRCharacter::UpdateHUDHealth()
     }
 }
 
-void AWTRCharacter::UpdateHUDShield() 
+void AWTRCharacter::UpdateHUDShield()
 {
     WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
     if (WTRPlayerController)
@@ -951,7 +988,7 @@ void AWTRCharacter::OnRep_Health(float LastHealth)
     }
 }
 
-void AWTRCharacter::OnRep_Shield(float LastShield) 
+void AWTRCharacter::OnRep_Shield(float LastShield)
 {
     UpdateHUDShield();
 
@@ -1027,6 +1064,10 @@ void AWTRCharacter::HideCharacterWithWeaponIfCameraClose()
         {
             Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = true;
         }
+        if (Combat && Combat->SecondWeapon && Combat->SecondWeapon->GetWeaponMesh())
+        {
+            Combat->SecondWeapon->GetWeaponMesh()->bOwnerNoSee = true;
+        }
     }
     else
     {
@@ -1034,6 +1075,10 @@ void AWTRCharacter::HideCharacterWithWeaponIfCameraClose()
         if (Combat && Combat->EquippedWeapon && Combat->EquippedWeapon->GetWeaponMesh())
         {
             Combat->EquippedWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+        }
+        if (Combat && Combat->SecondWeapon && Combat->SecondWeapon->GetWeaponMesh())
+        {
+            Combat->SecondWeapon->GetWeaponMesh()->bOwnerNoSee = false;
         }
     }
 }
