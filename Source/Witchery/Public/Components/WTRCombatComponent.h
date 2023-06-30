@@ -53,11 +53,17 @@ protected:
     void Reload();
     void Fire();
 
+    void EquipFirstWeapon(AWTRWeapon* WeaponToEquip);
+    void EquipSecondWeapon(AWTRWeapon* WeaponToEquip);
+
     /*
      * Multiplayer functions and callbacks
      */
     UFUNCTION()
     void OnRep_EquippedWeapon();
+
+    UFUNCTION()
+    void OnRep_SecondWeapon();
 
     UFUNCTION(Server, Reliable)
     void Server_SetAiming(bool bAiming);
@@ -278,6 +284,9 @@ private:
     UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
     AWTRWeapon* EquippedWeapon;
 
+    UPROPERTY(ReplicatedUsing = OnRep_SecondWeapon)
+    AWTRWeapon* SecondWeapon;
+
     UPROPERTY()
     AWTRWeapon* LastEquippedWeapon;
 
@@ -304,14 +313,16 @@ private:
     void ThrowGrenade();
     void DroppedEquippedWeapon();
     void UpdateCarriedAmmoAndHUD();
-    void PlayPickupSound();
+    void PlayPickupSound(AWTRWeapon* WeaponToPickup);
     void ReloadEmptyWeapon();
     void SetCharacterSettingsWhenEquip();
     void AttachActorToRightHand(AActor* ActorToAttach);
     void AttachActorToLeftHand(AActor* ActorToAttach);
+    void AttachActorToBackpack(AActor* ActorToAttach);
     void UpdateHUDWeaponType();
     void UpdateHUDAmmo();
     void UpdateHUDGrenades();
     void SetShowGrenadeMesh(bool bShow);
     void SpawnAndEquipDefaultWeapon();
+    void DropOrDestroyFirstWeapon();
 };

@@ -28,6 +28,7 @@ void UWTRCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(UWTRCombatComponent, EquippedWeapon);
+    DOREPLIFETIME(UWTRCombatComponent, SecondWeapon);
     DOREPLIFETIME(UWTRCombatComponent, bIsAiming);
     DOREPLIFETIME(UWTRCombatComponent, CombatState);
     DOREPLIFETIME(UWTRCombatComponent, Grenades);
@@ -185,14 +186,21 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
 {
     if (!Character || !WeaponToEquip) return;
 
-    if (EquippedWeapon && EquippedWeapon->bNeedDestroy)
+    if (EquippedWeapon && !SecondWeapon)
     {
-        EquippedWeapon->Destroy();
+        EquipSecondWeapon(WeaponToEquip);
     }
     else
     {
-        DroppedEquippedWeapon();
+        EquipFirstWeapon(WeaponToEquip);
     }
+}
+
+void UWTRCombatComponent::EquipFirstWeapon(AWTRWeapon* WeaponToEquip) 
+{
+    if (!WeaponToEquip) return;
+
+    DropOrDestroyFirstWeapon();
 
     EquippedWeapon = WeaponToEquip;
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
@@ -200,11 +208,24 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
 
     StopReloadWhileEquip();
     UpdateCarriedAmmoAndHUD();
-    PlayPickupSound();
+    PlayPickupSound(EquippedWeapon);
     ReloadEmptyWeapon();
     SetCharacterSettingsWhenEquip();
     AttachActorToRightHand(EquippedWeapon);
     UpdateHUDAmmo();
+}
+
+void UWTRCombatComponent::EquipSecondWeapon(AWTRWeapon* WeaponToEquip) 
+{
+    if (!WeaponToEquip) return;
+
+    SecondWeapon = WeaponToEquip;
+    SecondWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+    SecondWeapon->SetOwner(Character);
+
+    StopReloadWhileEquip();
+    PlayPickupSound(SecondWeapon);
+    AttachActorToBackpack(SecondWeapon);
 }
 
 void UWTRCombatComponent::OnRep_EquippedWeapon()
@@ -212,10 +233,20 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
     if (!Character || !EquippedWeapon) return;
 
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
-    PlayPickupSound();
+    PlayPickupSound(EquippedWeapon);
     SetCharacterSettingsWhenEquip();
     AttachActorToRightHand(EquippedWeapon);
     UpdateHUDWeaponType();
+    UpdateHUDAmmo();
+}
+
+void UWTRCombatComponent::OnRep_SecondWeapon() 
+{
+    if (!Character || !SecondWeapon) return;
+
+    SecondWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+    PlayPickupSound(SecondWeapon);
+    AttachActorToBackpack(SecondWeapon);
 }
 
 void UWTRCombatComponent::DroppedEquippedWeapon()
@@ -245,14 +276,14 @@ void UWTRCombatComponent::UpdateCarriedAmmoAndHUD()
     }
 }
 
-void UWTRCombatComponent::PlayPickupSound()
+void UWTRCombatComponent::PlayPickupSound(AWTRWeapon* WeaponToPickup)
 {
-    if (!EquippedWeapon || !EquippedWeapon->PickupSound || !Character) return;
+    if (!WeaponToPickup || !WeaponToPickup->PickupSound || !Character) return;
 
-    // Play pickup sound (for server, for client will play in OnRep_EquippedWeapon)
+    // Play pickup sound (for server, for client will play in OnRep_Notify)
     UGameplayStatics::PlaySoundAtLocation(  //
         this,                               //
-        EquippedWeapon->PickupSound,        //
+        WeaponToPickup->PickupSound,        //
         Character->GetActorLocation()       //
     );
 }
@@ -279,7 +310,7 @@ void UWTRCombatComponent::SetCharacterSettingsWhenEquip()
 
 void UWTRCombatComponent::AttachActorToRightHand(AActor* ActorToAttach)
 {
-    if (!Character || !Character->GetMesh()) return;
+    if (!Character || !Character->GetMesh() || !ActorToAttach) return;
 
     const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
     if (HandSocket)
@@ -290,7 +321,7 @@ void UWTRCombatComponent::AttachActorToRightHand(AActor* ActorToAttach)
 
 void UWTRCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
 {
-    if (!Character || !Character->GetMesh() || !EquippedWeapon) return;
+    if (!Character || !Character->GetMesh() || !EquippedWeapon || !ActorToAttach) return;
 
     bool bUsePistolSocket =                                            //
         EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Pistol ||  //
@@ -305,6 +336,17 @@ void UWTRCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
     }
 }
 
+void UWTRCombatComponent::AttachActorToBackpack(AActor* ActorToAttach) 
+{
+    if (!Character || !Character->GetMesh() || !ActorToAttach) return;
+
+    const USkeletalMeshSocket* BackpackSocket = Character->GetMesh()->GetSocketByName(FName("BackpackSocket"));
+    if (BackpackSocket)
+    {
+        BackpackSocket->AttachActor(ActorToAttach, Character->GetMesh());
+    }
+}
+
 void UWTRCombatComponent::SpawnAndEquipDefaultWeapon()
 {
     AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
@@ -313,6 +355,18 @@ void UWTRCombatComponent::SpawnAndEquipDefaultWeapon()
         AWTRWeapon* StartWeapon = GetWorld()->SpawnActor<AWTRWeapon>(DefautlWeaponClass);
         EquipWeapon(StartWeapon);
         StartWeapon->bNeedDestroy = true;
+    }
+}
+
+void UWTRCombatComponent::DropOrDestroyFirstWeapon() 
+{
+    if (EquippedWeapon && EquippedWeapon->bNeedDestroy)
+    {
+        EquippedWeapon->Destroy();
+    }
+    else
+    {
+        DroppedEquippedWeapon();
     }
 }
 

@@ -228,10 +228,14 @@ void AWTRWeapon::OnRep_Owner()
         WTROwnerPlayerController = nullptr;
         WTROwnerCharacter = nullptr;
     }
-    else
+    /*else
     {
-        SetHUDAmmo();
-    }
+        WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
+        if (WTROwnerCharacter && WTROwnerCharacter->GetEquippedWeapon() && WTROwnerCharacter->GetEquippedWeapon() == this)
+        {
+            SetHUDAmmo();
+        }
+    }*/
 }
 
 void AWTRWeapon::Dropped()
