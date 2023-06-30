@@ -309,7 +309,7 @@ private:
     void ReloadShotgunAndSubCarriedAmmo();
     void StopReloadWhileEquip();
     void ThrowGrenade();
-    void DroppedEquippedWeapon();
+    void DroppedWeapon(AWTRWeapon* Weapon);
     void UpdateCarriedAmmoAndHUD();
     void PlayPickupSound(AWTRWeapon* WeaponToPickup);
     void ReloadEmptyWeapon();
@@ -322,7 +322,7 @@ private:
     void UpdateHUDGrenades();
     void SetShowGrenadeMesh(bool bShow);
     void SpawnAndEquipDefaultWeapon();
-    void DropOrDestroyFirstWeapon();
+    void DropOrDestroyWeapon(AWTRWeapon* Weapon);
     void SwapWeapon();
     void HandleSwapWeapon();
     bool CanFire() const;

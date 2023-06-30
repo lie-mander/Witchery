@@ -757,17 +757,8 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
 
 void AWTRCharacter::Elim()
 {
-    if (Combat && Combat->EquippedWeapon)
-    {
-        if (Combat->EquippedWeapon->bNeedDestroy)
-        {
-            Combat->EquippedWeapon->Destroy();
-        }
-        else
-        {
-            Combat->EquippedWeapon->Dropped();
-        }
-    }
+    DropOrDestroyWeapons();
+
     if (Combat && WTRPlayerController)
     {
         Combat->CarriedAmmo = 0;
@@ -1079,6 +1070,21 @@ void AWTRCharacter::HideCharacterWithWeaponIfCameraClose()
         if (Combat && Combat->SecondWeapon && Combat->SecondWeapon->GetWeaponMesh())
         {
             Combat->SecondWeapon->GetWeaponMesh()->bOwnerNoSee = false;
+        }
+    }
+}
+
+void AWTRCharacter::DropOrDestroyWeapons() 
+{
+    if (Combat)
+    {
+        if (Combat->EquippedWeapon)
+        {
+            Combat->DropOrDestroyWeapon(Combat->EquippedWeapon);
+        }
+        if (Combat->SecondWeapon)
+        {
+            Combat->DropOrDestroyWeapon(Combat->SecondWeapon);
         }
     }
 }

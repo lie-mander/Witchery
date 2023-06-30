@@ -200,7 +200,7 @@ void UWTRCombatComponent::EquipFirstWeapon(AWTRWeapon* WeaponToEquip)
 {
     if (!WeaponToEquip) return;
 
-    DropOrDestroyFirstWeapon();
+    DropOrDestroyWeapon(EquippedWeapon);
 
     EquippedWeapon = WeaponToEquip;
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
@@ -249,12 +249,16 @@ void UWTRCombatComponent::OnRep_SecondWeapon()
     AttachActorToBackpack(SecondWeapon);
 }
 
-void UWTRCombatComponent::DroppedEquippedWeapon()
+void UWTRCombatComponent::DroppedWeapon(AWTRWeapon* Weapon)
 {
-    if (EquippedWeapon)
+    if (Weapon)
     {
-        EquippedWeapon->Dropped();
-        EquippedWeapon = nullptr;
+        Weapon->Dropped();
+
+        if (Weapon == EquippedWeapon)
+        {
+            EquippedWeapon = nullptr;
+        }
     }
 }
 
@@ -358,15 +362,15 @@ void UWTRCombatComponent::SpawnAndEquipDefaultWeapon()
     }
 }
 
-void UWTRCombatComponent::DropOrDestroyFirstWeapon() 
+void UWTRCombatComponent::DropOrDestroyWeapon(AWTRWeapon* Weapon)
 {
-    if (EquippedWeapon && EquippedWeapon->bNeedDestroy)
+    if (Weapon && Weapon->bNeedDestroy)
     {
-        EquippedWeapon->Destroy();
+        Weapon->Destroy();
     }
     else
     {
-        DroppedEquippedWeapon();
+        DroppedWeapon(Weapon);
     }
 }
 

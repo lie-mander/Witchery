@@ -324,6 +324,7 @@ private:
     void SetTurningInPlace(float DeltaTime);
     void UpdateIfIsNotStanding();
     void HideCharacterWithWeaponIfCameraClose();
+    void DropOrDestroyWeapons();
     float CalculateSpeed() const;
     AWTRGameMode* GetWTRGameMode() const;
 
