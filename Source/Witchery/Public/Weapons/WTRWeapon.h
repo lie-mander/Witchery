@@ -48,8 +48,8 @@ public:
     FORCEINLINE int32 GetMagazineCapacity() const { return MagazineCapacity; }
 
     /*
-    * If weapon needs destroy when owner elim or weapon dropped
-    */
+     * If weapon needs destroy when owner elim or weapon dropped
+     */
     bool bNeedDestroy = false;
 
     /*
@@ -94,6 +94,11 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon Firing")
     bool bAutomaticWeapon = true;
+
+    /*
+    * Fix firing through static meshes, we want to decrease ammo, but don`t want to spawn projectiles
+    */
+    bool bOverlapOtherStaticMeshes = false;
 
     /*
      * Functions
@@ -187,5 +192,13 @@ private:
 
     UFUNCTION()
     void OnSphereEndOverlap(
+        UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+    UFUNCTION()
+    void OnWeaponMeshBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+    UFUNCTION()
+    void OnWeaponMeshEndOverlap(
         UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

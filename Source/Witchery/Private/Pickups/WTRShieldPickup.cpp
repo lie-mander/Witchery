@@ -9,7 +9,7 @@ void AWTRShieldPickup::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompo
 {
     Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
-    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(OtherActor);
+    const AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(OtherActor);
     if (WTRCharacter && !WTRCharacter->IsFullShield())
     {
         UWTRBuffComponent* WTRBuffComponent = WTRCharacter->GetBuffComponent();

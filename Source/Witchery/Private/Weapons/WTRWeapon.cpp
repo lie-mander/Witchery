@@ -65,11 +65,14 @@ void AWTRWeapon::BeginPlay()
         AreaSphere->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnSphereBeginOverlap);
         AreaSphere->OnComponentEndOverlap.AddUniqueDynamic(this, &ThisClass::OnSphereEndOverlap);
     }
+
+    WeaponMesh->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnWeaponMeshBeginOverlap);
+    WeaponMesh->OnComponentEndOverlap.AddUniqueDynamic(this, &ThisClass::OnWeaponMeshEndOverlap);
 }
 
 AController* AWTRWeapon::GetOwnerPlayerController() const
 {
-    APawn* OwnerPawn = Cast<APawn>(GetOwner());
+    const APawn* OwnerPawn = Cast<APawn>(GetOwner());
     if (!OwnerPawn) return nullptr;
 
     return OwnerPawn->GetController();
@@ -92,11 +95,11 @@ void AWTRWeapon::Fire(const FVector& HitTarget)
     const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh->GetSocketByName(FName(AmmoEjectSocketName));
     if (AmmoEjectSocket && GetWorld())
     {
-        FTransform AmmoEjectSocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh);
+        const FTransform AmmoEjectSocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh);
 
-        float RandRoll = FMath::RandRange(-RandRollForShellsSpawn, RandRollForShellsSpawn);
-        float RandPitch = FMath::RandRange(-RandPitchForShellsSpawn, RandPitchForShellsSpawn);
-        FRotator3d RandRotator = FRotator3d(                                     //
+        const float RandRoll = FMath::RandRange(-RandRollForShellsSpawn, RandRollForShellsSpawn);
+        const float RandPitch = FMath::RandRange(-RandPitchForShellsSpawn, RandPitchForShellsSpawn);
+        const FRotator3d RandRotator = FRotator3d(                               //
             AmmoEjectSocketTransform.GetRotation().Rotator().Pitch + RandPitch,  //
             AmmoEjectSocketTransform.GetRotation().Rotator().Yaw,                //
             AmmoEjectSocketTransform.GetRotation().Rotator().Roll + RandRoll     //
@@ -128,10 +131,10 @@ void AWTRWeapon::OnRep_Ammo()
     SetHUDAmmo();
 
     WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
-    bool bNeedToJump = IsFull() &&                                 //
-                       WTROwnerCharacter &&                        //
-                       WTROwnerCharacter->GetCombatComponent() &&  //
-                       WeaponType == EWeaponType::EWT_Shotgun;
+    const bool bNeedToJump = IsFull() &&                                 //
+                             WTROwnerCharacter &&                        //
+                             WTROwnerCharacter->GetCombatComponent() &&  //
+                             WeaponType == EWeaponType::EWT_Shotgun;
     if (bNeedToJump)
     {
         WTROwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
@@ -169,12 +172,14 @@ void AWTRWeapon::HandleStateEquipped()
 
     WeaponMesh->SetSimulatePhysics(false);
     WeaponMesh->SetEnableGravity(false);
-    WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+    WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Overlap);
+    WeaponMesh->SetGenerateOverlapEvents(true);
     if (WeaponType == EWeaponType::EWT_SubmachineGun)
     {
         WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
         WeaponMesh->SetEnableGravity(true);
-        WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
     }
 
     SetShowWidget(false);
@@ -203,6 +208,7 @@ void AWTRWeapon::HandleStateDropped()
     WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
     WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
     WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap);
+    WeaponMesh->SetGenerateOverlapEvents(false);
 
     WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
     WeaponMesh->MarkRenderStateDirty();
@@ -256,6 +262,26 @@ void AWTRWeapon::OnSphereEndOverlap(
     {
         WTRCharacter->SetOverlappingWeapon(nullptr);
     }
+}
+
+void AWTRWeapon::OnWeaponMeshBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    // If we overlapped weapon we don`t want to block shooting
+    const AWTRWeapon* OverlapWeapon = Cast<AWTRWeapon>(OtherActor);
+    if (OverlapWeapon) return;
+
+    bOverlapOtherStaticMeshes = true;
+}
+
+void AWTRWeapon::OnWeaponMeshEndOverlap(
+    UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+    // If we overlapped weapon we don`t want to block shooting
+    const AWTRWeapon* OverlapWeapon = Cast<AWTRWeapon>(OtherActor);
+    if (OverlapWeapon) return;
+
+    bOverlapOtherStaticMeshes = false;
 }
 
 void AWTRWeapon::SetShowWidget(bool bShowWidget)

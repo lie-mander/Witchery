@@ -103,8 +103,8 @@ void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
 
     if (Character->GetCharacterMovement())
     {
-        FVector2D CharacterVelocityRange(0.f, Character->GetCharacterMovement()->MaxWalkSpeed);
-        FVector2D OutputVelocityRange(0.f, 1.f);
+        const FVector2D CharacterVelocityRange(0.f, Character->GetCharacterMovement()->MaxWalkSpeed);
+        const FVector2D OutputVelocityRange(0.f, 1.f);
         FVector CurrentVelocity = Character->GetVelocity();
         CurrentVelocity.Z = 0.f;
 
@@ -196,7 +196,7 @@ void UWTRCombatComponent::EquipWeapon(AWTRWeapon* WeaponToEquip)
     }
 }
 
-void UWTRCombatComponent::EquipFirstWeapon(AWTRWeapon* WeaponToEquip) 
+void UWTRCombatComponent::EquipFirstWeapon(AWTRWeapon* WeaponToEquip)
 {
     if (!WeaponToEquip) return;
 
@@ -215,7 +215,7 @@ void UWTRCombatComponent::EquipFirstWeapon(AWTRWeapon* WeaponToEquip)
     UpdateHUDAmmo();
 }
 
-void UWTRCombatComponent::EquipSecondWeapon(AWTRWeapon* WeaponToEquip) 
+void UWTRCombatComponent::EquipSecondWeapon(AWTRWeapon* WeaponToEquip)
 {
     if (!WeaponToEquip) return;
 
@@ -240,7 +240,7 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
     UpdateHUDAmmo();
 }
 
-void UWTRCombatComponent::OnRep_SecondWeapon() 
+void UWTRCombatComponent::OnRep_SecondWeapon()
 {
     if (!Character || !SecondWeapon) return;
 
@@ -327,11 +327,11 @@ void UWTRCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
 {
     if (!Character || !Character->GetMesh() || !EquippedWeapon || !ActorToAttach) return;
 
-    bool bUsePistolSocket =                                            //
+    const bool bUsePistolSocket =                                      //
         EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Pistol ||  //
         EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SubmachineGun;
 
-    FName SocketName = bUsePistolSocket ? FName("PistolSocket") : FName("LeftHandSocket");
+    const FName SocketName = bUsePistolSocket ? FName("PistolSocket") : FName("LeftHandSocket");
 
     const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(SocketName);
     if (HandSocket)
@@ -340,7 +340,7 @@ void UWTRCombatComponent::AttachActorToLeftHand(AActor* ActorToAttach)
     }
 }
 
-void UWTRCombatComponent::AttachActorToBackpack(AActor* ActorToAttach) 
+void UWTRCombatComponent::AttachActorToBackpack(AActor* ActorToAttach)
 {
     if (!Character || !Character->GetMesh() || !ActorToAttach) return;
 
@@ -353,7 +353,7 @@ void UWTRCombatComponent::AttachActorToBackpack(AActor* ActorToAttach)
 
 void UWTRCombatComponent::SpawnAndEquipDefaultWeapon()
 {
-    AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
+    const AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
     if (WTRGameMode && GetWorld() && DefautlWeaponClass && Character && !Character->IsElimmed())
     {
         AWTRWeapon* StartWeapon = GetWorld()->SpawnActor<AWTRWeapon>(DefautlWeaponClass);
@@ -374,7 +374,7 @@ void UWTRCombatComponent::DropOrDestroyWeapon(AWTRWeapon* Weapon)
     }
 }
 
-void UWTRCombatComponent::SwapWeapon() 
+void UWTRCombatComponent::SwapWeapon()
 {
     if (!CanSwapWeapon()) return;
 
@@ -385,7 +385,7 @@ void UWTRCombatComponent::SwapWeapon()
     HandleSwapWeapon();
 }
 
-void UWTRCombatComponent::HandleSwapWeapon() 
+void UWTRCombatComponent::HandleSwapWeapon()
 {
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
     StopReloadWhileEquip();
@@ -455,8 +455,8 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
     {
         Fire();
 
-        bool bHideScope = Character && Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
-                          EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+        const bool bHideScope = Character && Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
+                                EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
         if (bHideScope)
         {
             SetAiming(false);
@@ -564,8 +564,8 @@ void UWTRCombatComponent::StopReloadWhileEquip()
         CombatState = ECombatState::ECS_Unoccupied;
         Character->StopReloadMontage();
 
-        bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
-                          EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+        const bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
+                                EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
         if (bShowScope)
         {
             Character->SetShowScopeAnimation(bShowScope);
@@ -713,11 +713,11 @@ int32 UWTRCombatComponent::AmmoToReload()
 {
     if (!EquippedWeapon) return 0;
 
-    int32 EmplyPlaceInMag = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
+    const int32 EmplyPlaceInMag = EquippedWeapon->GetMagazineCapacity() - EquippedWeapon->GetAmmo();
     if (CarriedAmmoByWeaponTypeMap.Contains(EquippedWeapon->GetWeaponType()))
     {
-        int32 AmountCarried = CarriedAmmoByWeaponTypeMap[EquippedWeapon->GetWeaponType()];
-        int32 Least = FMath::Min(EmplyPlaceInMag, AmountCarried);
+        const int32 AmountCarried = CarriedAmmoByWeaponTypeMap[EquippedWeapon->GetWeaponType()];
+        const int32 Least = FMath::Min(EmplyPlaceInMag, AmountCarried);
 
         return FMath::Clamp(EmplyPlaceInMag, 0, Least);
     }
@@ -730,7 +730,7 @@ void UWTRCombatComponent::ReloadWeaponAndSubCarriedAmmo()
     if (!EquippedWeapon || LastEquippedWeapon != EquippedWeapon) return;
 
     // Reloading weapon and subtract carried ammo for this weapon type
-    int32 ReloadAmmo = AmmoToReload();
+    const int32 ReloadAmmo = AmmoToReload();
     if (CarriedAmmoByWeaponTypeMap.Contains(EquippedWeapon->GetWeaponType()))
     {
         CarriedAmmoByWeaponTypeMap[EquippedWeapon->GetWeaponType()] -= ReloadAmmo;
@@ -782,8 +782,8 @@ void UWTRCombatComponent::FinishReloading()
     {
         CombatState = ECombatState::ECS_Unoccupied;
 
-        bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
-                          EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+        const bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
+                                EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
         if (bShowScope)
         {
             Character->SetShowScopeAnimation(bShowScope);
@@ -845,7 +845,7 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
         GEngine->GameViewport->GetViewportSize(ViewportSize);
     }
 
-    FVector2D CrosshairLocation = FVector2D(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+    const FVector2D CrosshairLocation = FVector2D(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
     FVector CrosshairWorldPosition;
     FVector CrosshairWorldDirection;
 
@@ -865,7 +865,7 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
             Start += CrosshairWorldDirection * (DistanceToCharacter + DistanceFromCamera);
         }
 
-        FVector End = CrosshairWorldPosition + CrosshairWorldDirection * TRACE_RANGE;
+        const FVector End = CrosshairWorldPosition + CrosshairWorldDirection * TRACE_RANGE;
 
         GetWorld()->LineTraceSingleByChannel(  //
             TraceFromScreenHitResult,          //
@@ -928,8 +928,9 @@ void UWTRCombatComponent::Server_SetAiming_Implementation(bool bAiming)
 
 bool UWTRCombatComponent::CanFire() const
 {
-    bool bIsShotgunCanFire = EquippedWeapon && !EquippedWeapon->IsEmpty() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
-                             bCanFire && CombatState == ECombatState::ECS_Reloading;
+    const bool bIsShotgunCanFire = EquippedWeapon && !EquippedWeapon->IsEmpty() &&
+                                   EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun && bCanFire &&
+                                   CombatState == ECombatState::ECS_Reloading;
     if (bIsShotgunCanFire)
     {
         return true;

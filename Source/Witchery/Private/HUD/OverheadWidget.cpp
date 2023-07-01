@@ -6,7 +6,7 @@
 
 void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 {
-    ENetRole RemoteRole = InPawn->GetRemoteRole();
+    const ENetRole RemoteRole = InPawn->GetRemoteRole();
     FString Role;
     switch (RemoteRole)
     {
@@ -16,15 +16,15 @@ void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
         case ROLE_Authority: Role = FString("Authority"); break;
     }
 
-    FString RemoteRoleString = FString::Printf(TEXT("Remote role -> %s"), *Role);
+    const FString RemoteRoleString = FString::Printf(TEXT("Remote role -> %s"), *Role);
     SetDisplayText(RemoteRoleString);
 }
 
-void UOverheadWidget::ShowPlayerName(APawn* InPawn) 
+void UOverheadWidget::ShowPlayerName(APawn* InPawn)
 {
     if (InPawn && InPawn->GetPlayerState())
     {
-        FString Name = InPawn->GetPlayerState()->GetPlayerName();
+        const FString Name = InPawn->GetPlayerState()->GetPlayerName();
         SetDisplayText(Name);
     }
 }

@@ -206,7 +206,7 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Player Stats")
     float MaxHealth = 100.f;
 
-    UPROPERTY(ReplicatedUsing = OnRep_Health, VisibleAnywhere, Category = "WTR | Player Stats")
+    UPROPERTY(ReplicatedUsing = OnRep_Health, EditDefaultsOnly, Category = "WTR | Player Stats")
     float Health = 100.f;
 
     /*
@@ -215,7 +215,7 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Player Stats")
     float MaxShield = 100.f;
 
-    UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "WTR | Player Stats")
+    UPROPERTY(ReplicatedUsing = OnRep_Shield, EditDefaultsOnly, Category = "WTR | Player Stats")
     float Shield = 100.f;
 
     /*

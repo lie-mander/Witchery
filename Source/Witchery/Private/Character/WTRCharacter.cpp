@@ -219,7 +219,7 @@ void AWTRCharacter::Destroyed()
     Super::Destroyed();
 
     const AWTRGameMode* WTRGameMode = GetWTRGameMode();
-    bool bMatchIsNotInProgress = WTRGameMode && WTRGameMode->GetMatchState() != MatchState::InProgress;
+    const bool bMatchIsNotInProgress = WTRGameMode && WTRGameMode->GetMatchState() != MatchState::InProgress;
 
     if (Combat && Combat->EquippedWeapon && bMatchIsNotInProgress)
     {
@@ -420,8 +420,8 @@ void AWTRCharacter::CalculateAO_Pitch()
     // We must convert it back to [-90; 0)
     if (AO_Pitch > 90.f && !IsLocallyControlled())
     {
-        FVector2D InRange(270.f, 360.f);
-        FVector2D OutRange(-90.f, 0.f);
+        const FVector2D InRange(270.f, 360.f);
+        const FVector2D OutRange(-90.f, 0.f);
         AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
     }
 }
@@ -511,7 +511,6 @@ void AWTRCharacter::PlayReloadMontage()
         case EWeaponType::EWT_GrenadeLauncher: SectionName = FName("RocketLauncher"); break;
     }
 
-    UE_LOG(LogTemp, Display, TEXT("%s"), *SectionName.ToString());
     AnimInstance->Montage_JumpToSection(SectionName);
 }
 
@@ -700,13 +699,18 @@ void AWTRCharacter::OnWeaponSwapButtonPressed()
         DelaySwapButton                           //
     );
 
-    if (Combat && HasAuthority())
+    if (Combat)
     {
-        Combat->SwapWeapon();
-    }
-    else
-    {
-        Server_OnWeaponSwapButtonPressed();
+        Combat->SetAiming(false);
+
+        if (HasAuthority())
+        {
+            Combat->SwapWeapon();
+        }
+        else
+        {
+            Server_OnWeaponSwapButtonPressed();
+        }
     }
 
     bCanSwap = false;
@@ -839,7 +843,7 @@ void AWTRCharacter::Multicast_Elim_Implementation()
         );
     }
 
-    bool bHideScoup = IsLocallyControlled() && Combat && Combat->bIsAiming && Combat->EquippedWeapon &&
+    const bool bHideScoup = IsLocallyControlled() && Combat && Combat->bIsAiming && Combat->EquippedWeapon &&
                       Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
     if (bHideScoup)
     {

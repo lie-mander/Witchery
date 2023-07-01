@@ -73,9 +73,9 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     bTransformRightHand = Character->GetCombatState() == ECombatState::ECS_Unoccupied && !Character->IsDisableGameplay();
 
     // Set offset yaw for strafing
-    FRotator AimRotation = Character->GetBaseAimRotation();
-    FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());
-    FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(AimRotation, MovementRotation);
+    const FRotator AimRotation = Character->GetBaseAimRotation();
+    const FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(Character->GetVelocity());
+    const FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(AimRotation, MovementRotation);
     DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaSeconds, 6.f);
     YawOffset = DeltaRotation.Yaw;
 

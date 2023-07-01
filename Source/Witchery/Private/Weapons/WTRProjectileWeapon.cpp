@@ -13,25 +13,39 @@ void AWTRProjectileWeapon::Fire(const FVector& HitTarget)
     const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName(FName(MuzzleSocketName));
     if (MuzzleSocket)
     {
-        FTransform MuzzleSocketTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
-        FVector ToTargetVector = HitTarget - MuzzleSocketTransform.GetLocation();
-        FRotator ToTargetRotation = ToTargetVector.Rotation();
+        const FTransform MuzzleSocketTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
+        const FVector ToTargetVector = HitTarget - MuzzleSocketTransform.GetLocation();
+        const FRotator ToTargetRotation = ToTargetVector.Rotation();
 
-        UWorld* World = GetWorld();
         APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 
-        if (World && InstigatorPawn)
+        if (GetWorld() && InstigatorPawn)
         {
             FActorSpawnParameters ProjSpawnParams;
             ProjSpawnParams.Owner = GetOwner();
             ProjSpawnParams.Instigator = InstigatorPawn;
 
-            World->SpawnActor<AWTRProjectile>(        //
-                ProjectileClass,                      //
-                MuzzleSocketTransform.GetLocation(),  //
-                ToTargetRotation,                     //
-                ProjSpawnParams                       //
-            );
+            // We want to spawn projectile reverce if out weapon overlapping with static mesh (such as walls, boxes, doors)
+            if (bOverlapOtherStaticMeshes)
+            {
+                const FRotator ToTargetRotationReverse = FRotator(ToTargetRotation.Pitch, -ToTargetRotation.Yaw, ToTargetRotation.Roll);
+
+                GetWorld()->SpawnActor<AWTRProjectile>(   //
+                    ProjectileClass,                      //
+                    MuzzleSocketTransform.GetLocation(),  //
+                    ToTargetRotationReverse,              //
+                    ProjSpawnParams                       //
+                );
+            }
+            else
+            {
+                GetWorld()->SpawnActor<AWTRProjectile>(   //
+                    ProjectileClass,                      //
+                    MuzzleSocketTransform.GetLocation(),  //
+                    ToTargetRotation,                     //
+                    ProjSpawnParams                       //
+                );
+            }
         }
     }
 }

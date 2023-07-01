@@ -14,6 +14,8 @@ void AWTRHitScanWeapon::Fire(const FVector& HitTarget)
 {
     Super::Fire(HitTarget);
 
+    if (bOverlapOtherStaticMeshes) return;
+
     const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
     if (MuzzleSocket)
     {
@@ -69,7 +71,7 @@ void AWTRHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector&
 void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(const FHitResult& HitResult)
 {
     AController* InstigatorController = GetOwnerPlayerController();
-    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(HitResult.GetActor());
+    const AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(HitResult.GetActor());
 
     if (HasAuthority() && HitResult.bBlockingHit && WTRCharacter && InstigatorController)
     {
@@ -129,11 +131,11 @@ void AWTRHitScanWeapon::HandleEffects(const FHitResult& HitResult, const FTransf
 
 FVector AWTRHitScanWeapon::TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget)
 {
-    FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
-    FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
-    FVector RandVect = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
-    FVector EndLocation = SphereCenter + RandVect;
-    FVector ToEnd = (EndLocation - TraceStart);
+    const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
+    const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
+    const FVector RandVect = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
+    const FVector EndLocation = SphereCenter + RandVect;
+    const FVector ToEnd = (EndLocation - TraceStart);
 
     /* DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Red, true);
     DrawDebugSphere(GetWorld(), EndLocation, 3.f, 12, FColor::Orange, true);

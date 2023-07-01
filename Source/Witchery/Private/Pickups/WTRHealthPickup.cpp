@@ -9,7 +9,7 @@ void AWTRHealthPickup::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompo
 {
     Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
-    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(OtherActor);
+    const AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(OtherActor);
     if (WTRCharacter && !WTRCharacter->IsFullHealth())
     {
         UWTRBuffComponent* WTRBuffComponent = WTRCharacter->GetBuffComponent();

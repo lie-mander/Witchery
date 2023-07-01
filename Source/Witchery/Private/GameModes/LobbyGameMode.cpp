@@ -7,7 +7,7 @@
 
 DEFINE_LOG_CATEGORY_STATIC(WTRLobbyGameModeLog, All, All);
 
-void ALobbyGameMode::StartPlay() 
+void ALobbyGameMode::StartPlay()
 {
     Super::StartPlay();
 
@@ -27,15 +27,13 @@ void ALobbyGameMode::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);
 
-    int32 NumOfPlayers = GameState.Get()->PlayerArray.Num();
+    const int32 NumOfPlayers = GameState.Get()->PlayerArray.Num();
     if (NumOfPlayers == PlayersToStart)
     {
-        const auto World = GetWorld();
-        if (World)
+        if (GetWorld())
         {
             bUseSeamlessTravel = true;
-            World->ServerTravel("/Game/Maps/BattleMap_0?listen"); // TODO break magic string
+            GetWorld()->ServerTravel("/Game/Maps/BattleMap_0?listen");  // TODO break magic string
         }
     }
 }
-

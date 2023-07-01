@@ -88,7 +88,7 @@ void AWTRProjectile::SpawnTrailSystem()
     }
 }
 
-void AWTRProjectile::StartDestroyTimer() 
+void AWTRProjectile::StartDestroyTimer()
 {
     SetLifeSpan(DestroyDelay);
 }
@@ -98,7 +98,7 @@ void AWTRProjectile::LifeSpanExpired()
     Super::LifeSpanExpired();
 }
 
-void AWTRProjectile::DestroyCosmetic() 
+void AWTRProjectile::DestroyCosmetic()
 {
     if (ProjectileMesh)
     {
@@ -149,10 +149,10 @@ void AWTRProjectile::PlayImpact(AActor* HitActor)
     }
 }
 
-bool AWTRProjectile::ExplodeDamage() 
+bool AWTRProjectile::ExplodeDamage()
 {
     // Calls on the server
-    APawn* OwnerPawn = GetInstigator();
+    const APawn* OwnerPawn = GetInstigator();
     if (OwnerPawn && HasAuthority())
     {
         AController* OwnerController = OwnerPawn->GetController();

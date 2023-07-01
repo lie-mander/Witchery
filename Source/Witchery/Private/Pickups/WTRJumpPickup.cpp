@@ -9,7 +9,7 @@ void AWTRJumpPickup::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompone
 {
     Super::OnSphereBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
-    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(OtherActor);
+    const AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(OtherActor);
     if (WTRCharacter)
     {
         UWTRBuffComponent* WTRBuffComponent = WTRCharacter->GetBuffComponent();

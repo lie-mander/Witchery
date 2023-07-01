@@ -5,12 +5,12 @@
 #include "HUD/WTRAnnouncementWidget.h"
 #include "GameFramework/PlayerController.h"
 
-void AWTR_HUD::BeginPlay() 
+void AWTR_HUD::BeginPlay()
 {
     Super::BeginPlay();
 }
 
-void AWTR_HUD::AddCharacterOverlay() 
+void AWTR_HUD::AddCharacterOverlay()
 {
     APlayerController* PlayerController = GetOwningPlayerController();
 
@@ -21,7 +21,7 @@ void AWTR_HUD::AddCharacterOverlay()
     }
 }
 
-void AWTR_HUD::AddAnnouncement() 
+void AWTR_HUD::AddAnnouncement()
 {
     APlayerController* PlayerController = GetOwningPlayerController();
 
@@ -40,37 +40,37 @@ void AWTR_HUD::DrawHUD()
     {
         FVector2D ViewportSize;
         GEngine->GameViewport.Get()->GetViewportSize(ViewportSize);
-        FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+        const FVector2D ViewportCenter(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
 
         float SpreadMultiplier = CrosshairSpreadMultiplier * CrosshairHUDPackage.CrosshairSpread;
 
         if (CrosshairHUDPackage.CrosshairsCenter)
         {
-            FVector2D Spread(FVector2D::Zero());
+            const FVector2D Spread(FVector2D::Zero());
             DrawCrosshair(CrosshairHUDPackage.CrosshairsCenter, ViewportCenter, Spread, CrosshairHUDPackage.CrosshairColor);
         }
 
         if (CrosshairHUDPackage.CrosshairsLeft)
         {
-            FVector2D Spread(-SpreadMultiplier, 0.f);
+            const FVector2D Spread(-SpreadMultiplier, 0.f);
             DrawCrosshair(CrosshairHUDPackage.CrosshairsLeft, ViewportCenter, Spread, CrosshairHUDPackage.CrosshairColor);
         }
 
         if (CrosshairHUDPackage.CrosshairsRight)
         {
-            FVector2D Spread(SpreadMultiplier, 0.f);
+            const FVector2D Spread(SpreadMultiplier, 0.f);
             DrawCrosshair(CrosshairHUDPackage.CrosshairsRight, ViewportCenter, Spread, CrosshairHUDPackage.CrosshairColor);
         }
 
         if (CrosshairHUDPackage.CrosshairsTop)
         {
-            FVector2D Spread(0.f, -SpreadMultiplier);
+            const FVector2D Spread(0.f, -SpreadMultiplier);
             DrawCrosshair(CrosshairHUDPackage.CrosshairsTop, ViewportCenter, Spread, CrosshairHUDPackage.CrosshairColor);
         }
 
         if (CrosshairHUDPackage.CrosshairsBottom)
         {
-            FVector2D Spread(0.f, SpreadMultiplier);
+            const FVector2D Spread(0.f, SpreadMultiplier);
             DrawCrosshair(CrosshairHUDPackage.CrosshairsBottom, ViewportCenter, Spread, CrosshairHUDPackage.CrosshairColor);
         }
     }
