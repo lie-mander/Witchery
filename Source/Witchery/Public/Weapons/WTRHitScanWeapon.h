@@ -15,7 +15,7 @@ class WITCHERY_API AWTRHitScanWeapon : public AWTRWeapon
     GENERATED_BODY()
 
 public:
-    virtual void Fire(const FVector& HitTarget);
+    virtual void Fire(const FVector& HitTarget) override;
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
@@ -45,9 +45,6 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
     UParticleSystem* MuzzleParticles;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
-    USoundCue* ShootSound;
 
     void ApplyDamageIfHasAuthority(const FHitResult& HitResult);
     void HandleEffects(const FHitResult& HitResult, const FTransform& Muzzle);

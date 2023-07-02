@@ -79,6 +79,7 @@ void UWTRCombatComponent::InitCarriedAmmoMap()
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_Shotgun, ShotgunCarrAmmo);
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_SniperRifle, SniperRifleCarrAmmo);
     CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_GrenadeLauncher, GrenadeLauncherCarrAmmo);
+    CarriedAmmoByWeaponTypeMap.Emplace(EWeaponType::EWT_Flamethrower, FlamethrowerCarrAmmo);
 }
 
 void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
@@ -211,7 +212,7 @@ void UWTRCombatComponent::EquipFirstWeapon(AWTRWeapon* WeaponToEquip)
     PlayPickupSound(EquippedWeapon);
     ReloadEmptyWeapon();
     SetCharacterSettingsWhenEquip();
-    AttachActorToRightHand(EquippedWeapon);
+    AttachWeaponByTypeToRightHand(EquippedWeapon);
     UpdateHUDAmmo();
 }
 
@@ -235,7 +236,7 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
     PlayPickupSound(EquippedWeapon);
     SetCharacterSettingsWhenEquip();
-    AttachActorToRightHand(EquippedWeapon);
+    AttachWeaponByTypeToRightHand(EquippedWeapon);
     UpdateHUDWeaponType();
     UpdateHUDAmmo();
 }
@@ -312,11 +313,34 @@ void UWTRCombatComponent::SetCharacterSettingsWhenEquip()
     Character->GetSpringArm()->SocketOffset = SpringArmOffsetWhileEquipped;
 }
 
+void UWTRCombatComponent::AttachWeaponByTypeToRightHand(AWTRWeapon* WeaponToAttach)
+{
+    if (WeaponToAttach && WeaponToAttach->GetWeaponType() == EWeaponType::EWT_Flamethrower)
+    {
+        AttachActorToFlamethrowerRightHand(WeaponToAttach);
+    }
+    else if (WeaponToAttach)
+    {
+        AttachActorToRightHand(WeaponToAttach);
+    }
+}
+
 void UWTRCombatComponent::AttachActorToRightHand(AActor* ActorToAttach)
 {
     if (!Character || !Character->GetMesh() || !ActorToAttach) return;
 
     const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+    if (HandSocket)
+    {
+        HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
+    }
+}
+
+void UWTRCombatComponent::AttachActorToFlamethrowerRightHand(AActor* ActorToAttach)
+{
+    if (!Character || !Character->GetMesh() || !ActorToAttach) return;
+
+    const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("FlamethrowerRightHandSocket"));
     if (HandSocket)
     {
         HandSocket->AttachActor(ActorToAttach, Character->GetMesh());
@@ -392,7 +416,7 @@ void UWTRCombatComponent::HandleSwapWeapon()
     UpdateCarriedAmmoAndHUD();
     PlayPickupSound(EquippedWeapon);
     ReloadEmptyWeapon();
-    AttachActorToRightHand(EquippedWeapon);
+    AttachWeaponByTypeToRightHand(EquippedWeapon);
     UpdateHUDAmmo();
 
     SecondWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecond);
@@ -463,6 +487,10 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
             Character->SetShowScopeAnimation(false);
         }
     }
+    else
+    {
+        Server_StopFire();
+    }
 }
 
 void UWTRCombatComponent::Fire()
@@ -528,15 +556,34 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
         return;
     }
 
-    if (Character && EquippedWeapon && CombatState == ECombatState::ECS_Unoccupied)
+    if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Flamethrower &&
+        CombatState == ECombatState::ECS_Unoccupied)
     {
         Character->PlayFireMontage(bIsAiming);
+        EquippedWeapon->Fire(TraceHitTarget);
+    }
+
+    if (Character && EquippedWeapon && CombatState == ECombatState::ECS_Unoccupied)
+    {
         EquippedWeapon->Fire(TraceHitTarget);
     }
 
     if (EquippedWeapon && EquippedWeapon->IsEmpty())
     {
         Reload();
+    }
+}
+
+void UWTRCombatComponent::Server_StopFire_Implementation()
+{
+    Multicast_StopFire();
+}
+
+void UWTRCombatComponent::Multicast_StopFire_Implementation()
+{
+    if (EquippedWeapon)
+    {
+        EquippedWeapon->StopFire();
     }
 }
 
@@ -611,7 +658,7 @@ void UWTRCombatComponent::ThrowGrenadeFinished()
 
     if (EquippedWeapon)
     {
-        AttachActorToRightHand(EquippedWeapon);
+        AttachWeaponByTypeToRightHand(EquippedWeapon);
     }
 }
 
@@ -824,6 +871,7 @@ void UWTRCombatComponent::AddPickupAmmo(EWeaponType Type, int32 Ammo)
             case EWeaponType::EWT_Shotgun: MaxCarriedAmmoForType = Max_ShotgunCarrAmmo; break;
             case EWeaponType::EWT_SniperRifle: MaxCarriedAmmoForType = Max_SniperRifleCarrAmmo; break;
             case EWeaponType::EWT_GrenadeLauncher: MaxCarriedAmmoForType = Max_GrenadeLauncherCarrAmmo; break;
+            case EWeaponType::EWT_Flamethrower: MaxCarriedAmmoForType = Max_FlamethrowerCarrAmmo; break;
         }
 
         CarriedAmmoByWeaponTypeMap[Type] = FMath::Clamp(CarriedAmmoByWeaponTypeMap[Type] + Ammo, 0, MaxCarriedAmmoForType);

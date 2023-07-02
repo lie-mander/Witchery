@@ -38,6 +38,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | FX")
     UNiagaraSystem* TrailSystem;
 
+    UPROPERTY()
     UNiagaraComponent* TrailComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")

@@ -12,7 +12,7 @@ class WITCHERY_API AWTRShotgun : public AWTRHitScanWeapon
     GENERATED_BODY()
 
 public:
-    virtual void Fire(const FVector& HitTarget);
+    virtual void Fire(const FVector& HitTarget) override;
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")

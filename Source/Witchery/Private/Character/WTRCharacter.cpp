@@ -5,6 +5,7 @@
 #include "Character/WTRAnimInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapons/WTRWeapon.h"
+#include "Weapons/WTRFlamethrower.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerState.h"
@@ -92,6 +93,7 @@ void AWTRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
     DOREPLIFETIME(AWTRCharacter, Health);
     DOREPLIFETIME(AWTRCharacter, Shield);
     DOREPLIFETIME(AWTRCharacter, bDisableGameplay);
+    DOREPLIFETIME(AWTRCharacter, bDamageFromFlamethrower);
 }
 
 void AWTRCharacter::Tick(float DeltaTime)
@@ -509,6 +511,7 @@ void AWTRCharacter::PlayReloadMontage()
         case EWeaponType::EWT_Shotgun: SectionName = FName("Shotgun"); break;
         case EWeaponType::EWT_SniperRifle: SectionName = FName("SniperRifle"); break;
         case EWeaponType::EWT_GrenadeLauncher: SectionName = FName("RocketLauncher"); break;
+        case EWeaponType::EWT_Flamethrower: SectionName = FName("Flamethrower"); break;
     }
 
     AnimInstance->Montage_JumpToSection(SectionName);
@@ -724,7 +727,7 @@ void AWTRCharacter::Server_OnWeaponSwapButtonPressed_Implementation()
     }
 }
 
-void AWTRCharacter::SwapButtonTimerFinished() 
+void AWTRCharacter::SwapButtonTimerFinished()
 {
     bCanSwap = true;
 }
@@ -844,7 +847,7 @@ void AWTRCharacter::Multicast_Elim_Implementation()
     }
 
     const bool bHideScoup = IsLocallyControlled() && Combat && Combat->bIsAiming && Combat->EquippedWeapon &&
-                      Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+                            Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
     if (bHideScoup)
     {
         Combat->SetAiming(false);
@@ -927,6 +930,16 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
     const AWTRGameMode* WTRGameMode = GetWTRGameMode();
     if (WTRGameMode && WTRGameMode->GetMatchState() == MatchState::Cooldown) return;
 
+    AWTRFlamethrower* WTRFlamethrower = Cast<AWTRFlamethrower>(DamageCauser);
+    if (WTRFlamethrower)
+    {
+        bDamageFromFlamethrower = true;
+    }
+    else
+    {
+        bDamageFromFlamethrower = false;
+    }
+
     float DamageThroughShield = Damage;
     if (Shield > 0.f)
     {
@@ -946,7 +959,11 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
 
     UpdateHUDHealth();
     UpdateHUDShield();
-    PlayHitReactMontage();
+
+    if (!bDamageFromFlamethrower)
+    {
+        PlayHitReactMontage();
+    }
 
     if (Health <= 0.f && GetWorld())
     {
@@ -977,7 +994,7 @@ void AWTRCharacter::OnRep_Health(float LastHealth)
 {
     UpdateHUDHealth();
 
-    if (Health > 0.f && Health < LastHealth)
+    if (Health > 0.f && Health < LastHealth && !bDamageFromFlamethrower)
     {
         PlayHitReactMontage();
     }
@@ -987,7 +1004,7 @@ void AWTRCharacter::OnRep_Shield(float LastShield)
 {
     UpdateHUDShield();
 
-    if (Shield > 0.f && Shield < LastShield)
+    if (Shield > 0.f && Shield < LastShield && !bDamageFromFlamethrower)
     {
         PlayHitReactMontage();
     }
@@ -1078,7 +1095,7 @@ void AWTRCharacter::HideCharacterWithWeaponIfCameraClose()
     }
 }
 
-void AWTRCharacter::DropOrDestroyWeapons() 
+void AWTRCharacter::DropOrDestroyWeapons()
 {
     if (Combat)
     {

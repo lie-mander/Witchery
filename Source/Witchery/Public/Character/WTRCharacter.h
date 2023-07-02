@@ -178,6 +178,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
     UAnimMontage* ThrowGrenadeMontage;
 
+    UPROPERTY(Replicated)
+    bool bDamageFromFlamethrower = false;
+
     /*
      * Movement
      */

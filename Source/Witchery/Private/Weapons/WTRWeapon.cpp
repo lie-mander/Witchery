@@ -118,6 +118,8 @@ void AWTRWeapon::Fire(const FVector& HitTarget)
     DecreaseAmmo();
 }
 
+void AWTRWeapon::StopFire() {}
+
 void AWTRWeapon::DecreaseAmmo()
 {
     Ammo = FMath::Clamp(Ammo - 1, 0, MagazineCapacity);

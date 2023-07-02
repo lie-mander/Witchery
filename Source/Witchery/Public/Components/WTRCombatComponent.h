@@ -74,8 +74,14 @@ protected:
     UFUNCTION(Server, Reliable)
     void Server_Fire(const FVector_NetQuantize& TraceHitTarget);
 
+    UFUNCTION(Server, Reliable)
+    void Server_StopFire();
+
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_Fire(const FVector_NetQuantize& TraceHitTarget);
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_StopFire();
 
     UFUNCTION(Server, Reliable)
     void Server_ThrowGrenade();
@@ -139,6 +145,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
     int32 GrenadeLauncherCarrAmmo = 5;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Carried ammo")
+    int32 FlamethrowerCarrAmmo = 90;
+
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
     int32 Max_AssaultRifleCarrAmmo = 90;
 
@@ -159,6 +168,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
     int32 Max_GrenadeLauncherCarrAmmo = 10;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Max Carried ammo")
+    int32 Max_FlamethrowerCarrAmmo = 100;
 
     // Carried ammo for current equipped weapon
     UPROPERTY(ReplicatedUsing = OnRep_CarriedAmmo);
@@ -314,7 +326,9 @@ private:
     void PlayPickupSound(AWTRWeapon* WeaponToPickup);
     void ReloadEmptyWeapon();
     void SetCharacterSettingsWhenEquip();
+    void AttachWeaponByTypeToRightHand(AWTRWeapon* WeaponToAttach);
     void AttachActorToRightHand(AActor* ActorToAttach);
+    void AttachActorToFlamethrowerRightHand(AActor* ActorToAttach);
     void AttachActorToLeftHand(AActor* ActorToAttach);
     void AttachActorToBackpack(AActor* ActorToAttach);
     void UpdateHUDWeaponType();

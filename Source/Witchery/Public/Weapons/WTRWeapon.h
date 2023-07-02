@@ -26,6 +26,7 @@ public:
     void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void Tick(float DeltaTime) override;
     virtual void Fire(const FVector& HitTarget);
+    virtual void StopFire();
     void Dropped();
     void AddAmmo(int32 AmmoToAdd);
     void EnableCustomDepth(bool bEnable);
@@ -94,6 +95,12 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon Firing")
     bool bAutomaticWeapon = true;
+
+    /*
+    * Sounds
+    */
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
+    USoundCue* ShootSound;
 
     /*
     * Fix firing through static meshes, we want to decrease ammo, but don`t want to spawn projectiles

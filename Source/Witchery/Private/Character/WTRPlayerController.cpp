@@ -437,6 +437,10 @@ void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
                 WeaponTypeText = FString("Submachine gun");  //
                 break;
 
+            case EWeaponType::EWT_Flamethrower:              //
+                WeaponTypeText = FString("Flamethrower");  //
+                break;
+
             case EWeaponType::EWT_MAX:         //
                 WeaponTypeText = FString("");  //
                 break;
