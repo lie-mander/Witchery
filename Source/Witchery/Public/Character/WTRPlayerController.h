@@ -173,6 +173,23 @@ private:
     float FPS = 0.f;
 
     /*
+    * Ping
+    */
+
+    /*We are showing ping every Frequency and after that waiting Duration*/
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Ping")
+    float ShowPingFrequency = 5.f;
+    
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Ping")
+    float ShowPingDuration = 7.f;
+    
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Ping")
+    float PingThreshold = 50.f;
+    
+    float ShowPingFrequencyRuntime = 0.f;
+    float ShowPingDurationRuntime = 0.f;
+
+    /*
      * Functions
      */
     UFUNCTION(Client, Reliable)
@@ -182,4 +199,7 @@ private:
     void SetHUDTime();
     void Debug_ShowHUDTime();
     void ShowFPS(float DeltaTime);
+    void PingTick(float DeltaTime);
+    void ShowPing();
+    void HidePing();
 };

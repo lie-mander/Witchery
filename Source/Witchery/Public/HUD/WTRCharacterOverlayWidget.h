@@ -9,6 +9,7 @@
 class UProgressBar;
 class UTextBlock;
 class UWidgetAnimation;
+class UImage;
 
 UCLASS()
 class WITCHERY_API UWTRCharacterOverlayWidget : public UUserWidget
@@ -60,4 +61,10 @@ public:
 
     UPROPERTY(Transient, meta = (BindWidgetAnim))
     UWidgetAnimation* Blinking;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* PingImage;
+
+    UPROPERTY(Transient, meta = (BindWidgetAnim))
+    UWidgetAnimation* Ping;
 };

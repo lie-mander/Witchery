@@ -846,9 +846,7 @@ void AWTRCharacter::Multicast_Elim_Implementation()
         );
     }
 
-    const bool bHideScoup = IsLocallyControlled() && Combat && Combat->bIsAiming && Combat->EquippedWeapon &&
-                            Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
-    if (bHideScoup)
+    if (Combat)
     {
         Combat->SetAiming(false);
     }

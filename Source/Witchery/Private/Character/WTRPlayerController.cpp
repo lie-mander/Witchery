@@ -8,6 +8,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/WTRCombatComponent.h"
+#include "Components/Image.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -37,11 +38,12 @@ void AWTRPlayerController::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     UpdateSyncTime(DeltaTime);
-    DelayInit();
+    ShowFPS(DeltaTime);
+    PingTick(DeltaTime);
 
+    DelayInit();
     SetHUDTime();
 
-    ShowFPS(DeltaTime);
     Debug_ShowHUDTime();
 }
 
@@ -437,7 +439,7 @@ void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
                 WeaponTypeText = FString("Submachine gun");  //
                 break;
 
-            case EWeaponType::EWT_Flamethrower:              //
+            case EWeaponType::EWT_Flamethrower:            //
                 WeaponTypeText = FString("Flamethrower");  //
                 break;
 
@@ -622,6 +624,70 @@ void AWTRPlayerController::ShowFPS(float DeltaTime)
         {
             SetHUD_FPS();
             TimeToFPSUpdate = 0.f;
+        }
+    }
+}
+
+void AWTRPlayerController::PingTick(float DeltaTime)
+{
+    const bool bPingAnimPlaying = WTR_HUD &&                                                                                   //
+                                  WTR_HUD->CharacterOverlayWidget &&                                                           //
+                                  WTR_HUD->CharacterOverlayWidget->Ping &&                                                     //
+                                  WTR_HUD->CharacterOverlayWidget->IsAnimationPlaying(WTR_HUD->CharacterOverlayWidget->Ping);  //
+
+    ShowPingFrequencyRuntime += DeltaTime;
+    if (ShowPingFrequencyRuntime >= ShowPingFrequency && !bPingAnimPlaying)
+    {
+        PlayerState = (PlayerState == nullptr) ? GetPlayerState<APlayerState>() : PlayerState;
+        if (PlayerState && PlayerState->GetPing() * 4 >= PingThreshold)
+        {
+            ShowPing();
+        }
+    }
+    else if (bPingAnimPlaying)
+    {
+        ShowPingDurationRuntime += DeltaTime;
+        if (ShowPingDurationRuntime >= ShowPingDuration)
+        {
+            HidePing();
+
+            ShowPingDurationRuntime = 0.f;
+            ShowPingFrequencyRuntime = 0.f;
+        }
+    }
+}
+
+void AWTRPlayerController::ShowPing()
+{
+    WTR_HUD = GetWTR_HUD();
+
+    const bool bHUDValid = WTR_HUD &&                                     //
+                           WTR_HUD->CharacterOverlayWidget &&             //
+                           WTR_HUD->CharacterOverlayWidget->PingImage &&  // PingImage
+                           WTR_HUD->CharacterOverlayWidget->Ping;         // Ping
+
+    if (bHUDValid)
+    {
+        WTR_HUD->CharacterOverlayWidget->PingImage->SetOpacity(1.f);
+        WTR_HUD->CharacterOverlayWidget->PlayAnimation(WTR_HUD->CharacterOverlayWidget->Ping, 0.f, static_cast<int32>(ShowPingDuration));
+    }
+}
+
+void AWTRPlayerController::HidePing()
+{
+    WTR_HUD = GetWTR_HUD();
+
+    const bool bHUDValid = WTR_HUD &&                                     //
+                           WTR_HUD->CharacterOverlayWidget &&             //
+                           WTR_HUD->CharacterOverlayWidget->PingImage &&  // PingImage
+                           WTR_HUD->CharacterOverlayWidget->Ping;         // Ping
+
+    if (bHUDValid)
+    {
+        WTR_HUD->CharacterOverlayWidget->PingImage->SetOpacity(0.f);
+        if (WTR_HUD->CharacterOverlayWidget->IsAnimationPlaying(WTR_HUD->CharacterOverlayWidget->Ping))
+        {
+            WTR_HUD->CharacterOverlayWidget->StopAnimation(WTR_HUD->CharacterOverlayWidget->Ping);
         }
     }
 }
