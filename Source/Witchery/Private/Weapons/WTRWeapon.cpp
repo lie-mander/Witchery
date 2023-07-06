@@ -11,6 +11,7 @@
 #include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "WTRTools.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AWTRWeapon::AWTRWeapon()
 {
@@ -311,4 +312,27 @@ void AWTRWeapon::EnableCustomDepth(bool bEnable)
     {
         WeaponMesh->SetRenderCustomDepth(bEnable);
     }
+}
+
+FVector AWTRWeapon::TraceEndWithScatter(const FVector& HitTarget)
+{
+    if (!WeaponMesh) return FVector();
+
+    const USkeletalMeshSocket* MuzzleSocket = WeaponMesh->GetSocketByName("MuzzleFlash");
+    if (!MuzzleSocket) return FVector();
+
+    const FTransform MuzzleTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
+    const FVector TraceStart = MuzzleTransform.GetLocation();
+
+    const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
+    const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
+    const FVector RandVect = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
+    const FVector EndLocation = SphereCenter + RandVect;
+    const FVector ToEnd = (EndLocation - TraceStart);
+
+    /* DrawDebugSphere(GetWorld(), SphereCenter, SphereRadius, 12, FColor::Red, true);
+    DrawDebugSphere(GetWorld(), EndLocation, 3.f, 12, FColor::Orange, true);
+    DrawDebugLine(GetWorld(), TraceStart, TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size(), FColor::Orange, true);*/
+
+    return FVector(TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size());
 }

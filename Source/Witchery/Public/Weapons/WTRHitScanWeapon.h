@@ -27,16 +27,6 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     USoundCue* ImpactSound;
 
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Scatter")
-    float SphereRadius = 75.f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Scatter")
-    float DistanceToSphere = 800.f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Scatter")
-    bool bUseScatter = false;
-
-    virtual FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
     virtual void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
 
 private:

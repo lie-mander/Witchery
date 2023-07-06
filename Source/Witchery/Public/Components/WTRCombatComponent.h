@@ -341,6 +341,11 @@ private:
     void DropOrDestroyWeapon(AWTRWeapon* Weapon);
     void SwapWeapon();
     void HandleSwapWeapon();
+    void FireByWeaponFireType();
+    void HandleHitScanWeaponFire();
+    void HandleProjectileWeaponFire();
+    void HandleShotgunWeaponFire();
+    void HandleFlamethrowerWeaponFire();
     bool CanFire() const;
     bool CanSwapWeapon() const;
     int32 AmmoToReload();

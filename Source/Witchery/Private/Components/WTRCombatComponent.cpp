@@ -500,8 +500,7 @@ void UWTRCombatComponent::Fire()
     {
         bCanFire = false;
 
-        LocalFire(HitTarget);
-        Server_Fire(HitTarget);
+        FireByWeaponFireType();
 
         if (EquippedWeapon)
         {
@@ -513,6 +512,8 @@ void UWTRCombatComponent::Fire()
     else if (EquippedWeapon && EquippedWeapon->IsEmpty() && CarriedAmmo == 0)
     {
         UGameplayStatics::PlaySoundAtLocation(this, EmptyWeapon, EquippedWeapon->GetActorLocation());
+        LocalStopFire();
+        Server_StopFire();
     }
     else if (EquippedWeapon && EquippedWeapon->IsEmpty())
     {
@@ -520,6 +521,47 @@ void UWTRCombatComponent::Fire()
         Server_StopFire();
         Reload();
     }
+}
+
+void UWTRCombatComponent::FireByWeaponFireType()
+{
+    if (!EquippedWeapon) return;
+
+    switch (EquippedWeapon->GetFireType())
+    {
+        case EFireType::EFT_HitScan: HandleHitScanWeaponFire(); break;
+        case EFireType::EFT_Projectile: HandleProjectileWeaponFire(); break;
+        case EFireType::EFT_Shotgun: HandleShotgunWeaponFire(); break;
+        case EFireType::EFT_Flamethrower: HandleFlamethrowerWeaponFire(); break;
+    }
+}
+
+void UWTRCombatComponent::HandleHitScanWeaponFire() 
+{
+    if (!EquippedWeapon) return;
+
+    HitTarget = (EquippedWeapon->bUseScatter) ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
+    LocalFire(HitTarget);
+    Server_Fire(HitTarget);
+}
+
+void UWTRCombatComponent::HandleProjectileWeaponFire() 
+{
+    HitTarget = (EquippedWeapon->bUseScatter) ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
+    LocalFire(HitTarget);
+    Server_Fire(HitTarget);
+}
+
+void UWTRCombatComponent::HandleShotgunWeaponFire() 
+{
+    LocalFire(HitTarget);
+    Server_Fire(HitTarget);
+}
+
+void UWTRCombatComponent::HandleFlamethrowerWeaponFire() 
+{
+    LocalFire(HitTarget);
+    Server_Fire(HitTarget);
 }
 
 void UWTRCombatComponent::FireTimerStart()
@@ -555,7 +597,7 @@ void UWTRCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
         return;
     }
     else if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Flamethrower &&
-        CombatState == ECombatState::ECS_Unoccupied)
+             CombatState == ECombatState::ECS_Unoccupied)
     {
         Character->PlayFireMontage(bIsAiming);
         EquippedWeapon->Fire(TraceHitTarget);
@@ -581,14 +623,14 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
     if (Character && Character->IsLocallyControlled()) return;
 
     /*
-    * if we here, we on the server or on the simulated proxy
-    * server - will apply damage in weapon Fire() functions
-    * simulated proxy - will play cosmetics 
-    */
+     * if we here, we on the server or on the simulated proxy
+     * server - will apply damage in weapon Fire() functions
+     * simulated proxy - will play cosmetics
+     */
     LocalFire(TraceHitTarget);
 }
 
-void UWTRCombatComponent::LocalStopFire() 
+void UWTRCombatComponent::LocalStopFire()
 {
     if (EquippedWeapon)
     {
@@ -944,10 +986,18 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
             ECC_Visibility                     //
         );
 
+        if (EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Flamethrower)
+        {
+            TraceFromScreenHitResult.ImpactPoint = End;
+            HUDPackage.CrosshairColor = CrosshairColorWithoutTarget;
+            return;
+        }
+
         if (!TraceFromScreenHitResult.bBlockingHit)
         {
             TraceFromScreenHitResult.ImpactPoint = End;
         }
+
         if (TraceFromScreenHitResult.GetActor() && TraceFromScreenHitResult.GetActor()->Implements<UInteractWithCrosshairInterface>())
         {
             HUDPackage.CrosshairColor = CrosshairColorWithTarget;

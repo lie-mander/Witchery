@@ -24,7 +24,7 @@ void AWTRShotgun::Fire(const FVector& HitTarget)
         {
             // Do hit
             FHitResult FireHit;
-            const FVector End = TraceEndWithScatter(Start, HitTarget);
+            const FVector End = TraceEndWithScatter(HitTarget);
             WeaponTraceHit(Start, End, FireHit);
 
             // Calculate num of hits

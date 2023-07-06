@@ -42,6 +42,7 @@ public:
     FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
     FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
     FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+    FORCEINLINE EFireType GetFireType() const { return FireType; }
     FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
     FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
     FORCEINLINE float GetWeaponFiringDelay() const { return FireDelay; }
@@ -72,6 +73,20 @@ public:
     UTexture2D* CrosshairsBottom = nullptr;
 
     /*
+     * Scatter
+     */
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Scatter")
+    float SphereRadius = 75.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Scatter")
+    float DistanceToSphere = 800.f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Scatter")
+    bool bUseScatter = false;
+
+    virtual FVector TraceEndWithScatter(const FVector& HitTarget);
+
+    /*
      * Sounds
      */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Sounds")
@@ -97,14 +112,14 @@ protected:
     bool bAutomaticWeapon = true;
 
     /*
-    * Sounds
-    */
+     * Sounds
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
     USoundCue* ShootSound;
 
     /*
-    * Fix firing through static meshes, we want to decrease ammo, but don`t want to spawn projectiles
-    */
+     * Fix firing through static meshes, we want to decrease ammo, but don`t want to spawn projectiles
+     */
     bool bOverlapOtherStaticMeshes = false;
 
     /*
@@ -151,6 +166,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")
     EWeaponType WeaponType;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")
+    EFireType FireType;
 
     /*
      * Ammo
