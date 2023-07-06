@@ -115,7 +115,10 @@ void AWTRWeapon::Fire(const FVector& HitTarget)
         }
     }
 
-    DecreaseAmmo();
+    if (HasAuthority())
+    {
+        DecreaseAmmo();
+    }
 }
 
 void AWTRWeapon::StopFire() {}

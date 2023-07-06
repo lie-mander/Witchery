@@ -52,6 +52,8 @@ protected:
 
     void Reload();
     void Fire();
+    void LocalFire(const FVector_NetQuantize& TraceHitTarget);
+    void LocalStopFire();
 
     void EquipFirstWeapon(AWTRWeapon* WeaponToEquip);
     void EquipSecondWeapon(AWTRWeapon* WeaponToEquip);

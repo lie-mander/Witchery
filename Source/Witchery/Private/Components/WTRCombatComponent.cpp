@@ -489,6 +489,7 @@ void UWTRCombatComponent::OnFireButtonPressed(bool bPressed)
     }
     else
     {
+        LocalStopFire();
         Server_StopFire();
     }
 }
@@ -499,6 +500,7 @@ void UWTRCombatComponent::Fire()
     {
         bCanFire = false;
 
+        LocalFire(HitTarget);
         Server_Fire(HitTarget);
 
         if (EquippedWeapon)
@@ -514,6 +516,8 @@ void UWTRCombatComponent::Fire()
     }
     else if (EquippedWeapon && EquippedWeapon->IsEmpty())
     {
+        LocalStopFire();
+        Server_StopFire();
         Reload();
     }
 }
@@ -540,12 +544,7 @@ void UWTRCombatComponent::FireTimerUpdate()
     }
 }
 
-void UWTRCombatComponent::Server_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
-{
-    Multicast_Fire(TraceHitTarget);
-}
-
-void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+void UWTRCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 {
     if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
         CombatState == ECombatState::ECS_Reloading)
@@ -555,22 +554,45 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
         CombatState = ECombatState::ECS_Unoccupied;
         return;
     }
-
-    if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Flamethrower &&
+    else if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Flamethrower &&
         CombatState == ECombatState::ECS_Unoccupied)
     {
         Character->PlayFireMontage(bIsAiming);
         EquippedWeapon->Fire(TraceHitTarget);
     }
-
-    if (Character && EquippedWeapon && CombatState == ECombatState::ECS_Unoccupied)
+    else if (Character && EquippedWeapon && CombatState == ECombatState::ECS_Unoccupied)
     {
         EquippedWeapon->Fire(TraceHitTarget);
     }
-
-    if (EquippedWeapon && EquippedWeapon->IsEmpty())
+    else if (EquippedWeapon && EquippedWeapon->IsEmpty())
     {
         Reload();
+    }
+}
+
+void UWTRCombatComponent::Server_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+    Multicast_Fire(TraceHitTarget);
+}
+
+void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+{
+    // if Locally controlled character - return, cause we already played LocalFire() in Fire()
+    if (Character && Character->IsLocallyControlled()) return;
+
+    /*
+    * if we here, we on the server or on the simulated proxy
+    * server - will apply damage in weapon Fire() functions
+    * simulated proxy - will play cosmetics 
+    */
+    LocalFire(TraceHitTarget);
+}
+
+void UWTRCombatComponent::LocalStopFire() 
+{
+    if (EquippedWeapon)
+    {
+        EquippedWeapon->StopFire();
     }
 }
 
@@ -581,10 +603,10 @@ void UWTRCombatComponent::Server_StopFire_Implementation()
 
 void UWTRCombatComponent::Multicast_StopFire_Implementation()
 {
-    if (EquippedWeapon)
-    {
-        EquippedWeapon->StopFire();
-    }
+    // The same logic like Multicast_Fire
+    if (Character && Character->IsLocallyControlled()) return;
+
+    LocalStopFire();
 }
 
 void UWTRCombatComponent::Reload()

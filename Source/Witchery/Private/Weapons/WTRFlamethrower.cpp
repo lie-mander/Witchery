@@ -24,11 +24,6 @@ AWTRFlamethrower::AWTRFlamethrower()
     DamageArea->OnComponentEndOverlap.AddDynamic(this, &AWTRFlamethrower::OnDamageAreaEndOverlap);
 }
 
-void AWTRFlamethrower::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-}
-
 void AWTRFlamethrower::Fire(const FVector& HitTarget)
 {
     Super::Fire(HitTarget);

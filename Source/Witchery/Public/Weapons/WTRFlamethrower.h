@@ -24,7 +24,6 @@ public:
 protected:
     virtual void Fire(const FVector& HitTarget) override;
     virtual void StopFire() override;
-    virtual void Tick(float DeltaTime) override;
 
 private:
     UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
