@@ -58,13 +58,10 @@ void AWTRWeapon::BeginPlay()
         PickupWidget->SetVisibility(false);
     }
 
-    if (HasAuthority())
-    {
-        AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-        AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-        AreaSphere->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnSphereBeginOverlap);
-        AreaSphere->OnComponentEndOverlap.AddUniqueDynamic(this, &ThisClass::OnSphereEndOverlap);
-    }
+    AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+    AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    AreaSphere->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnSphereBeginOverlap);
+    AreaSphere->OnComponentEndOverlap.AddUniqueDynamic(this, &ThisClass::OnSphereEndOverlap);
 
     WeaponMesh->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnWeaponMeshBeginOverlap);
     WeaponMesh->OnComponentEndOverlap.AddUniqueDynamic(this, &ThisClass::OnWeaponMeshEndOverlap);
