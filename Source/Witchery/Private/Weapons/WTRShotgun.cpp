@@ -3,6 +3,7 @@
 #include "Weapons/WTRShotgun.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Character/WTRCharacter.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
@@ -80,5 +81,29 @@ void AWTRShotgun::Fire(const FVector& HitTarget)
                 );
             }
         }
+    }
+}
+
+void AWTRShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets) 
+{
+    if (!GetWeaponMesh()) return;
+
+    const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
+    if (!MuzzleSocket) return;
+
+    const FTransform MuzzleTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
+    const FVector TraceStart = MuzzleTransform.GetLocation();
+
+    const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
+    const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
+
+    for (uint32 i = 0; i < NumberOfShotgunShells; ++i)
+    {
+        const FVector RandVect = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
+        const FVector EndLocation = SphereCenter + RandVect;
+        const FVector ToEnd = (EndLocation - TraceStart);
+        const FVector ResultRandVector = TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size();
+
+        HitTargets.Add(ResultRandVector);
     }
 }

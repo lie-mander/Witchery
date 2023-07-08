@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Weapons/WTRWeapon.h"
 #include "Weapons/WTRProjectile.h"
+#include "Weapons/WTRShotgun.h"
 #include "Character/WTRCharacter.h"
 #include "Character/WTRPlayerController.h"
 #include "Engine/SkeletalMeshSocket.h"
@@ -547,6 +548,8 @@ void UWTRCombatComponent::HandleHitScanWeaponFire()
 
 void UWTRCombatComponent::HandleProjectileWeaponFire() 
 {
+    if (!EquippedWeapon) return;
+
     HitTarget = (EquippedWeapon->bUseScatter) ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
     LocalFire(HitTarget);
     Server_Fire(HitTarget);
@@ -554,8 +557,14 @@ void UWTRCombatComponent::HandleProjectileWeaponFire()
 
 void UWTRCombatComponent::HandleShotgunWeaponFire() 
 {
-    LocalFire(HitTarget);
-    Server_Fire(HitTarget);
+    if (!EquippedWeapon) return;
+
+    AWTRShotgun* Shotgun = Cast<AWTRShotgun>(EquippedWeapon);
+    if (Shotgun)
+    {
+        TArray<FVector> HitTargets;
+        Shotgun->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
+    }
 }
 
 void UWTRCombatComponent::HandleFlamethrowerWeaponFire() 

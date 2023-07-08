@@ -13,6 +13,7 @@ class WITCHERY_API AWTRShotgun : public AWTRHitScanWeapon
 
 public:
     virtual void Fire(const FVector& HitTarget) override;
+    void ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets);
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")
