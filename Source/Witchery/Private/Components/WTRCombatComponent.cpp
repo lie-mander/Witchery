@@ -537,7 +537,7 @@ void UWTRCombatComponent::FireByWeaponFireType()
     }
 }
 
-void UWTRCombatComponent::HandleHitScanWeaponFire() 
+void UWTRCombatComponent::HandleHitScanWeaponFire()
 {
     if (!EquippedWeapon) return;
 
@@ -546,7 +546,7 @@ void UWTRCombatComponent::HandleHitScanWeaponFire()
     Server_Fire(HitTarget);
 }
 
-void UWTRCombatComponent::HandleProjectileWeaponFire() 
+void UWTRCombatComponent::HandleProjectileWeaponFire()
 {
     if (!EquippedWeapon) return;
 
@@ -555,19 +555,22 @@ void UWTRCombatComponent::HandleProjectileWeaponFire()
     Server_Fire(HitTarget);
 }
 
-void UWTRCombatComponent::HandleShotgunWeaponFire() 
+void UWTRCombatComponent::HandleShotgunWeaponFire()
 {
     if (!EquippedWeapon) return;
 
     AWTRShotgun* Shotgun = Cast<AWTRShotgun>(EquippedWeapon);
     if (Shotgun)
     {
-        TArray<FVector> HitTargets;
+        TArray<FVector_NetQuantize> HitTargets;
         Shotgun->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
+
+        LocalFireShotgun(HitTargets);
+        Server_FireShotgun(HitTargets);
     }
 }
 
-void UWTRCombatComponent::HandleFlamethrowerWeaponFire() 
+void UWTRCombatComponent::HandleFlamethrowerWeaponFire()
 {
     LocalFire(HitTarget);
     Server_Fire(HitTarget);
@@ -603,7 +606,6 @@ void UWTRCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
         Character->PlayFireMontage(bIsAiming);
         EquippedWeapon->Fire(TraceHitTarget);
         CombatState = ECombatState::ECS_Unoccupied;
-        return;
     }
     else if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Flamethrower &&
              CombatState == ECombatState::ECS_Unoccupied)
@@ -616,6 +618,27 @@ void UWTRCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
         EquippedWeapon->Fire(TraceHitTarget);
     }
     else if (EquippedWeapon && EquippedWeapon->IsEmpty())
+    {
+        Reload();
+    }
+}
+
+void UWTRCombatComponent::LocalFireShotgun(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+    AWTRShotgun* Shotgun = Cast<AWTRShotgun>(EquippedWeapon);
+    if (!Shotgun || !Character) return;
+
+    if (CombatState == ECombatState::ECS_Reloading)
+    {
+        Character->PlayFireMontage(bIsAiming);
+        Shotgun->FireShotgun(TraceHitTargets);
+        CombatState = ECombatState::ECS_Unoccupied;
+    }
+    else if (CombatState == ECombatState::ECS_Unoccupied)
+    {
+        Shotgun->FireShotgun(TraceHitTargets);
+    }
+    else if (Shotgun->IsEmpty())
     {
         Reload();
     }
@@ -637,6 +660,19 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
      * simulated proxy - will play cosmetics
      */
     LocalFire(TraceHitTarget);
+}
+
+void UWTRCombatComponent::Server_FireShotgun_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+    Multicast_FireShotgun(TraceHitTargets);
+}
+
+void UWTRCombatComponent::Multicast_FireShotgun_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+{
+    // The same logic like Multicast_Fire
+    if (Character && Character->IsLocallyControlled()) return;
+
+    LocalFireShotgun(TraceHitTargets);
 }
 
 void UWTRCombatComponent::LocalStopFire()

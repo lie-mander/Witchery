@@ -8,9 +8,9 @@
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 
-void AWTRShotgun::Fire(const FVector& HitTarget)
+void AWTRShotgun::FireShotgun(const TArray<FVector_NetQuantize> HitTargets)
 {
-    AWTRWeapon::Fire(HitTarget);
+    AWTRWeapon::Fire(FVector());
 
     const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
     if (MuzzleSocket)
@@ -18,15 +18,14 @@ void AWTRShotgun::Fire(const FVector& HitTarget)
         const FTransform MuzzleTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
         const FVector Start = MuzzleTransform.GetLocation();
 
-        AController* InstigatorController = GetOwnerPlayerController();
-
+        // Map for characters and number of hits to every character in this map
         TMap<AWTRCharacter*, uint32> HitsMap;
-        for (uint32 i = 0; i < NumberOfShotgunShells; i++)
+
+        for (const auto HitTarget : HitTargets)
         {
             // Do hit
             FHitResult FireHit;
-            const FVector End = TraceEndWithScatter(HitTarget);
-            WeaponTraceHit(Start, End, FireHit);
+            WeaponTraceHit(Start, HitTarget, FireHit);
 
             // Calculate num of hits
             AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(FireHit.GetActor());
@@ -68,13 +67,14 @@ void AWTRShotgun::Fire(const FVector& HitTarget)
             }
         }
 
+        AController* InstigatorController = GetOwnerPlayerController();
         if (HasAuthority() && !HitsMap.IsEmpty() && InstigatorController)
         {
             for (auto Pair : HitsMap)
             {
                 UGameplayStatics::ApplyDamage(  //
-                    Pair.Key,                   //
-                    Damage * Pair.Value,        //
+                    Pair.Key,                   // For every character in this map ..
+                    Damage * Pair.Value,        // Apply damage multiply by number of hits
                     InstigatorController,       //
                     this,                       //
                     UDamageType::StaticClass()  //
@@ -84,7 +84,7 @@ void AWTRShotgun::Fire(const FVector& HitTarget)
     }
 }
 
-void AWTRShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets) 
+void AWTRShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)
 {
     if (!GetWeaponMesh()) return;
 
@@ -102,7 +102,7 @@ void AWTRShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FV
         const FVector RandVect = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, SphereRadius);
         const FVector EndLocation = SphereCenter + RandVect;
         const FVector ToEnd = (EndLocation - TraceStart);
-        const FVector ResultRandVector = TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size();
+        const FVector_NetQuantize ResultRandVector = TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size();
 
         HitTargets.Add(ResultRandVector);
     }

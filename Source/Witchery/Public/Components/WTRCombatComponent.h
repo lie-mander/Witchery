@@ -53,6 +53,7 @@ protected:
     void Reload();
     void Fire();
     void LocalFire(const FVector_NetQuantize& TraceHitTarget);
+    void LocalFireShotgun(const TArray<FVector_NetQuantize>& TraceHitTargets);
     void LocalStopFire();
 
     void EquipFirstWeapon(AWTRWeapon* WeaponToEquip);
@@ -77,10 +78,16 @@ protected:
     void Server_Fire(const FVector_NetQuantize& TraceHitTarget);
 
     UFUNCTION(Server, Reliable)
+    void Server_FireShotgun(const TArray<FVector_NetQuantize>& TraceHitTargets);
+
+    UFUNCTION(Server, Reliable)
     void Server_StopFire();
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_Fire(const FVector_NetQuantize& TraceHitTarget);
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_FireShotgun(const TArray<FVector_NetQuantize>& TraceHitTargets);
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_StopFire();
