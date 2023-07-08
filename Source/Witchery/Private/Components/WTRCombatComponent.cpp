@@ -698,9 +698,12 @@ void UWTRCombatComponent::Multicast_StopFire_Implementation()
 
 void UWTRCombatComponent::Reload()
 {
-    if (CarriedAmmo > 0 && EquippedWeapon && !EquippedWeapon->IsFull() && CombatState == ECombatState::ECS_Unoccupied)
+    if (CarriedAmmo > 0 && EquippedWeapon && !EquippedWeapon->IsFull() && CombatState == ECombatState::ECS_Unoccupied && !bLocallyReloading)
     {
         Server_Reload();
+        ReloadHandle();
+
+        bLocallyReloading = true;
     }
 }
 
@@ -710,7 +713,11 @@ void UWTRCombatComponent::Server_Reload_Implementation()
 
     CombatState = ECombatState::ECS_Reloading;
     LastEquippedWeapon = EquippedWeapon;
-    ReloadHandle();
+
+    if (!Character->IsLocallyControlled())
+    {
+        ReloadHandle();
+    }
 }
 
 void UWTRCombatComponent::StopReloadWhileEquip()
@@ -719,6 +726,7 @@ void UWTRCombatComponent::StopReloadWhileEquip()
     {
         CombatState = ECombatState::ECS_Unoccupied;
         Character->StopReloadMontage();
+        bLocallyReloading = false;
 
         const bool bShowScope = Character->IsLocallyControlled() && bIsAiming && EquippedWeapon &&
                                 EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
@@ -846,7 +854,10 @@ void UWTRCombatComponent::OnRep_CombatState()
             break;
 
         case ECombatState::ECS_Reloading:  //
-            ReloadHandle();
+            if (!Character->IsLocallyControlled())
+            {
+                ReloadHandle();
+            }
             break;
 
         case ECombatState::ECS_ThrowingGrenade:  //
@@ -933,6 +944,8 @@ void UWTRCombatComponent::ShotgunShellReload()
 void UWTRCombatComponent::FinishReloading()
 {
     if (!Character) return;
+
+    bLocallyReloading = false;
 
     if (Character->HasAuthority() && CombatState == ECombatState::ECS_Reloading)
     {

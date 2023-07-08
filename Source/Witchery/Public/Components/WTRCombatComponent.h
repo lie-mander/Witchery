@@ -126,6 +126,7 @@ private:
     bool bAimButtonPressed = false;
     bool bFireButtonPressed = false;
     bool bCanFire = true;
+    bool bLocallyReloading = false;
 
     FVector HitTarget;
     FTimerHandle FireTimerHandle;

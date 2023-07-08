@@ -54,6 +54,7 @@ public:
 
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
+    bool IsLocallyReloading() const;
     FORCEINLINE bool IsElimmed() const { return bElimmed; }
     FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
     FORCEINLINE bool IsDisableGameplay() const { return bDisableGameplay; }

@@ -1063,6 +1063,11 @@ bool AWTRCharacter::IsAiming() const
     return Combat && Combat->bIsAiming;
 }
 
+bool AWTRCharacter::IsLocallyReloading() const
+{
+    return Combat && Combat->bLocallyReloading;
+}
+
 void AWTRCharacter::HideCharacterWithWeaponIfCameraClose()
 {
     if (!IsLocallyControlled()) return;

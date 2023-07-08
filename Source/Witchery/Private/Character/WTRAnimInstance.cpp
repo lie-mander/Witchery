@@ -66,6 +66,12 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     // When character is reloading or throwing grenade, he doesn`t need to use FABRIK to left hand. Will be more condition
     bUseFABRIK = Character->GetCombatState() == ECombatState::ECS_Unoccupied;
 
+    // We also don`t want use FABRIK if we locally reloading now
+    if (Character->IsLocallyControlled() && Character->GetCombatState() != ECombatState::ECS_ThrowingGrenade)
+    {
+        bUseFABRIK = !Character->IsLocallyReloading();
+    }
+
     // When character is reloading or throwing grenade, he doesn`t need to use Offsets, cause reload animation will broke (hands). Will be more condition
     bUseAimOffsets = Character->GetCombatState() == ECombatState::ECS_Unoccupied && !Character->IsDisableGameplay();
 
