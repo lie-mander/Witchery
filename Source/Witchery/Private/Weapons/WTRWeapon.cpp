@@ -47,7 +47,6 @@ void AWTRWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AWTRWeapon, WeaponState);
-    DOREPLIFETIME(AWTRWeapon, Ammo);
 }
 
 void AWTRWeapon::BeginPlay()
@@ -113,10 +112,7 @@ void AWTRWeapon::Fire(const FVector& HitTarget)
         }
     }
 
-    if (HasAuthority())
-    {
-        DecreaseAmmo();
-    }
+    DecreaseAmmo();
 }
 
 void AWTRWeapon::StopFire() {}
@@ -124,13 +120,43 @@ void AWTRWeapon::StopFire() {}
 void AWTRWeapon::DecreaseAmmo()
 {
     Ammo = FMath::Clamp(Ammo - 1, 0, MagazineCapacity);
+    ++SequenceAmmo;
 
     WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
     SetHUDAmmo();
+
+    if (HasAuthority())
+    {
+        Client_UpdateAmmo(Ammo);
+    }
 }
 
-void AWTRWeapon::OnRep_Ammo()
+void AWTRWeapon::AddAmmo(int32 AmmoToAdd)
 {
+    Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagazineCapacity);
+    SetHUDAmmo();
+
+    if (HasAuthority())
+    {
+        Client_AddAmmo(AmmoToAdd);
+    }
+}
+
+void AWTRWeapon::Client_UpdateAmmo_Implementation(int32 NewAmmo)
+{
+    if (HasAuthority()) return;
+
+    Ammo = NewAmmo;
+    --SequenceAmmo;
+    Ammo -= SequenceAmmo;
+    SetHUDAmmo();
+}
+
+void AWTRWeapon::Client_AddAmmo_Implementation(int32 AmmoToAdd)
+{
+    if (HasAuthority()) return;
+
+    Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagazineCapacity);
     SetHUDAmmo();
 
     WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
@@ -238,13 +264,6 @@ void AWTRWeapon::Dropped()
     SetOwner(nullptr);
     WTROwnerPlayerController = nullptr;
     WTROwnerCharacter = nullptr;
-}
-
-void AWTRWeapon::AddAmmo(int32 AmmoToAdd)
-{
-    Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagazineCapacity);
-
-    SetHUDAmmo();
 }
 
 void AWTRWeapon::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,

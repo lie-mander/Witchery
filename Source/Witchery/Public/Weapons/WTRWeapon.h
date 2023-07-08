@@ -173,16 +173,22 @@ private:
     /*
      * Ammo
      */
-    UPROPERTY(ReplicatedUsing = OnRep_Ammo, EditDefaultsOnly, Category = "WTR | Weapon properties")
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")
     int32 Ammo = 10;
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Weapon properties")
     int32 MagazineCapacity = 10;
 
-    UFUNCTION()
-    void OnRep_Ammo();
+    // Num of ammo that server need to apply, increase in DecreaseAmmo(), decrease in Client_UpdateAmmo()
+    int32 SequenceAmmo = 0;
 
     void DecreaseAmmo();
+
+    UFUNCTION(Client, Reliable)
+    void Client_UpdateAmmo(int32 NewAmmo);
+
+    UFUNCTION(Client, Reliable)
+    void Client_AddAmmo(int32 AmmoToAdd);
 
     /*
      * Zooming
