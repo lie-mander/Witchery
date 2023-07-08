@@ -639,7 +639,7 @@ void AWTRPlayerController::PingTick(float DeltaTime)
     if (ShowPingFrequencyRuntime >= ShowPingFrequency && !bPingAnimPlaying)
     {
         PlayerState = (PlayerState == nullptr) ? GetPlayerState<APlayerState>() : PlayerState;
-        if (PlayerState && PlayerState->GetPing() * 4 >= PingThreshold)
+        if (PlayerState && PlayerState->GetPingInMilliseconds() >= PingThreshold)
         {
             ShowPing();
         }

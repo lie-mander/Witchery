@@ -1056,13 +1056,15 @@ void UWTRCombatComponent::TraceFromScreen(FHitResult& TraceFromScreenHitResult)
 
 void UWTRCombatComponent::SetAiming(bool bAiming)
 {
-    if (bIsAiming == bAiming) return;
+    if (bIsAiming == bAiming || !Character) return;
 
     bIsAiming = bAiming;
 
-    if (Character)
+    Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+
+    if (Character->IsLocallyControlled())
     {
-        Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+        bAimButtonPressed = bAiming;
     }
 
     if (Character->IsLocallyControlled() && EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
@@ -1088,6 +1090,14 @@ void UWTRCombatComponent::Server_SetAiming_Implementation(bool bAiming)
     if (Character)
     {
         Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+    }
+}
+
+void UWTRCombatComponent::OnRep_IsAiming()
+{
+    if (Character && Character->IsLocallyControlled())
+    {
+        bIsAiming = bAimButtonPressed;
     }
 }
 

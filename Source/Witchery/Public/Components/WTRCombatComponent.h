@@ -120,15 +120,18 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
     FVector3d SpringArmOffsetWhileEquipped = FVector3d(0.f, 180.f, 0.f);
 
-    UPROPERTY(Replicated)
+    UPROPERTY(ReplicatedUsing = OnRep_IsAiming)
     bool bIsAiming = false;
 
+    bool bAimButtonPressed = false;
     bool bFireButtonPressed = false;
     bool bCanFire = true;
 
     FVector HitTarget;
-
     FTimerHandle FireTimerHandle;
+
+    UFUNCTION()
+    void OnRep_IsAiming();
 
     /*
      * Carried ammo
