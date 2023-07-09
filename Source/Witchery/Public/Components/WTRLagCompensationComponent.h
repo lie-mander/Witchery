@@ -33,4 +33,13 @@ private:
 
     UPROPERTY()
     AWTRPlayerController* Controller;
+    
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | RewindTime")
+    float MaxRecordTime = 4.f;
+
+    TDoubleLinkedList<FFramePackage> FrameHistory;
+
+    void RecordFrameHistory();
+    void SaveThisFrame();
+    float TimeBetweenHeadAndTail();
 };

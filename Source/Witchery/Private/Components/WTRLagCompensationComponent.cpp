@@ -13,15 +13,34 @@ UWTRLagCompensationComponent::UWTRLagCompensationComponent()
 void UWTRLagCompensationComponent::BeginPlay()
 {
     Super::BeginPlay();
-
-    FFramePackage Package;
-    SaveFramePackage(Package);
-    ShowFramePackage(Package, FColor::Red);
 }
 
 void UWTRLagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+    RecordFrameHistory();
+}
+
+void UWTRLagCompensationComponent::RecordFrameHistory()
+{
+    if (FrameHistory.Num() <= 1)
+    {
+        SaveThisFrame();
+    }
+    else
+    {
+        float HistoryLenghtInSec = TimeBetweenHeadAndTail();
+
+        while (HistoryLenghtInSec > MaxRecordTime)
+        {
+            FrameHistory.RemoveNode(FrameHistory.GetTail());
+            HistoryLenghtInSec = TimeBetweenHeadAndTail();
+        }
+
+        SaveThisFrame();
+        ShowFramePackage(FrameHistory.GetHead()->GetValue(), FColor::Orange);
+    }
 }
 
 void UWTRLagCompensationComponent::SaveFramePackage(FFramePackage& Package)
@@ -55,7 +74,22 @@ void UWTRLagCompensationComponent::ShowFramePackage(const FFramePackage& Package
             FrameInfoPair.Value.BoxExtent,        //
             FQuat(FrameInfoPair.Value.Rotation),  //
             Color,                                //
-            true                                  //
+            false,                                //
+            MaxRecordTime                         //
         );
     }
+}
+
+float UWTRLagCompensationComponent::TimeBetweenHeadAndTail()
+{
+    float HeadTime = FrameHistory.GetHead()->GetValue().Time;
+    float TailTime = FrameHistory.GetTail()->GetValue().Time;
+    return HeadTime - TailTime;
+}
+
+void UWTRLagCompensationComponent::SaveThisFrame()
+{
+    FFramePackage ThisFrame;
+    SaveFramePackage(ThisFrame);
+    FrameHistory.AddHead(ThisFrame);
 }
