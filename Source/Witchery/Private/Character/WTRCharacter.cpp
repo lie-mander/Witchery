@@ -13,6 +13,7 @@
 #include "Components/WidgetComponent.h"
 #include "Components/WTRCombatComponent.h"
 #include "Components/WTRBuffComponent.h"
+#include "Components/WTRLagCompensationComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Components/BoxComponent.h"
@@ -58,6 +59,8 @@ AWTRCharacter::AWTRCharacter()
 
     Buff = CreateDefaultSubobject<UWTRBuffComponent>("Buff");
     Buff->SetIsReplicated(true);
+
+    LagCompensation = CreateDefaultSubobject<UWTRLagCompensationComponent>("LagCompensation");
 
     DissolveTimelineComponent = CreateDefaultSubobject<UTimelineComponent>("DissolveTimelineComponent");
 
@@ -293,6 +296,16 @@ void AWTRCharacter::PostInitializeComponents()
             Buff->InitialBaseSpeed = GetCharacterMovement()->MaxWalkSpeed;
             Buff->InitialCrouchSpeed = GetCharacterMovement()->MaxWalkSpeedCrouched;
             Buff->InitialJumpZVelocity = GetCharacterMovement()->JumpZVelocity;
+        }
+    }
+
+    if (LagCompensation)
+    {
+        LagCompensation->Character = this;
+        if (Controller)
+        {
+            WTRPlayerController = Cast<AWTRPlayerController>(Controller);
+            LagCompensation->Controller = WTRPlayerController;
         }
     }
 }

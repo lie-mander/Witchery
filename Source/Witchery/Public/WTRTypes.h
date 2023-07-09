@@ -18,9 +18,8 @@ class UTexture2D;
 // Delegates
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotifyPlayed, class USkeletalMeshComponent*)
 
-// Animation
-UENUM(BlueprintType)
-enum class ETurningInPlace : uint8
+    // Animation
+    UENUM(BlueprintType) enum class ETurningInPlace : uint8
 {
     ETIP_Right UMETA(DisplayName = "Turn right"),
     ETIP_Left UMETA(DisplayName = "Turn left"),
@@ -99,4 +98,34 @@ struct FCrosshairHUDPackage
 
     float CrosshairSpread = 0.0f;
     FLinearColor CrosshairColor = FLinearColor::White;
+};
+
+/*
+ * Frame package for server-side rewind
+ */
+USTRUCT(BlueprintType)
+struct FBoxInformation
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    FVector Location;
+
+    UPROPERTY()
+    FRotator Rotation;
+
+    UPROPERTY()
+    FVector BoxExtent;
+};
+
+USTRUCT(BlueprintType)
+struct FFramePackage
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    float Time;
+
+    UPROPERTY()
+    TMap<FName, FBoxInformation> FrameInfo;
 };

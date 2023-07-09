@@ -21,6 +21,7 @@ class AWTRPlayerController;
 class AWTRPlayerState;
 class UWTRCombatComponent;
 class UWTRBuffComponent;
+class UWTRLagCompensationComponent;
 class AWTR_HUD;
 class AWTRGameMode;
 
@@ -196,11 +197,14 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "WTR | Camera")
     UCameraComponent* CameraComponent;
 
-    UPROPERTY(VisibleAnywhere, Category = "WTR | Combat")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
     UWTRCombatComponent* Combat;
 
-    UPROPERTY(VisibleAnywhere, Category = "WTR | Buff")
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
     UWTRBuffComponent* Buff;
+
+    UPROPERTY(VisibleAnywhere, Category = "WTR | Components")
+    UWTRLagCompensationComponent* LagCompensation;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "WTR | OverheadWidget")
     UWidgetComponent* OverheadWidget;

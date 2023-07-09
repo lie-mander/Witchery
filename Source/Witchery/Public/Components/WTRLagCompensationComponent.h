@@ -6,12 +6,17 @@
 #include "Components/ActorComponent.h"
 #include "WTRLagCompensationComponent.generated.h"
 
+class AWTRCharacter;
+class AWTRPlayerController;
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class WITCHERY_API UWTRLagCompensationComponent : public UActorComponent
 {
     GENERATED_BODY()
 
 public:
+    friend class AWTRCharacter;
+
     UWTRLagCompensationComponent();
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -19,4 +24,9 @@ protected:
     virtual void BeginPlay() override;
 
 private:
+    UPROPERTY()
+    AWTRCharacter* Character;
+
+    UPROPERTY()
+    AWTRPlayerController* Controller;
 };
