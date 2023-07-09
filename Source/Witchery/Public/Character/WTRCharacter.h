@@ -82,6 +82,7 @@ public:
     FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
     FORCEINLINE UStaticMeshComponent* GetGrenadeMesh() const { return GrenadeMesh; }
     FORCEINLINE UWTRBuffComponent* GetBuffComponent() const { return Buff; }
+    FORCEINLINE UWTRLagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
     ECombatState GetCombatState() const;
     AWTRWeapon* GetEquippedWeapon() const;
     FVector GetHitTarget() const;

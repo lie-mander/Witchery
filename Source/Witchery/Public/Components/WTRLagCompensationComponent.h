@@ -24,6 +24,9 @@ public:
     void SaveFramePackage(FFramePackage& Package);
     void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 
+    // Main function for server-side rewind
+    void ServerSideRewind(AWTRCharacter* HitCharacter, const FVector& TraceStart, const FVector& HitLocation, float HitTime);
+
 protected:
     virtual void BeginPlay() override;
 
