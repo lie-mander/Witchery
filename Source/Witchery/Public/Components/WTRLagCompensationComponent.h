@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "WTRTypes.h"
 #include "WTRLagCompensationComponent.generated.h"
 
 class AWTRCharacter;
@@ -19,6 +20,9 @@ public:
 
     UWTRLagCompensationComponent();
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+    void SaveFramePackage(FFramePackage& Package);
+    void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 
 protected:
     virtual void BeginPlay() override;

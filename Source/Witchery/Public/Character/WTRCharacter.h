@@ -95,66 +95,8 @@ public:
     UFUNCTION(BlueprintImplementableEvent)
     void SetShowScopeAnimation(bool bShowScope);
 
-    /*
-    * Hit boxes for server-side rewind
-    * They named by skeleton bones to which they are attached
-    */
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* head;
-    
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* pelvis;
-    
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* spine_01;
-    
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* spine_02;
-    
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* spine_03;
-    
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* upperarm_l;
-    
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* lowerarm_l;
-    
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* hand_l;
-    
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* upperarm_r;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* lowerarm_r;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* hand_r;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* thigh_l;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* calf_l;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* foot_l;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* thigh_r;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* calf_r;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* foot_r;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* backpack;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
-    UBoxComponent* blanket;
+    UPROPERTY()
+    TMap<FName, UBoxComponent*> HitBoxesMap;
 
 protected:
     /*
@@ -341,6 +283,67 @@ private:
      */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Grenade")
     UStaticMeshComponent* GrenadeMesh;
+
+    /*
+     * Hit boxes for server-side rewind
+     * They named by skeleton bones to which they are attached
+     */
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* head;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* pelvis;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* spine_01;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* spine_02;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* spine_03;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* upperarm_l;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* lowerarm_l;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* hand_l;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* upperarm_r;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* lowerarm_r;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* hand_r;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* thigh_l;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* calf_l;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* foot_l;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* thigh_r;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* calf_r;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* foot_r;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* backpack;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | HitBoxes")
+    UBoxComponent* blanket;
 
     /*
      * Base variables
