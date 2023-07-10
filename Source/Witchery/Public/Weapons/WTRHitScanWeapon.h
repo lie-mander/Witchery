@@ -19,9 +19,6 @@ public:
 
 protected:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
-    float Damage = 20.f;
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     UParticleSystem* ImpactParticles;
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
@@ -36,6 +33,6 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
     UParticleSystem* MuzzleParticles;
 
-    void ApplyDamageIfHasAuthority(const FHitResult& HitResult);
+    void ApplyDamageByRole(const FVector& TraceStart, const FHitResult& HitResult);
     void HandleEffects(const FHitResult& HitResult, const FTransform& Muzzle);
 };

@@ -35,9 +35,6 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Shoot")
     USoundCue* FlameEndSound;
 
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
-    float Damage = 20.f;
-
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Fire FX")
     FVector FireSystemScale;
 

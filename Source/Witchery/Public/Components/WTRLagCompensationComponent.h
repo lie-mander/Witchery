@@ -9,6 +9,7 @@
 
 class AWTRCharacter;
 class AWTRPlayerController;
+class AWTRWeapon;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class WITCHERY_API UWTRLagCompensationComponent : public UActorComponent
@@ -20,6 +21,10 @@ public:
 
     UWTRLagCompensationComponent();
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+    UFUNCTION(Server, Reliable)
+    void Server_ScoreRequest(AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation,
+        float HitTime, AWTRWeapon* DamageCauser);
 
 protected:
     virtual void BeginPlay() override;

@@ -46,6 +46,7 @@ public:
     FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
     FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
     FORCEINLINE float GetWeaponFiringDelay() const { return FireDelay; }
+    FORCEINLINE float GetDamage() const { return Damage; }
     FORCEINLINE int32 GetAmmo() const { return Ammo; }
     FORCEINLINE int32 GetMagazineCapacity() const { return MagazineCapacity; }
 
@@ -123,6 +124,27 @@ protected:
     bool bOverlapOtherStaticMeshes = false;
 
     /*
+     * Server-side rewind
+     */
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | SSR")
+    bool bUseServerSideRewind = false;
+
+    /*
+     * Other variables
+     */
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
+    float Damage = 20.f;
+
+    /*
+     * Base variables
+     */
+    UPROPERTY()
+    AWTRCharacter* WTROwnerCharacter;
+
+    UPROPERTY()
+    AWTRPlayerController* WTROwnerPlayerController;
+
+    /*
      * Functions
      */
     virtual void BeginPlay() override;
@@ -198,16 +220,6 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Zooming", meta = (ClampMin = "0.0", ClampMax = "90.0"))
     float ZoomInterpSpeed = 20.f;
-
-    /*
-     * Base variables
-     */
-
-    UPROPERTY()
-    AWTRCharacter* WTROwnerCharacter;
-
-    UPROPERTY()
-    AWTRPlayerController* WTROwnerPlayerController;
 
     /*
      * Callbacks

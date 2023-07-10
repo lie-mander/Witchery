@@ -196,7 +196,8 @@ void AWTRPlayerController::Client_SendServerTime_Implementation(float ClientTime
     if (GetWorld())
     {
         const float RoundTrip = GetWorld()->GetTimeSeconds() - ClientTimeOfSending;
-        const float CurrentServerTime = ServerTimeResponse - (RoundTrip * 0.5f);
+        SingleTripTime = RoundTrip * 0.5f;
+        const float CurrentServerTime = ServerTimeResponse + SingleTripTime;
         ClientServerTimeDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
     }
 }

@@ -26,6 +26,8 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void DelayInit();
 
+    virtual float GetServerTime();
+
     void SetMatchState(const FName& State);
 
     void TurnDownTheVolume();
@@ -44,9 +46,10 @@ public:
     void SetHUD_FPS();
     void SetHUDGrenades(int32 Grenades);
 
+    float SingleTripTime = 0.f;
+
 protected:
     virtual void BeginPlay() override;
-    virtual float GetServerTime();
 
 private:
     /*

@@ -4,6 +4,8 @@
 #include "Components/BoxComponent.h"
 #include "Character/WTRCharacter.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "Weapons/WTRWeapon.h"
 
 UWTRLagCompensationComponent::UWTRLagCompensationComponent()
 {
@@ -20,6 +22,23 @@ void UWTRLagCompensationComponent::TickComponent(float DeltaTime, ELevelTick Tic
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     RecordFrameHistory();
+}
+
+void UWTRLagCompensationComponent::Server_ScoreRequest_Implementation(AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
+    const FVector_NetQuantize& HitLocation, float HitTime, AWTRWeapon* DamageCauser)
+{
+    FServerSideRewindResult Confrim = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);
+
+    if (Confrim.bConfrimHit && DamageCauser && Character)
+    {
+        UGameplayStatics::ApplyDamage(  //
+            HitCharacter,               //
+            DamageCauser->GetDamage(),  //
+            Character->Controller,      //
+            DamageCauser,               //
+            UDamageType::StaticClass()  //
+        );
+    }
 }
 
 FServerSideRewindResult UWTRLagCompensationComponent::ServerSideRewind(
@@ -110,6 +129,8 @@ FServerSideRewindResult UWTRLagCompensationComponent::ServerSideRewind(
 
 void UWTRLagCompensationComponent::RecordFrameHistory()
 {
+    if (Character && Character->HasAuthority()) return;
+
     if (FrameHistory.Num() <= 1)
     {
         SaveThisFrame();
@@ -125,7 +146,7 @@ void UWTRLagCompensationComponent::RecordFrameHistory()
         }
 
         SaveThisFrame();
-        ShowFramePackage(FrameHistory.GetHead()->GetValue(), FColor::Orange);
+        //ShowFramePackage(FrameHistory.GetHead()->GetValue(), FColor::Orange);
     }
 }
 
@@ -282,6 +303,7 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
             return ServerSideRewindResult;
         }
     }
+
     return ServerSideRewindResult;
 }
 

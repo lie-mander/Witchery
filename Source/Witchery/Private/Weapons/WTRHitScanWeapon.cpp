@@ -4,10 +4,12 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/WTRCharacter.h"
+#include "Character/WTRPlayerController.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "DrawDebugHelpers.h"
 #include "WTRTypes.h"
+#include "Components/WTRLagCompensationComponent.h"
 
 void AWTRHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -25,7 +27,7 @@ void AWTRHitScanWeapon::Fire(const FVector& HitTarget)
         if (GetWorld())
         {
             WeaponTraceHit(Start, HitTarget, FireHit);
-            ApplyDamageIfHasAuthority(FireHit);
+            ApplyDamageByRole(Start, FireHit);
             HandleEffects(FireHit, MuzzleTransform);
         }
     }
@@ -67,12 +69,12 @@ void AWTRHitScanWeapon::WeaponTraceHit(const FVector& TraceStart, const FVector&
     }
 }
 
-void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(const FHitResult& HitResult)
+void AWTRHitScanWeapon::ApplyDamageByRole(const FVector& TraceStart, const FHitResult& HitResult)
 {
     AController* InstigatorController = GetOwnerPlayerController();
-    const AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(HitResult.GetActor());
+    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(HitResult.GetActor());
 
-    if (HasAuthority() && HitResult.bBlockingHit && WTRCharacter && InstigatorController)
+    if (!bUseServerSideRewind && HasAuthority() && HitResult.bBlockingHit && WTRCharacter && InstigatorController)
     {
         UGameplayStatics::ApplyDamage(  //
             HitResult.GetActor(),       //
@@ -81,6 +83,23 @@ void AWTRHitScanWeapon::ApplyDamageIfHasAuthority(const FHitResult& HitResult)
             this,                       //
             UDamageType::StaticClass()  //
         );
+    }
+    if (bUseServerSideRewind && !HasAuthority() && HitResult.bBlockingHit && WTRCharacter && InstigatorController)
+    {
+        WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
+        WTROwnerPlayerController =
+            (WTROwnerPlayerController == nullptr) ? Cast<AWTRPlayerController>(InstigatorController) : WTROwnerPlayerController;
+
+        if (WTROwnerCharacter && WTROwnerPlayerController && WTROwnerCharacter->GetLagCompensation())
+        {
+            WTROwnerCharacter->GetLagCompensation()->Server_ScoreRequest(                              //
+                WTRCharacter,                                                                          //
+                TraceStart,                                                                            //
+                HitResult.ImpactPoint,                                                                 //
+                WTROwnerPlayerController->GetServerTime() - WTROwnerPlayerController->SingleTripTime,  //
+                this                                                                                   //
+            );
+        }
     }
 }
 
