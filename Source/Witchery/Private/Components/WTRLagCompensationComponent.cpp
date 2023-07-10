@@ -22,20 +22,20 @@ void UWTRLagCompensationComponent::TickComponent(float DeltaTime, ELevelTick Tic
     RecordFrameHistory();
 }
 
-void UWTRLagCompensationComponent::ServerSideRewind(
-    AWTRCharacter* HitCharacter, const FVector& TraceStart, const FVector& HitLocation, float HitTime)
+FServerSideRewindResult UWTRLagCompensationComponent::ServerSideRewind(
+    AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
     // Firstly need to check pointest to things that we will use
     const bool bNeedReturn = !HitCharacter || !HitCharacter->GetLagCompensation() ||
                              !HitCharacter->GetLagCompensation()->FrameHistory.GetHead() ||
                              !HitCharacter->GetLagCompensation()->FrameHistory.GetTail();
-    if (bNeedReturn) return;
+    if (bNeedReturn) return FServerSideRewindResult();
 
-    /* 
-    * 1. For shortly-using
-    * 2. Variable to save final frame package
-    * 3. In mostly situations - we need to use interpolate between 2 frame packages, but we have exceptions
-    */
+    /*
+     * 1. For shortly-using
+     * 2. Variable to save final frame package
+     * 3. In mostly situations - we need to use interpolate between 2 frame packages, but we have exceptions
+     */
     const TDoubleLinkedList<FFramePackage>& History = HitCharacter->GetLagCompensation()->FrameHistory;
     FFramePackage FrameToCheck;
     bool bNeedInterpolate = true;
@@ -44,7 +44,7 @@ void UWTRLagCompensationComponent::ServerSideRewind(
     // Need to break SSR (Server-side rewind)
     if (HitTime < History.GetTail()->GetValue().Time)
     {
-        return;
+        return FServerSideRewindResult();
     }
 
     // If true - character has the baddest allowable ping, but we can use package from history in this time
@@ -60,15 +60,15 @@ void UWTRLagCompensationComponent::ServerSideRewind(
         bNeedInterpolate = false;
         FrameToCheck = History.GetHead()->GetValue();
     }
- 
+
     /*
-    * Two pointers for realise algorithm of finding two Frame Packages which are on two sides of HitTime
-    * 
-    * Older < HitTime < Younger
-    * 
-    * Firstly we need to init them with Head pointer and moving from Head to Tail
-    * After complete finding we will use interpolation between Older/Younger values
-    */
+     * Two pointers for realise algorithm of finding two Frame Packages which are on two sides of HitTime
+     *
+     * Older < HitTime < Younger
+     *
+     * Firstly we need to init them with Head pointer and moving from Head to Tail
+     * After complete finding we will use interpolation between Older/Younger values
+     */
     TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Younger = History.GetHead();
     TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Older = Younger;
 
@@ -102,8 +102,10 @@ void UWTRLagCompensationComponent::ServerSideRewind(
     // Interpolate between Older and Younger packages
     if (bNeedInterpolate)
     {
-        InterpBetweenPackages(Older->GetValue(), Younger->GetValue());
+        FrameToCheck = InterpBetweenPackages(Older->GetValue(), Younger->GetValue(), HitTime);
     }
+
+    return ConfrimHit(FrameToCheck, HitCharacter, TraceStart, HitLocation);
 }
 
 void UWTRLagCompensationComponent::RecordFrameHistory()
@@ -164,7 +166,8 @@ void UWTRLagCompensationComponent::ShowFramePackage(const FFramePackage& Package
     }
 }
 
-FFramePackage UWTRLagCompensationComponent::InterpBetweenPackages(const FFramePackage& OlderPackage, const FFramePackage& YoungerPackage, float HitTime)
+FFramePackage UWTRLagCompensationComponent::InterpBetweenPackages(
+    const FFramePackage& OlderPackage, const FFramePackage& YoungerPackage, float HitTime)
 {
     // Time between younger and older packages will be our distance to interpolation
     const float DistanceInSec = YoungerPackage.Time - OlderPackage.Time;
@@ -176,9 +179,9 @@ FFramePackage UWTRLagCompensationComponent::InterpBetweenPackages(const FFramePa
     InterpFramePackage.Time = HitTime;
 
     /*
-    * We`re going through Younger (or Older) pair to interp all boxes between OlderPackage and YoungerPackage
-    * And save result in InterpFramePackage
-    */ 
+     * We`re going through Younger (or Older) pair to interp all boxes between OlderPackage and YoungerPackage
+     * And save result in InterpFramePackage
+     */
     for (auto& YoungerPair : YoungerPackage.FrameInfo)
     {
         const FName& BoxName = YoungerPair.Key;
@@ -200,6 +203,146 @@ FFramePackage UWTRLagCompensationComponent::InterpBetweenPackages(const FFramePa
     }
 
     return InterpFramePackage;
+}
+
+FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePackage& Package, AWTRCharacter* HitCharacter,
+    const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation)
+{
+    if (!HitCharacter || !GetWorld()) return FServerSideRewindResult();
+
+    /*
+     * Cache current frame, cause after confirmed hit we need to return boxes to main position
+     * Move boxes to interp package position
+     * Disabled character mesh collision, cause it can block line trace and we want check only line trace with boxes
+     */
+    FFramePackage CurrentFrame;
+    CacheFrame(CurrentFrame, HitCharacter);
+    MoveBoxes(Package, HitCharacter);
+    EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
+
+    // Default result
+    FServerSideRewindResult ServerSideRewindResult;
+    ServerSideRewindResult.bConfrimHit = false;
+    ServerSideRewindResult.bHeadshot = false;
+
+    // Firsty we will check headshot
+    UBoxComponent* HeadBox = HitCharacter->HitBoxesMap[FName("head")];
+    HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+
+    // HitResult for check blocking hit with boxes
+    FHitResult RewindHitResult;
+
+    // TraceEnd but we did it longer on 25% that line trace will go always through HitCharacter
+    const FVector TraceEnd = TraceStart + (HitLocation - HitLocation) * 1.25f;
+
+    GetWorld()->LineTraceSingleByChannel(  //
+        RewindHitResult,                   //
+        TraceStart,                        //
+        TraceEnd,                          //
+        ECollisionChannel::ECC_Visibility  //
+    );
+
+    if (RewindHitResult.bBlockingHit)
+    {
+        // We have headshot, can return early
+        EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+        ReturnBoxes(CurrentFrame, HitCharacter);
+
+        ServerSideRewindResult.bConfrimHit = true;
+        ServerSideRewindResult.bHeadshot = true;
+        return ServerSideRewindResult;
+    }
+    else
+    {
+        // Do line trace for other boxes
+        for (auto& HitBoxPair : HitCharacter->HitBoxesMap)
+        {
+            if (HitBoxPair.Value)
+            {
+                HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+                HitBoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+            }
+        }
+
+        GetWorld()->LineTraceSingleByChannel(  //
+            RewindHitResult,                   //
+            TraceStart,                        //
+            TraceEnd,                          //
+            ECollisionChannel::ECC_Visibility  //
+        );
+
+        if (RewindHitResult.bBlockingHit)
+        {
+            // We have confirmed hit, but not headshot. Can return
+            EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+            ReturnBoxes(CurrentFrame, HitCharacter);
+
+            ServerSideRewindResult.bConfrimHit = true;
+            return ServerSideRewindResult;
+        }
+    }
+    return ServerSideRewindResult;
+}
+
+void UWTRLagCompensationComponent::CacheFrame(FFramePackage& Package, AWTRCharacter* HitCharacter)
+{
+    if (!HitCharacter) return;
+
+    for (auto& HitBoxPair : HitCharacter->HitBoxesMap)
+    {
+        if (HitBoxPair.Value)
+        {
+            FBoxInformation BoxInfo;
+            BoxInfo.Location = HitBoxPair.Value->GetComponentLocation();
+            BoxInfo.Rotation = HitBoxPair.Value->GetComponentRotation();
+            BoxInfo.BoxExtent = HitBoxPair.Value->GetScaledBoxExtent();
+
+            Package.FrameInfo.Add(HitBoxPair.Key, BoxInfo);
+        }
+    }
+}
+
+void UWTRLagCompensationComponent::MoveBoxes(const FFramePackage& Package, AWTRCharacter* HitCharacter)
+{
+    if (!HitCharacter) return;
+
+    for (auto& HitBoxPair : HitCharacter->HitBoxesMap)
+    {
+        if (HitBoxPair.Value)
+        {
+            const FBoxInformation& BoxInfo = Package.FrameInfo[HitBoxPair.Key];
+
+            HitBoxPair.Value->SetWorldLocation(BoxInfo.Location);
+            HitBoxPair.Value->SetWorldRotation(BoxInfo.Rotation);
+            HitBoxPair.Value->SetBoxExtent(BoxInfo.BoxExtent);
+        }
+    }
+}
+
+void UWTRLagCompensationComponent::ReturnBoxes(const FFramePackage& Package, AWTRCharacter* HitCharacter)
+{
+    if (!HitCharacter) return;
+
+    for (auto& HitBoxPair : HitCharacter->HitBoxesMap)
+    {
+        if (HitBoxPair.Value)
+        {
+            const FBoxInformation& BoxInfo = Package.FrameInfo[HitBoxPair.Key];
+
+            HitBoxPair.Value->SetWorldLocation(BoxInfo.Location);
+            HitBoxPair.Value->SetWorldRotation(BoxInfo.Rotation);
+            HitBoxPair.Value->SetBoxExtent(BoxInfo.BoxExtent);
+            HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        }
+    }
+}
+
+void UWTRLagCompensationComponent::EnableCharacterMeshCollision(AWTRCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled)
+{
+    if (!HitCharacter || !HitCharacter->GetMesh()) return;
+
+    HitCharacter->GetMesh()->SetCollisionEnabled(CollisionEnabled);
 }
 
 float UWTRLagCompensationComponent::TimeBetweenHeadAndTail()

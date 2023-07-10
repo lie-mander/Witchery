@@ -27,9 +27,16 @@ protected:
     void SaveFramePackage(FFramePackage& Package);
     void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
     FFramePackage InterpBetweenPackages(const FFramePackage& OlderPackage, const FFramePackage& YoungerPackage, float HitTime);
+    FServerSideRewindResult ConfrimHit(const FFramePackage& Package, AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
+        const FVector_NetQuantize& HitLocation);
+    void CacheFrame(FFramePackage& Package, AWTRCharacter* HitCharacter);
+    void MoveBoxes(const FFramePackage& Package, AWTRCharacter* HitCharacter);
+    void ReturnBoxes(const FFramePackage& Package, AWTRCharacter* HitCharacter);
+    void EnableCharacterMeshCollision(AWTRCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
 
     // Main function for server-side rewind
-    void ServerSideRewind(AWTRCharacter* HitCharacter, const FVector& TraceStart, const FVector& HitLocation, float HitTime);
+    FServerSideRewindResult ServerSideRewind(
+        AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime);
 
 private:
     UPROPERTY()

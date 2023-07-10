@@ -101,7 +101,7 @@ struct FCrosshairHUDPackage
 };
 
 /*
- * Frame package for server-side rewind
+ * Server-side rewind
  */
 USTRUCT(BlueprintType)
 struct FBoxInformation
@@ -128,4 +128,16 @@ struct FFramePackage
 
     UPROPERTY()
     TMap<FName, FBoxInformation> FrameInfo;
+};
+
+USTRUCT(BlueprintType)
+struct FServerSideRewindResult
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    bool bConfrimHit = false;
+
+    UPROPERTY()
+    bool bHeadshot = false;
 };
