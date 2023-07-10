@@ -21,14 +21,15 @@ public:
     UWTRLagCompensationComponent();
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+protected:
+    virtual void BeginPlay() override;
+
     void SaveFramePackage(FFramePackage& Package);
     void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
+    FFramePackage InterpBetweenPackages(const FFramePackage& OlderPackage, const FFramePackage& YoungerPackage, float HitTime);
 
     // Main function for server-side rewind
     void ServerSideRewind(AWTRCharacter* HitCharacter, const FVector& TraceStart, const FVector& HitLocation, float HitTime);
-
-protected:
-    virtual void BeginPlay() override;
 
 private:
     UPROPERTY()
@@ -36,7 +37,7 @@ private:
 
     UPROPERTY()
     AWTRPlayerController* Controller;
-    
+
     UPROPERTY(EditDefaultsOnly, Category = "WTR | RewindTime")
     float MaxRecordTime = 4.f;
 

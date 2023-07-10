@@ -102,7 +102,7 @@ void UWTRLagCompensationComponent::ServerSideRewind(
     // Interpolate between Older and Younger packages
     if (bNeedInterpolate)
     {
-
+        InterpBetweenPackages(Older->GetValue(), Younger->GetValue());
     }
 }
 
@@ -162,6 +162,44 @@ void UWTRLagCompensationComponent::ShowFramePackage(const FFramePackage& Package
             MaxRecordTime                         //
         );
     }
+}
+
+FFramePackage UWTRLagCompensationComponent::InterpBetweenPackages(const FFramePackage& OlderPackage, const FFramePackage& YoungerPackage, float HitTime)
+{
+    // Time between younger and older packages will be our distance to interpolation
+    const float DistanceInSec = YoungerPackage.Time - OlderPackage.Time;
+    // Part of the distance which we need to interp to
+    const float InterpFraction = (HitTime - OlderPackage.Time) / DistanceInSec;
+
+    // Result frame package
+    FFramePackage InterpFramePackage;
+    InterpFramePackage.Time = HitTime;
+
+    /*
+    * We`re going through Younger (or Older) pair to interp all boxes between OlderPackage and YoungerPackage
+    * And save result in InterpFramePackage
+    */ 
+    for (auto& YoungerPair : YoungerPackage.FrameInfo)
+    {
+        const FName& BoxName = YoungerPair.Key;
+
+        const FBoxInformation& YoungerBoxInfo = YoungerPackage.FrameInfo[BoxName];
+        const FBoxInformation& OlderBoxInfo = OlderPackage.FrameInfo[BoxName];
+
+        FBoxInformation InterpBoxInfo;
+
+        // We don`t want to use DeltaTime, we want to do one interp in one time
+        InterpBoxInfo.Location = FMath::VInterpTo(OlderBoxInfo.Location, YoungerBoxInfo.Location, 1.f, InterpFraction);
+        InterpBoxInfo.Rotation = FMath::RInterpTo(OlderBoxInfo.Rotation, YoungerBoxInfo.Rotation, 1.f, InterpFraction);
+
+        // BoxExtent for every box is unchanged, we can simple copy it from Younger (or Older) pair
+        InterpBoxInfo.BoxExtent = YoungerBoxInfo.BoxExtent;
+
+        // And save every interp box in resutl frame package
+        InterpFramePackage.FrameInfo.Add(BoxName, InterpBoxInfo);
+    }
+
+    return InterpFramePackage;
 }
 
 float UWTRLagCompensationComponent::TimeBetweenHeadAndTail()
