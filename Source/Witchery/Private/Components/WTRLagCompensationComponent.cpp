@@ -129,7 +129,7 @@ FServerSideRewindResult UWTRLagCompensationComponent::ServerSideRewind(
 
 void UWTRLagCompensationComponent::RecordFrameHistory()
 {
-    if (Character && Character->HasAuthority()) return;
+    if (!Character || !Character->HasAuthority()) return;
 
     if (FrameHistory.Num() <= 1)
     {
@@ -255,7 +255,7 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
     FHitResult RewindHitResult;
 
     // TraceEnd but we did it longer on 25% that line trace will go always through HitCharacter
-    const FVector TraceEnd = TraceStart + (HitLocation - HitLocation) * 1.25f;
+    const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;
 
     GetWorld()->LineTraceSingleByChannel(  //
         RewindHitResult,                   //

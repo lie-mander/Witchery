@@ -126,13 +126,13 @@ protected:
     /*
      * Server-side rewind
      */
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | SSR")
+    UPROPERTY(EditAnywhere, Category = "WTR | SSR")
     bool bUseServerSideRewind = false;
 
     /*
      * Other variables
      */
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
+    UPROPERTY(EditAnywhere, Category = "WTR | Hit")
     float Damage = 20.f;
 
     /*
