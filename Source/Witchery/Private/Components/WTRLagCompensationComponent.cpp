@@ -84,8 +84,11 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
 
     // Firsty we will check headshot
     UBoxComponent* HeadBox = HitCharacter->HitBoxesMap[FName("head")];
-    HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-    HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+    if (HeadBox)
+    {
+        HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+    }
 
     // HitResult for check blocking hit with boxes
     FHitResult RewindHitResult;
@@ -146,10 +149,127 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
 FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShorgunConfirmHits(
     const TArray<FFramePackage>& FramePackages, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations)
 {
-    return FShotgunServerSideRewindResult();
+    if (!GetWorld()) return FShotgunServerSideRewindResult();
+    for (auto& FramePackage : FramePackages)
+    {
+        if (!FramePackage.OwnerCharacter) return FShotgunServerSideRewindResult();
+    }
+
+    TArray<FFramePackage> CurrentFrames;
+    for (auto& FramePackage : FramePackages)
+    {
+        FFramePackage CurrentFrame;
+        CurrentFrame.OwnerCharacter = FramePackage.OwnerCharacter;
+        CacheFrame(CurrentFrame, CurrentFrame.OwnerCharacter);
+        MoveBoxes(FramePackage, CurrentFrame.OwnerCharacter);
+        EnableCharacterMeshCollision(CurrentFrame.OwnerCharacter, ECollisionEnabled::NoCollision);
+    }
+
+    for (auto& FramePackage : FramePackages)
+    {
+        UBoxComponent* HeadBox = FramePackage.OwnerCharacter->HitBoxesMap[FName("head")];
+        if (HeadBox)
+        {
+            HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+            HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+        }
+    }
+
+    //
+    // Maps for result shoots
+    FShotgunServerSideRewindResult ShotgunResult;
+    //
+
+    // Do headshots
+    for (auto& HitLocation : HitLocations)
+    {
+        // HitResult for check blocking hit with boxes
+        FHitResult RewindHitResult;
+
+        // TraceEnd but we did it longer on 25% that line trace will go always through HitCharacter
+        const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;
+
+        GetWorld()->LineTraceSingleByChannel(  //
+            RewindHitResult,                   //
+            TraceStart,                        //
+            TraceEnd,                          //
+            ECollisionChannel::ECC_Visibility  //
+        );
+
+        AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(RewindHitResult.GetActor());
+        if (RewindHitResult.bBlockingHit && WTRCharacter)
+        {
+            // If we already have character in map - increment hits to him
+            if (ShotgunResult.HeadShots.Contains(WTRCharacter))
+            {
+                ++ShotgunResult.HeadShots[WTRCharacter];
+            }
+            // Or add him to map with 1 hit
+            else
+            {
+                ShotgunResult.HeadShots.Emplace(WTRCharacter, 1);
+            }
+        }
+    }
+
+    // ENABLE OTHER BOXES COLLISIONS, BUT DISABLE HEAD BOXES (WE ALREADY CHECKED IT UPPER!)
+    for (auto& FramePackage : FramePackages)
+    {
+        // Enable all boxes collisions
+        for (auto& HitBoxPair : FramePackage.OwnerCharacter->HitBoxesMap)
+        {
+            if (HitBoxPair.Value)
+            {
+                HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+                HitBoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+            }
+        }
+
+        // Disable heads collisions
+        UBoxComponent* HeadBox = FramePackage.OwnerCharacter->HitBoxesMap[FName("head")];
+        if (HeadBox)
+        {
+            HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+            HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+        }
+    }
+
+    // Do bodyshots
+    for (auto& HitLocation : HitLocations)
+    {
+        // HitResult for check blocking hit with boxes
+        FHitResult RewindHitResult;
+
+        // TraceEnd but we did it longer on 25% that line trace will go always through HitCharacter
+        const FVector TraceEnd = TraceStart + (HitLocation - TraceStart) * 1.25f;
+
+        GetWorld()->LineTraceSingleByChannel(  //
+            RewindHitResult,                   //
+            TraceStart,                        //
+            TraceEnd,                          //
+            ECollisionChannel::ECC_Visibility  //
+        );
+
+        AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(RewindHitResult.GetActor());
+        if (RewindHitResult.bBlockingHit && WTRCharacter)
+        {
+            // If we already have character in map - increment hits to him
+            if (ShotgunResult.BodyShots.Contains(WTRCharacter))
+            {
+                ++ShotgunResult.BodyShots[WTRCharacter];
+            }
+            // Or add him to map with 1 hit
+            else
+            {
+                ShotgunResult.BodyShots.Emplace(WTRCharacter, 1);
+            }
+        }
+    }
+
+    return ShotgunResult;
 }
 
-FFramePackage UWTRLagCompensationComponent::GetFrameToCheck(AWTRCharacter* HitCharacter, float HitTime) 
+FFramePackage UWTRLagCompensationComponent::GetFrameToCheck(AWTRCharacter* HitCharacter, float HitTime)
 {
     // Firstly need to check pointest to things that we will use
     const bool bNeedReturn = !HitCharacter || !HitCharacter->GetLagCompensation() ||

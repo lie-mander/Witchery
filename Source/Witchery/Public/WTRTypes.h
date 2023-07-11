@@ -3,6 +3,7 @@
 #include "WTRTypes.generated.h"
 
 class UTexture2D;
+class AWTRCharacter;
 
 // Trace distance
 #define TRACE_RANGE 20000.f
