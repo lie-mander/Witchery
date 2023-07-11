@@ -128,6 +128,9 @@ struct FFramePackage
 
     UPROPERTY()
     TMap<FName, FBoxInformation> FrameInfo;
+
+    UPROPERTY()
+    AWTRCharacter* OwnerCharacter;
 };
 
 USTRUCT(BlueprintType)
@@ -140,4 +143,16 @@ struct FServerSideRewindResult
 
     UPROPERTY()
     bool bHeadshot = false;
+};
+
+USTRUCT(BlueprintType)
+struct FShotgunServerSideRewindResult
+{
+    GENERATED_USTRUCT_BODY()
+
+    UPROPERTY()
+    TMap<AWTRCharacter*, uint32> HeadShots;
+
+    UPROPERTY()
+    TMap<AWTRCharacter*, uint32> BodyShots;
 };

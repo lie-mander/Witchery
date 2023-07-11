@@ -73,8 +73,15 @@ void AWTRHitScanWeapon::ApplyDamageByRole(const FVector& TraceStart, const FHitR
 {
     AController* InstigatorController = GetOwnerPlayerController();
     AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(HitResult.GetActor());
+    WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
 
-    if (HasAuthority() && HitResult.bBlockingHit && WTRCharacter && InstigatorController)
+    if (                                                                        //
+        (!bUseServerSideRewind || WTROwnerCharacter->IsLocallyControlled()) &&  //
+        HasAuthority() &&                                                       //
+        HitResult.bBlockingHit &&                                               //
+        WTRCharacter &&                                                         //
+        InstigatorController                                                    //
+    )
     {
         UGameplayStatics::ApplyDamage(  //
             HitResult.GetActor(),       //
@@ -86,7 +93,6 @@ void AWTRHitScanWeapon::ApplyDamageByRole(const FVector& TraceStart, const FHitR
     }
     else if (bUseServerSideRewind && !HasAuthority() && HitResult.bBlockingHit && WTRCharacter && InstigatorController)
     {
-        WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
         WTROwnerPlayerController =
             (WTROwnerPlayerController == nullptr) ? Cast<AWTRPlayerController>(InstigatorController) : WTROwnerPlayerController;
 

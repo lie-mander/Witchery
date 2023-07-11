@@ -38,10 +38,20 @@ protected:
     void MoveBoxes(const FFramePackage& Package, AWTRCharacter* HitCharacter);
     void ReturnBoxes(const FFramePackage& Package, AWTRCharacter* HitCharacter);
     void EnableCharacterMeshCollision(AWTRCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
+    FFramePackage GetFrameToCheck(AWTRCharacter* HitCharacter, float HitTime);
 
     // Main function for server-side rewind
     FServerSideRewindResult ServerSideRewind(
         AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime);
+
+    /*
+     * Shotgun
+     */
+    FShotgunServerSideRewindResult ShotgunServerSideRewind(const TArray<AWTRCharacter*>& HitCharacters,
+        const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime);
+
+    FShotgunServerSideRewindResult ShorgunConfirmHits(
+        const TArray<FFramePackage>& FramePackages, const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations);
 
 private:
     UPROPERTY()
