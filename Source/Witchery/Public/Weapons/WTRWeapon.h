@@ -153,6 +153,7 @@ protected:
     virtual void HandleStateEquippedSecond();
     virtual void HandleStateDropped();
 
+    FVector GetTraceStartFromMuzzleSocket() const;
     AController* GetOwnerPlayerController() const;
 
 private:

@@ -96,7 +96,8 @@ void AWTRHitScanWeapon::ApplyDamageByRole(const FVector& TraceStart, const FHitR
         WTROwnerPlayerController =
             (WTROwnerPlayerController == nullptr) ? Cast<AWTRPlayerController>(InstigatorController) : WTROwnerPlayerController;
 
-        if (WTROwnerCharacter && WTROwnerPlayerController && WTROwnerCharacter->GetLagCompensation())
+        if (WTROwnerCharacter && WTROwnerCharacter->IsLocallyControlled() && WTROwnerPlayerController &&
+            WTROwnerCharacter->GetLagCompensation())
         {
             WTROwnerCharacter->GetLagCompensation()->Server_ScoreRequest(                              //
                 WTRCharacter,                                                                          //

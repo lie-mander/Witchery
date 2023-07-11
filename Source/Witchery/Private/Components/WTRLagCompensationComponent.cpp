@@ -89,14 +89,14 @@ FServerSideRewindResult UWTRLagCompensationComponent::ServerSideRewind(
 FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShotgunServerSideRewind(const TArray<AWTRCharacter*>& HitCharacters,
     const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
 {
-    TArray<FFramePackage> FrameToChecks;
+    TArray<FFramePackage> FramesToCheck;
 
     for (AWTRCharacter* HitCharacter : HitCharacters)
     {
-        FrameToChecks.Add(GetFrameToCheck(HitCharacter, HitTime));
+        FramesToCheck.Add(GetFrameToCheck(HitCharacter, HitTime));
     }
 
-    return FShotgunServerSideRewindResult();
+    return ShorgunConfirmHits(FramesToCheck, TraceStart, HitLocations);
 }
 
 FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePackage& Package, AWTRCharacter* HitCharacter,
@@ -387,6 +387,8 @@ FFramePackage UWTRLagCompensationComponent::GetFrameToCheck(AWTRCharacter* HitCh
     {
         FrameToCheck = InterpBetweenPackages(Older->GetValue(), Younger->GetValue(), HitTime);
     }
+
+    FrameToCheck.OwnerCharacter = HitCharacter;
 
     return FrameToCheck;
 }

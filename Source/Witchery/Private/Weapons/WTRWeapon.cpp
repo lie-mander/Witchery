@@ -335,13 +335,7 @@ void AWTRWeapon::EnableCustomDepth(bool bEnable)
 
 FVector AWTRWeapon::TraceEndWithScatter(const FVector& HitTarget)
 {
-    if (!WeaponMesh) return FVector();
-
-    const USkeletalMeshSocket* MuzzleSocket = WeaponMesh->GetSocketByName("MuzzleFlash");
-    if (!MuzzleSocket) return FVector();
-
-    const FTransform MuzzleTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
-    const FVector TraceStart = MuzzleTransform.GetLocation();
+    const FVector TraceStart = GetTraceStartFromMuzzleSocket();
 
     const FVector ToTargetNormalized = (HitTarget - TraceStart).GetSafeNormal();
     const FVector SphereCenter = TraceStart + ToTargetNormalized * DistanceToSphere;
@@ -354,4 +348,15 @@ FVector AWTRWeapon::TraceEndWithScatter(const FVector& HitTarget)
     DrawDebugLine(GetWorld(), TraceStart, TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size(), FColor::Orange, true);*/
 
     return FVector(TraceStart + ToEnd * TRACE_RANGE / ToEnd.Size());
+}
+
+FVector AWTRWeapon::GetTraceStartFromMuzzleSocket() const
+{
+    if (!WeaponMesh) return FVector();
+
+    const USkeletalMeshSocket* MuzzleSocket = WeaponMesh->GetSocketByName("MuzzleFlash");
+    if (!MuzzleSocket) return FVector();
+
+    const FTransform MuzzleTransform = MuzzleSocket->GetSocketTransform(WeaponMesh);
+    return MuzzleTransform.GetLocation();
 }
