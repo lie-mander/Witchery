@@ -28,7 +28,7 @@ void AWTRFlamethrower::Fire(const FVector& HitTarget)
 {
     Super::Fire(HitTarget);
 
-    if (GetWeaponMesh() && !IsEmpty())
+    if (GetWeaponMesh())
     {
         bCanDamage = true;
 

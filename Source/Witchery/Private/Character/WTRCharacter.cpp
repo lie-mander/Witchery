@@ -861,11 +861,18 @@ void AWTRCharacter::OnReloadFinishedNotifyPlayed(USkeletalMeshComponent* MeshCom
 
 void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
 {
+    if (Weapon &&                                                   //
+        (Weapon->GetWeaponState() == EWeaponState::EWS_Equipped ||  //
+            Weapon->GetWeaponState() == EWeaponState::EWS_EquippedSecond))
+        return;
+
     if (OverlappingWeapon)
     {
-        OverlappingWeapon->SetShowWidget(false);
+        OverlappingWeapon->SetShowWidget(false); 
     }
+
     OverlappingWeapon = Weapon;
+
     if (IsLocallyControlled())
     {
         if (OverlappingWeapon)

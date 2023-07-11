@@ -42,6 +42,7 @@ public:
     FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }
     FORCEINLINE USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMesh; }
     FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
+    FORCEINLINE EWeaponState GetWeaponState() const { return WeaponState; }
     FORCEINLINE EFireType GetFireType() const { return FireType; }
     FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
     FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
