@@ -29,6 +29,9 @@ protected:
     UPROPERTY(VisibleAnywhere, Category = "WTR | Movement")
     UProjectileMovementComponent* ProjectileMovementComponent;
 
+    UPROPERTY(EditAnywhere, Category = "WTR | Movement")
+    float InitialSpeed = 50000.f;
+
     UPROPERTY(VisibleAnywhere, Category = "WTR | Projectile Mesh")
     UStaticMeshComponent* ProjectileMesh;
 
@@ -58,6 +61,16 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Radial hit")
     float DamageOutRadius = 500.f;
+
+    /*
+     * For server-side rewind using
+     */
+    UPROPERTY(EditAnywhere, Category = "WTR | SSR")
+    bool bUseServerSideRewind = false;
+
+    FVector_NetQuantize TraceStart;
+    FVector_NetQuantize100 LaunchVelocity;
+
 
     virtual void BeginPlay() override;
     virtual void SpawnTrailSystem();

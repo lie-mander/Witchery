@@ -194,10 +194,7 @@ void AWTRWeapon::OnWeaponStateChanged()
 
 void AWTRWeapon::HandleStateEquipped()
 {
-    if (HasAuthority())
-    {
-        AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    }
+    AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     WeaponMesh->SetSimulatePhysics(false);
     WeaponMesh->SetEnableGravity(false);
@@ -226,10 +223,7 @@ void AWTRWeapon::HandleStateEquippedSecond()
 
 void AWTRWeapon::HandleStateDropped()
 {
-    if (HasAuthority())
-    {
-        AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    }
+    AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
     WeaponMesh->SetSimulatePhysics(true);
     WeaponMesh->SetEnableGravity(true);
