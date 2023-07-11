@@ -26,6 +26,10 @@ public:
     void Server_ScoreRequest(AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation,
         float HitTime, AWTRWeapon* DamageCauser);
 
+    UFUNCTION(Server, Reliable)
+    void Server_ShotgunScoreRequest(const TArray<AWTRCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
+        const TArray<FVector_NetQuantize>& HitLocations, float HitTime);
+
 protected:
     virtual void BeginPlay() override;
 

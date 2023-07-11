@@ -41,6 +41,43 @@ void UWTRLagCompensationComponent::Server_ScoreRequest_Implementation(AWTRCharac
     }
 }
 
+void UWTRLagCompensationComponent::Server_ShotgunScoreRequest_Implementation(const TArray<AWTRCharacter*>& HitCharacters,
+    const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
+{
+    FShotgunServerSideRewindResult Confrim = ShotgunServerSideRewind(HitCharacters, TraceStart, HitLocations, HitTime);
+
+    for (auto HitCharacter : HitCharacters)
+    {
+        if (!Character ||                                                                //
+            !HitCharacter ||                                                             //
+            !Character->GetEquippedWeapon() ||                                           //
+            Character->GetEquippedWeapon()->GetWeaponType() != EWeaponType::EWT_Shotgun  //
+        )
+            continue;
+
+        // Calculate full head + body damage
+        float TotalDamage = 0.f;
+        if (Confrim.HeadShots.Contains(HitCharacter))
+        {
+            const float HeadDamage = Confrim.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
+            TotalDamage += HeadDamage;
+        }
+        if (Confrim.BodyShots.Contains(HitCharacter))
+        {
+            const float BodyDamage = Confrim.BodyShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
+            TotalDamage += BodyDamage;
+        }
+
+        UGameplayStatics::ApplyDamage(       //
+            HitCharacter,                    //
+            TotalDamage,                     //
+            Character->Controller,           //
+            Character->GetEquippedWeapon(),  //
+            UDamageType::StaticClass()       //
+        );
+    }
+}
+
 FServerSideRewindResult UWTRLagCompensationComponent::ServerSideRewind(
     AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
