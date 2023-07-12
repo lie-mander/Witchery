@@ -16,7 +16,26 @@ AWTRProjectileRocket::AWTRProjectileRocket()
     RocketMovementComponent = CreateDefaultSubobject<UWTRRocketMovementComponent>(TEXT("RocketMovementComponent"));
     RocketMovementComponent->bRotationFollowsVelocity = true;
     RocketMovementComponent->SetIsReplicated(true);
+    RocketMovementComponent->InitialSpeed = InitialSpeed;
+    RocketMovementComponent->MaxSpeed = InitialSpeed;
 }
+
+#if WITH_EDITOR
+void AWTRProjectileRocket::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+    Super::PostEditChangeProperty(PropertyChangedEvent);
+
+    FName PropertyName = PropertyChangedEvent.Property ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+    if (GET_MEMBER_NAME_CHECKED(AWTRProjectileRocket, InitialSpeed) == PropertyName)
+    {
+        if (RocketMovementComponent)
+        {
+            RocketMovementComponent->InitialSpeed = InitialSpeed;
+            RocketMovementComponent->MaxSpeed = InitialSpeed;
+        }
+    }
+}
+#endif
 
 void AWTRProjectileRocket::BeginPlay()
 {
