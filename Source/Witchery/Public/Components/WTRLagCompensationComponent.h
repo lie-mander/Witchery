@@ -36,17 +36,29 @@ protected:
     void SaveFramePackage(FFramePackage& Package);
     void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
     FFramePackage InterpBetweenPackages(const FFramePackage& OlderPackage, const FFramePackage& YoungerPackage, float HitTime);
-    FServerSideRewindResult ConfrimHit(const FFramePackage& Package, AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
-        const FVector_NetQuantize& HitLocation);
     void CacheFrame(FFramePackage& Package, AWTRCharacter* HitCharacter);
     void MoveBoxes(const FFramePackage& Package, AWTRCharacter* HitCharacter);
     void ReturnBoxes(const FFramePackage& Package, AWTRCharacter* HitCharacter);
     void EnableCharacterMeshCollision(AWTRCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
     FFramePackage GetFrameToCheck(AWTRCharacter* HitCharacter, float HitTime);
 
-    // Main function for server-side rewind
+    /*
+     * HitScan
+     */
     FServerSideRewindResult ServerSideRewind(
         AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime);
+
+    FServerSideRewindResult ConfrimHit(const FFramePackage& Package, AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
+        const FVector_NetQuantize& HitLocation);
+
+    /*
+     * Projectile
+     */
+    FServerSideRewindResult ProjectileServerSideRewind(
+        AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& LaunchVelocity, float HitTime);
+
+    FServerSideRewindResult ProjectileConfirmHit(const FFramePackage& Package, AWTRCharacter* HitCharacter,
+        const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& LaunchVelocity);
 
     /*
      * Shotgun

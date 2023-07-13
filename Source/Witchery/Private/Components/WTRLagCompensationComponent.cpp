@@ -86,6 +86,14 @@ FServerSideRewindResult UWTRLagCompensationComponent::ServerSideRewind(
     return ConfrimHit(FrameToCheck, HitCharacter, TraceStart, HitLocation);
 }
 
+FServerSideRewindResult UWTRLagCompensationComponent::ProjectileServerSideRewind(
+    AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& LaunchVelocity, float HitTime)
+{
+    FFramePackage FrameToCheck = GetFrameToCheck(HitCharacter, HitTime);
+
+    return ProjectileConfirmHit(FrameToCheck, HitCharacter, TraceStart, LaunchVelocity);
+}
+
 FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShotgunServerSideRewind(const TArray<AWTRCharacter*>& HitCharacters,
     const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
 {
@@ -174,6 +182,90 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
         if (RewindHitResult.bBlockingHit)
         {
             DrawHitBoxComponent(RewindHitResult, FColor::Green);
+
+            // We have confirmed hit, but not headshot. Can return
+            EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+            ReturnBoxes(CurrentFrame, HitCharacter);
+
+            ServerSideRewindResult.bConfrimHit = true;
+            return ServerSideRewindResult;
+        }
+    }
+
+    return ServerSideRewindResult;
+}
+
+FServerSideRewindResult UWTRLagCompensationComponent::ProjectileConfirmHit(const FFramePackage& Package, AWTRCharacter* HitCharacter,
+    const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& LaunchVelocity)
+{
+    if (!HitCharacter || !GetWorld()) return FServerSideRewindResult();
+
+    FFramePackage CurrentFrame;
+    CacheFrame(CurrentFrame, HitCharacter);
+    MoveBoxes(Package, HitCharacter);
+    EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
+
+    // Default result
+    FServerSideRewindResult ServerSideRewindResult;
+    ServerSideRewindResult.bConfrimHit = false;
+    ServerSideRewindResult.bHeadshot = false;
+
+    // Firsty we will check headshot
+    UBoxComponent* HeadBox = HitCharacter->HitBoxesMap[FName("head")];
+    if (HeadBox)
+    {
+        HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
+    }
+
+    // Configurate projectile hit
+    FPredictProjectilePathParams PathParams;
+    PathParams.bTraceWithCollision = true;
+    PathParams.TraceChannel = ECC_HitBox;
+    PathParams.MaxSimTime = MaxRecordTime;
+    PathParams.StartLocation = TraceStart;
+    PathParams.LaunchVelocity = LaunchVelocity;
+    PathParams.DrawDebugTime = 5.f;
+    PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
+    PathParams.ProjectileRadius = 5.f;
+    PathParams.SimFrequency = 15.f;
+    PathParams.ActorsToIgnore.Add(GetOwner());
+
+    FPredictProjectilePathResult PathResult;
+
+    // Do projectile hit
+    UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
+
+    if (PathResult.HitResult.bBlockingHit)
+    {
+        DrawHitBoxComponent(PathResult.HitResult, FColor::Red);
+
+        // We have headshot, can return early
+        EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
+        ReturnBoxes(CurrentFrame, HitCharacter);
+
+        ServerSideRewindResult.bConfrimHit = true;
+        ServerSideRewindResult.bHeadshot = true;
+        return ServerSideRewindResult;
+    }
+    else
+    {
+        // Do line trace for other boxes
+        for (auto& HitBoxPair : HitCharacter->HitBoxesMap)
+        {
+            if (HitBoxPair.Value)
+            {
+                HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+                HitBoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
+            }
+        }
+
+        // Do another projectile hit
+        UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
+
+        if (PathResult.HitResult.bBlockingHit)
+        {
+            DrawHitBoxComponent(PathResult.HitResult, FColor::Green);
 
             // We have confirmed hit, but not headshot. Can return
             EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
