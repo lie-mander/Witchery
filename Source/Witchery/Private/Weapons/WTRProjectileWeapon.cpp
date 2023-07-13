@@ -8,43 +8,69 @@ void AWTRProjectileWeapon::Fire(const FVector& HitTarget)
 {
     Super::Fire(HitTarget);
 
-    if (!HasAuthority()) return;
-
-    const USkeletalMeshSocket* MuzzleSocket = GetWeaponMesh()->GetSocketByName(FName(MuzzleSocketName));
-    if (MuzzleSocket)
+    APawn* InstigatorPawn = Cast<APawn>(GetOwner());
+    if (GetWorld() && InstigatorPawn)
     {
-        const FTransform MuzzleSocketTransform = MuzzleSocket->GetSocketTransform(GetWeaponMesh());
-        const FVector ToTargetVector = HitTarget - MuzzleSocketTransform.GetLocation();
-        const FRotator ToTargetRotation = ToTargetVector.Rotation();
+        const FVector TraceStart = GetTraceStartFromMuzzleSocket();
+        const FVector ToTargetVector = HitTarget - TraceStart;
+        FRotator ToTargetRotation = ToTargetVector.Rotation();
 
-        APawn* InstigatorPawn = Cast<APawn>(GetOwner());
+        FActorSpawnParameters ProjSpawnParams;
+        ProjSpawnParams.Owner = InstigatorPawn;
+        ProjSpawnParams.Instigator = InstigatorPawn;
 
-        if (GetWorld() && InstigatorPawn)
+        // We want to spawn projectile reverce if out weapon overlapping with static mesh (such as walls, boxes, doors)
+        if (bOverlapOtherStaticMeshes)
         {
-            FActorSpawnParameters ProjSpawnParams;
-            ProjSpawnParams.Owner = GetOwner();
-            ProjSpawnParams.Instigator = InstigatorPawn;
+            ToTargetRotation = FRotator(ToTargetRotation.Pitch, -ToTargetRotation.Yaw, ToTargetRotation.Roll);
+        }
 
-            // We want to spawn projectile reverce if out weapon overlapping with static mesh (such as walls, boxes, doors)
-            if (bOverlapOtherStaticMeshes)
+        AWTRProjectile* SpawnedProjectile = nullptr;
+        // Check SSR
+        if (bUseServerSideRewind)
+        {
+            if (InstigatorPawn->HasAuthority())  // server
             {
-                const FRotator ToTargetRotationReverse = FRotator(ToTargetRotation.Pitch, -ToTargetRotation.Yaw, ToTargetRotation.Roll);
-
-                GetWorld()->SpawnActor<AWTRProjectile>(   //
-                    ProjectileClass,                      //
-                    MuzzleSocketTransform.GetLocation(),  //
-                    ToTargetRotationReverse,              //
-                    ProjSpawnParams                       //
-                );
+                if (InstigatorPawn->IsLocallyControlled())  // server locally controlled - not SSR, replicated projectile
+                {
+                    SpawnedProjectile =
+                        GetWorld()->SpawnActor<AWTRProjectile>(ProjectileClass, TraceStart, ToTargetRotation, ProjSpawnParams);
+                    SpawnedProjectile->bUseServerSideRewind = false;
+                    SpawnedProjectile->SetDamage(Damage);
+                }
+                else  // server not locally controlled - not SSR, not replicated
+                {
+                    SpawnedProjectile = GetWorld()->SpawnActor<AWTRProjectile>(
+                        ServerSideRewindProjectileClass, TraceStart, ToTargetRotation, ProjSpawnParams);
+                    SpawnedProjectile->bUseServerSideRewind = false;
+                }
             }
-            else
+            else  // client
             {
-                GetWorld()->SpawnActor<AWTRProjectile>(   //
-                    ProjectileClass,                      //
-                    MuzzleSocketTransform.GetLocation(),  //
-                    ToTargetRotation,                     //
-                    ProjSpawnParams                       //
-                );
+                if (InstigatorPawn->IsLocallyControlled())  // client locally controlled - SSR, not replicated
+                {
+                    SpawnedProjectile = GetWorld()->SpawnActor<AWTRProjectile>(
+                        ServerSideRewindProjectileClass, TraceStart, ToTargetRotation, ProjSpawnParams);
+                    SpawnedProjectile->bUseServerSideRewind = true;
+                    SpawnedProjectile->SetDamage(Damage);
+                    SpawnedProjectile->TraceStart = TraceStart;
+                    SpawnedProjectile->LaunchVelocity = SpawnedProjectile->GetActorForwardVector() * SpawnedProjectile->GetInitialSpeed();
+                }
+                else // client not locally controlled - not SSR, not replicated
+                {
+                    SpawnedProjectile = GetWorld()->SpawnActor<AWTRProjectile>(
+                        ServerSideRewindProjectileClass, TraceStart, ToTargetRotation, ProjSpawnParams);
+                    SpawnedProjectile->bUseServerSideRewind = false;
+                }
+            }
+        }
+        else // spawn only on server`s characters replication projectiles
+        {
+            if (InstigatorPawn->HasAuthority())
+            {
+                SpawnedProjectile = GetWorld()->SpawnActor<AWTRProjectile>(ProjectileClass, TraceStart, ToTargetRotation, ProjSpawnParams);
+                SpawnedProjectile->bUseServerSideRewind = false;
+                SpawnedProjectile->SetDamage(Damage);
             }
         }
     }

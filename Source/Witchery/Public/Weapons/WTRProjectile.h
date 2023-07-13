@@ -25,6 +25,18 @@ public:
     virtual void Tick(float DeltaTime) override;
     virtual void LifeSpanExpired() override;
 
+    FORCEINLINE void SetDamage(float NewDamage) { Damage = NewDamage; }
+    FORCEINLINE float GetInitialSpeed() const { return InitialSpeed; }
+
+    /*
+     * For server-side rewind using
+     */
+    UPROPERTY(EditAnywhere, Category = "WTR | SSR")
+    bool bUseServerSideRewind = false;
+
+    FVector_NetQuantize TraceStart;
+    FVector_NetQuantize100 LaunchVelocity;
+
 protected:
     UPROPERTY(VisibleAnywhere, Category = "WTR | Movement")
     UProjectileMovementComponent* ProjectileMovementComponent;
@@ -61,16 +73,6 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Radial hit")
     float DamageOutRadius = 500.f;
-
-    /*
-     * For server-side rewind using
-     */
-    UPROPERTY(EditAnywhere, Category = "WTR | SSR")
-    bool bUseServerSideRewind = false;
-
-    FVector_NetQuantize TraceStart;
-    FVector_NetQuantize100 LaunchVelocity;
-
 
     virtual void BeginPlay() override;
     virtual void SpawnTrailSystem();

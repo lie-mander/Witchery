@@ -6,6 +6,8 @@
 #include "Weapons/WTRWeapon.h"
 #include "WTRProjectileWeapon.generated.h"
 
+class AWTRProjectile;
+
 UCLASS()
 class WITCHERY_API AWTRProjectileWeapon : public AWTRWeapon
 {
@@ -16,5 +18,8 @@ public:
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Projectile")
-    TSubclassOf<class AWTRProjectile> ProjectileClass;
+    TSubclassOf<AWTRProjectile> ProjectileClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Projectile")
+    TSubclassOf<AWTRProjectile> ServerSideRewindProjectileClass;
 };
