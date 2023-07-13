@@ -15,6 +15,7 @@ class AWTRCharacter;
 
 // Collision
 #define ECC_SkeletalMesh ECollisionChannel::ECC_GameTraceChannel1
+#define ECC_HitBox ECollisionChannel::ECC_GameTraceChannel2
 
 // Delegates
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotifyPlayed, class USkeletalMeshComponent*)

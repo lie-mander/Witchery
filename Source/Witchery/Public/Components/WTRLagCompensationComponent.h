@@ -72,4 +72,5 @@ private:
     void RecordFrameHistory();
     void SaveThisFrame();
     float TimeBetweenHeadAndTail();
+    void DrawHitBoxComponent(const FHitResult& HitResult, FColor Color);
 };

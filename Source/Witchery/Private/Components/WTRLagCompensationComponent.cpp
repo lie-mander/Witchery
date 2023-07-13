@@ -124,7 +124,7 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
     if (HeadBox)
     {
         HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-        HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+        HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
     }
 
     // HitResult for check blocking hit with boxes
@@ -137,11 +137,13 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
         RewindHitResult,                   //
         TraceStart,                        //
         TraceEnd,                          //
-        ECollisionChannel::ECC_Visibility  //
+        ECC_HitBox                         //
     );
 
     if (RewindHitResult.bBlockingHit)
     {
+        DrawHitBoxComponent(RewindHitResult, FColor::Red);
+
         // We have headshot, can return early
         EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
         ReturnBoxes(CurrentFrame, HitCharacter);
@@ -158,7 +160,7 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
             if (HitBoxPair.Value)
             {
                 HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-                HitBoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+                HitBoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
             }
         }
 
@@ -166,11 +168,13 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
             RewindHitResult,                   //
             TraceStart,                        //
             TraceEnd,                          //
-            ECollisionChannel::ECC_Visibility  //
+            ECC_HitBox                         //
         );
 
         if (RewindHitResult.bBlockingHit)
         {
+            DrawHitBoxComponent(RewindHitResult, FColor::Green);
+
             // We have confirmed hit, but not headshot. Can return
             EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
             ReturnBoxes(CurrentFrame, HitCharacter);
@@ -208,7 +212,7 @@ FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShorgunConfirmHits(
         if (HeadBox)
         {
             HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-            HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+            HeadBox->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
         }
     }
 
@@ -230,12 +234,14 @@ FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShorgunConfirmHits(
             RewindHitResult,                   //
             TraceStart,                        //
             TraceEnd,                          //
-            ECollisionChannel::ECC_Visibility  //
+            ECC_HitBox                         //
         );
 
         AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(RewindHitResult.GetActor());
         if (RewindHitResult.bBlockingHit && WTRCharacter)
         {
+            DrawHitBoxComponent(RewindHitResult, FColor::Red);
+
             // If we already have character in map - increment hits to him
             if (ShotgunResult.HeadShots.Contains(WTRCharacter))
             {
@@ -258,7 +264,7 @@ FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShorgunConfirmHits(
             if (HitBoxPair.Value)
             {
                 HitBoxPair.Value->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-                HitBoxPair.Value->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+                HitBoxPair.Value->SetCollisionResponseToChannel(ECC_HitBox, ECollisionResponse::ECR_Block);
             }
         }
 
@@ -266,8 +272,7 @@ FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShorgunConfirmHits(
         UBoxComponent* HeadBox = FramePackage.OwnerCharacter->HitBoxesMap[FName("head")];
         if (HeadBox)
         {
-            HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-            HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+            HeadBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         }
     }
 
@@ -284,12 +289,14 @@ FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShorgunConfirmHits(
             RewindHitResult,                   //
             TraceStart,                        //
             TraceEnd,                          //
-            ECollisionChannel::ECC_Visibility  //
+            ECC_HitBox                         //
         );
 
         AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(RewindHitResult.GetActor());
         if (RewindHitResult.bBlockingHit && WTRCharacter)
         {
+            DrawHitBoxComponent(RewindHitResult, FColor::Green);
+
             // If we already have character in map - increment hits to him
             if (ShotgunResult.BodyShots.Contains(WTRCharacter))
             {
@@ -564,5 +571,18 @@ void UWTRLagCompensationComponent::ShowFramePackage(const FFramePackage& Package
             false,                                //
             MaxRecordTime                         //
         );
+    }
+}
+
+void UWTRLagCompensationComponent::DrawHitBoxComponent(const FHitResult& HitResult, FColor Color)
+{
+    if (HitResult.Component.IsValid())
+    {
+        const UBoxComponent* Box = Cast<UBoxComponent>(HitResult.Component);
+        if (Box && GetWorld())
+        {
+            DrawDebugBox(
+                GetWorld(), Box->GetComponentLocation(), Box->GetScaledBoxExtent(), FQuat(Box->GetComponentRotation()), Color, false, 8.f);
+        }
     }
 }
