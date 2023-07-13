@@ -2,10 +2,12 @@
 
 #include "Weapons/WTRProjectileBullet.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/Character.h"
+#include "Character/WTRCharacter.h"
+#include "Character/WTRPlayerController.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Components/WTRLagCompensationComponent.h"
 
-AWTRProjectileBullet::AWTRProjectileBullet() 
+AWTRProjectileBullet::AWTRProjectileBullet()
 {
     ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
     ProjectileMovementComponent->bRotationFollowsVelocity = true;
@@ -15,7 +17,7 @@ AWTRProjectileBullet::AWTRProjectileBullet()
 }
 
 #if WITH_EDITOR
-void AWTRProjectileBullet::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) 
+void AWTRProjectileBullet::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
     Super::PostEditChangeProperty(PropertyChangedEvent);
 
@@ -34,37 +36,36 @@ void AWTRProjectileBullet::PostEditChangeProperty(FPropertyChangedEvent& Propert
 void AWTRProjectileBullet::OnHit(
     UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    const ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+    const AWTRCharacter* OwnerCharacter = Cast<AWTRCharacter>(GetOwner());
     if (OwnerCharacter)
     {
-        AController* OwnerController = Cast<AController>(OwnerCharacter->Controller);
-        if (OwnerController)
+        AWTRPlayerController* OwnerController = Cast<AWTRPlayerController>(OwnerCharacter->Controller);
+        if (                                                                     //
+            (!bUseServerSideRewind || OwnerCharacter->IsLocallyControlled()) &&  //
+            OwnerCharacter->HasAuthority() &&                                    //
+            Hit.bBlockingHit &&                                                  //
+            OtherActor &&                                                        //
+            OwnerController                                                      //
+        )
         {
             UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
+            Super::OnHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit);
+            return;
+        }
+        else if (bUseServerSideRewind && !OwnerCharacter->HasAuthority() && Hit.bBlockingHit && OtherActor && OwnerController)
+        {
+            if (OwnerCharacter && OwnerCharacter->IsLocallyControlled() && OwnerController && OwnerCharacter->GetLagCompensation())
+            {
+                AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(Hit.GetActor());
+                OwnerCharacter->GetLagCompensation()->Server_ProjectileScoreRequest(    //
+                    WTRCharacter,                                                       //
+                    TraceStart,                                                         //
+                    LaunchVelocity,                                                     //
+                    OwnerController->GetServerTime() - OwnerController->SingleTripTime  //
+                );
+            }
         }
     }
 
     Super::OnHit(HitComponent, OtherActor, OtherComp, NormalImpulse, Hit);
-}
-
-void AWTRProjectileBullet::BeginPlay() 
-{
-    Super::BeginPlay();
-
-    FPredictProjectilePathParams PathParams;
-    FPredictProjectilePathResult PathResult;
-
-    PathParams.ActorsToIgnore.Add(this);
-    PathParams.bTraceWithChannel = true;
-    PathParams.bTraceWithCollision = true;
-    PathParams.DrawDebugTime = 5.f;
-    PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
-    PathParams.LaunchVelocity = GetActorForwardVector() * InitialSpeed;
-    PathParams.MaxSimTime = 5.f;
-    PathParams.ProjectileRadius = 5.f;
-    PathParams.SimFrequency = 30.f;
-    PathParams.StartLocation = GetActorLocation();
-    PathParams.TraceChannel = ECollisionChannel::ECC_Visibility;
-
-    UGameplayStatics::PredictProjectilePath(this, PathParams, PathResult);
 }

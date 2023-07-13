@@ -38,11 +38,11 @@ void AWTRProjectileWeapon::Fire(const FVector& HitTarget)
                     SpawnedProjectile->bUseServerSideRewind = false;
                     SpawnedProjectile->SetDamage(Damage);
                 }
-                else  // server not locally controlled - not SSR, not replicated
+                else  // server not locally controlled - SSR, not replicated
                 {
                     SpawnedProjectile = GetWorld()->SpawnActor<AWTRProjectile>(
                         ServerSideRewindProjectileClass, TraceStart, ToTargetRotation, ProjSpawnParams);
-                    SpawnedProjectile->bUseServerSideRewind = false;
+                    SpawnedProjectile->bUseServerSideRewind = true;
                 }
             }
             else  // client

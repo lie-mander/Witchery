@@ -41,6 +41,23 @@ void UWTRLagCompensationComponent::Server_ScoreRequest_Implementation(AWTRCharac
     }
 }
 
+void UWTRLagCompensationComponent::Server_ProjectileScoreRequest_Implementation(
+    AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& LaunchVelocity, float HitTime)
+{
+    FServerSideRewindResult Confrim = ProjectileServerSideRewind(HitCharacter, TraceStart, LaunchVelocity, HitTime);
+
+    if (Confrim.bConfrimHit && Character && Character->GetEquippedWeapon())
+    {
+        UGameplayStatics::ApplyDamage(                    //
+            HitCharacter,                                 //
+            Character->GetEquippedWeapon()->GetDamage(),  //
+            Character->Controller,                        //
+            Character->GetEquippedWeapon(),               //
+            UDamageType::StaticClass()                    //
+        );
+    }
+}
+
 void UWTRLagCompensationComponent::Server_ShotgunScoreRequest_Implementation(const TArray<AWTRCharacter*>& HitCharacters,
     const FVector_NetQuantize& TraceStart, const TArray<FVector_NetQuantize>& HitLocations, float HitTime)
 {

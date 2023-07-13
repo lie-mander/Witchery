@@ -27,6 +27,10 @@ public:
         float HitTime, AWTRWeapon* DamageCauser);
 
     UFUNCTION(Server, Reliable)
+    void Server_ProjectileScoreRequest(
+        AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize100& LaunchVelocity, float HitTime);
+
+    UFUNCTION(Server, Reliable)
     void Server_ShotgunScoreRequest(const TArray<AWTRCharacter*>& HitCharacters, const FVector_NetQuantize& TraceStart,
         const TArray<FVector_NetQuantize>& HitLocations, float HitTime);
 
