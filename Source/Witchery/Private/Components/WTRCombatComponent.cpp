@@ -604,14 +604,7 @@ void UWTRCombatComponent::FireTimerUpdate()
 
 void UWTRCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 {
-    if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun &&
-        CombatState == ECombatState::ECS_Reloading)
-    {
-        Character->PlayFireMontage(bIsAiming);
-        EquippedWeapon->Fire(TraceHitTarget);
-        CombatState = ECombatState::ECS_Unoccupied;
-    }
-    else if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Flamethrower &&
+    if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Flamethrower &&
              CombatState == ECombatState::ECS_Unoccupied)
     {
         Character->PlayFireMontage(bIsAiming);
