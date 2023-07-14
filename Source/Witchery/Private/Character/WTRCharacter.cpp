@@ -654,6 +654,16 @@ void AWTRCharacter::PlayEliminationMontage()
     AnimInstance->Montage_Play(EliminationMontage);
 }
 
+void AWTRCharacter::PlaySwapingWeaponsMontage()
+{
+    if (!GetMesh() || !SwapingWeaponsMontage) return;
+
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    if (!AnimInstance) return;
+
+    AnimInstance->Montage_Play(SwapingWeaponsMontage);
+}
+
 void AWTRCharacter::PlayThrowGrenadeMontage()
 {
     if (!GetMesh() || !ThrowGrenadeMontage) return;
@@ -678,7 +688,7 @@ void AWTRCharacter::OnEquipButtonPressed()
 {
     if (bDisableGameplay) return;
 
-    if (Combat)
+    if (Combat && Combat->CombatState != ECombatState::ECS_SwapingWeapons)
     {
         Combat->SetAiming(false);
 
@@ -798,7 +808,9 @@ void AWTRCharacter::OnGrenadeButtonPressed()
 
 void AWTRCharacter::OnWeaponSwapButtonPressed()
 {
-    if (bDisableGameplay || !bCanSwap) return;
+    if (bDisableGameplay || !bCanSwap || !Combat || !Combat->CanSwapWeapon() || Combat->CombatState != ECombatState::ECS_Unoccupied) return;
+
+    bFinishedSwapping = false;
 
     GetWorldTimerManager().SetTimer(              //
         SwapButtonTimerHandle,                    //
@@ -807,18 +819,17 @@ void AWTRCharacter::OnWeaponSwapButtonPressed()
         DelaySwapButton                           //
     );
 
-    if (Combat)
-    {
-        Combat->SetAiming(false);
+    Combat->SetAiming(false);
 
-        if (HasAuthority())
-        {
-            Combat->SwapWeapon();
-        }
-        else
-        {
-            Server_OnWeaponSwapButtonPressed();
-        }
+    if (HasAuthority())
+    {
+        Combat->SwapWeapon();
+    }
+    else
+    {
+        Server_OnWeaponSwapButtonPressed();
+        PlaySwapingWeaponsMontage();
+        Combat->CombatState = ECombatState::ECS_SwapingWeapons;
     }
 
     bCanSwap = false;
@@ -860,7 +871,7 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
 
     if (OverlappingWeapon)
     {
-        OverlappingWeapon->SetShowWidget(false); 
+        OverlappingWeapon->SetShowWidget(false);
     }
 
     OverlappingWeapon = Weapon;

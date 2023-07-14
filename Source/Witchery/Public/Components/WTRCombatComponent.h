@@ -47,6 +47,12 @@ public:
     UFUNCTION(BlueprintCallable)
     void LaunchGrenade();
 
+    UFUNCTION(BlueprintCallable)
+    void SwapFinished();
+
+    UFUNCTION(BlueprintCallable)
+    void SwapAttachedWeapons();
+
 protected:
     virtual void BeginPlay() override;
 

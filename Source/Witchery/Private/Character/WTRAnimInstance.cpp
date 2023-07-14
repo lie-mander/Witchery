@@ -57,7 +57,7 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     // Set if character need to turn right or left while standing
     TurningInPlace = Character->GetTurningState();
 
-    // Sets whether or not to rotate the root bone (necessary if not a simulated proxy) 
+    // Sets whether or not to rotate the root bone (necessary if not a simulated proxy)
     bRotateRootBone = Character->ShouldRotateRootBone();
 
     // Sets to true when character is dead
@@ -67,15 +67,19 @@ void UWTRAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     bUseFABRIK = Character->GetCombatState() == ECombatState::ECS_Unoccupied;
 
     // We also don`t want use FABRIK if we locally reloading now
-    if (Character->IsLocallyControlled() && Character->GetCombatState() != ECombatState::ECS_ThrowingGrenade)
+    bool bOverrideFABRIK = Character->IsLocallyControlled() && Character->GetCombatState() != ECombatState::ECS_ThrowingGrenade &&
+                           Character->bFinishedSwapping;
+    if (bOverrideFABRIK)
     {
         bUseFABRIK = !Character->IsLocallyReloading();
     }
 
-    // When character is reloading or throwing grenade, he doesn`t need to use Offsets, cause reload animation will broke (hands). Will be more condition
+    // When character is reloading or throwing grenade, he doesn`t need to use Offsets, cause reload animation will broke (hands). Will be
+    // more condition
     bUseAimOffsets = Character->GetCombatState() == ECombatState::ECS_Unoccupied && !Character->IsDisableGameplay();
 
-    // When character is reloading or throwing grenade, he doesn`t need to transform right hand, cause weapon will continue rotating while reloading. Will be more condition
+    // When character is reloading or throwing grenade, he doesn`t need to transform right hand, cause weapon will continue rotating while
+    // reloading. Will be more condition
     bTransformRightHand = Character->GetCombatState() == ECombatState::ECS_Unoccupied && !Character->IsDisableGameplay();
 
     // Set offset yaw for strafing

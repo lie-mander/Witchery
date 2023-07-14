@@ -247,7 +247,6 @@ void UWTRCombatComponent::OnRep_SecondWeapon()
     if (!Character || !SecondWeapon) return;
 
     SecondWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecond);
-    PlayPickupSound(SecondWeapon);
     AttachActorToBackpack(SecondWeapon);
 }
 
@@ -401,13 +400,14 @@ void UWTRCombatComponent::DropOrDestroyWeapon(AWTRWeapon* Weapon)
 
 void UWTRCombatComponent::SwapWeapon()
 {
-    if (!CanSwapWeapon()) return;
+    if (!CanSwapWeapon() || !Character) return;
 
     AWTRWeapon* TempPtr = EquippedWeapon;
     EquippedWeapon = SecondWeapon;
     SecondWeapon = TempPtr;
 
-    HandleSwapWeapon();
+    Character->PlaySwapingWeaponsMontage();
+    CombatState = ECombatState::ECS_SwapingWeapons;
 }
 
 void UWTRCombatComponent::HandleSwapWeapon()
@@ -415,10 +415,14 @@ void UWTRCombatComponent::HandleSwapWeapon()
     EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
     StopReloadWhileEquip();
     UpdateCarriedAmmoAndHUD();
-    PlayPickupSound(EquippedWeapon);
     ReloadEmptyWeapon();
     AttachWeaponByTypeToRightHand(EquippedWeapon);
     UpdateHUDAmmo();
+
+    if (Character && Character->HasAuthority())
+    {
+        PlayPickupSound(EquippedWeapon);
+    }
 
     SecondWeapon->SetWeaponState(EWeaponState::EWS_EquippedSecond);
     AttachActorToBackpack(SecondWeapon);
@@ -632,6 +636,7 @@ void UWTRCombatComponent::LocalFireShotgun(const TArray<FVector_NetQuantize>& Tr
     {
         Character->PlayFireMontage(bIsAiming);
         Shotgun->FireShotgun(TraceHitTargets);
+        bLocallyReloading = false;
         CombatState = ECombatState::ECS_Unoccupied;
     }
     else if (CombatState == ECombatState::ECS_Unoccupied)
@@ -789,6 +794,24 @@ void UWTRCombatComponent::LaunchGrenade()
     }
 }
 
+void UWTRCombatComponent::SwapAttachedWeapons()
+{
+    HandleSwapWeapon();
+}
+
+void UWTRCombatComponent::SwapFinished()
+{
+    if (Character)
+    {
+        Character->bFinishedSwapping = true;
+    }
+
+    if (Character && Character->HasAuthority())
+    {
+        CombatState = ECombatState::ECS_Unoccupied;
+    }
+}
+
 void UWTRCombatComponent::Server_LaunchGrenade_Implementation(const FVector_NetQuantize& Target)
 {
     if (Character && Character->HasAuthority() && GrenadeClass && Character->GetGrenadeMesh())
@@ -866,6 +889,13 @@ void UWTRCombatComponent::OnRep_CombatState()
                 Character->PlayThrowGrenadeMontage();
                 AttachActorToLeftHand(EquippedWeapon);
                 SetShowGrenadeMesh(true);
+            }
+            break;
+
+        case ECombatState::ECS_SwapingWeapons:  //
+            if (Character && !Character->IsLocallyControlled())
+            {
+                Character->PlaySwapingWeaponsMontage();
             }
             break;
     }

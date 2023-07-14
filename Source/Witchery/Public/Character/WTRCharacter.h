@@ -51,6 +51,7 @@ public:
     void StopReloadMontage();
     void PlayHitReactMontage();
     void PlayEliminationMontage();
+    void PlaySwapingWeaponsMontage();
     void PlayThrowGrenadeMontage();
     void StopThrowGrenadeMontage();
 
@@ -98,6 +99,8 @@ public:
 
     UPROPERTY()
     TMap<FName, UBoxComponent*> HitBoxesMap;
+
+    bool bFinishedSwapping = true;
 
 protected:
     /*
@@ -187,6 +190,9 @@ private:
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
     UAnimMontage* ThrowGrenadeMontage;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Animation")
+    UAnimMontage* SwapingWeaponsMontage;
 
     UPROPERTY(Replicated)
     bool bDamageFromFlamethrower = false;
