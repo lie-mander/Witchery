@@ -640,9 +640,20 @@ void AWTRPlayerController::PingTick(float DeltaTime)
     if (ShowPingFrequencyRuntime >= ShowPingFrequency && !bPingAnimPlaying)
     {
         PlayerState = (PlayerState == nullptr) ? GetPlayerState<APlayerState>() : PlayerState;
+
+        if (PlayerState)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Ping: %f"), PlayerState->GetPingInMilliseconds());
+        }
+
         if (PlayerState && PlayerState->GetPingInMilliseconds() >= PingThreshold)
         {
             ShowPing();
+            Server_ReportHighPingStatus(true);
+        }
+        else
+        {
+            Server_ReportHighPingStatus(false);
         }
     }
     else if (bPingAnimPlaying)
@@ -691,6 +702,11 @@ void AWTRPlayerController::HidePing()
             WTR_HUD->CharacterOverlayWidget->StopAnimation(WTR_HUD->CharacterOverlayWidget->Ping);
         }
     }
+}
+
+void AWTRPlayerController::Server_ReportHighPingStatus_Implementation(bool bHighPing) 
+{
+    IsPingHighDelegate.Broadcast(bHighPing);
 }
 
 void AWTRPlayerController::HandleMatchStateWaitingToStart()

@@ -127,8 +127,11 @@ protected:
     /*
      * Server-side rewind
      */
-    UPROPERTY(EditAnywhere, Category = "WTR | SSR")
+    UPROPERTY(Replicated, EditAnywhere, Category = "WTR | SSR")
     bool bUseServerSideRewind = false;
+
+    UFUNCTION()
+    void OnPingHigh(bool bHighPing);
 
     /*
      * Other variables
@@ -152,6 +155,7 @@ protected:
     virtual void OnWeaponStateChanged();
     virtual void HandleStateEquipped();
     virtual void HandleStateEquippedSecond();
+    virtual void HandleEquipped();
     virtual void HandleStateDropped();
 
     FVector GetTraceStartFromMuzzleSocket() const;

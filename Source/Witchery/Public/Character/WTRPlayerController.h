@@ -46,6 +46,8 @@ public:
     void SetHUD_FPS();
     void SetHUDGrenades(int32 Grenades);
 
+    FIsPingHigh IsPingHighDelegate;
+
     float SingleTripTime = 0.f;
 
 protected:
@@ -191,6 +193,9 @@ private:
     
     float ShowPingFrequencyRuntime = 0.f;
     float ShowPingDurationRuntime = 0.f;
+
+    UFUNCTION(Server, Reliable)
+    void Server_ReportHighPingStatus(bool bHighPing);
 
     /*
      * Functions

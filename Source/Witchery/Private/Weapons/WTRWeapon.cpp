@@ -47,6 +47,7 @@ void AWTRWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AWTRWeapon, WeaponState);
+    DOREPLIFETIME_CONDITION(AWTRWeapon, bUseServerSideRewind, COND_OwnerOnly);
 }
 
 void AWTRWeapon::BeginPlay()
@@ -194,6 +195,36 @@ void AWTRWeapon::OnWeaponStateChanged()
 
 void AWTRWeapon::HandleStateEquipped()
 {
+    HandleEquipped();
+
+    WTROwnerPlayerController =
+        (WTROwnerPlayerController == nullptr) ? UWTRTools::GetPlayerControllerByActor(GetOwner()) : WTROwnerPlayerController;
+
+    if (WTROwnerPlayerController && HasAuthority() && bUseServerSideRewind && !WTROwnerPlayerController->IsPingHighDelegate.IsBound())
+    {
+        WTROwnerPlayerController->IsPingHighDelegate.AddDynamic(this, &AWTRWeapon::OnPingHigh);
+    }
+}
+
+void AWTRWeapon::HandleStateEquippedSecond()
+{
+    HandleEquipped();
+
+    WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
+    WeaponMesh->MarkRenderStateDirty();
+    EnableCustomDepth(true);
+
+    WTROwnerPlayerController =
+        (WTROwnerPlayerController == nullptr) ? UWTRTools::GetPlayerControllerByActor(GetOwner()) : WTROwnerPlayerController;
+
+    if (WTROwnerPlayerController && HasAuthority() && bUseServerSideRewind && WTROwnerPlayerController->IsPingHighDelegate.IsBound())
+    {
+        WTROwnerPlayerController->IsPingHighDelegate.RemoveDynamic(this, &AWTRWeapon::OnPingHigh);
+    }
+}
+
+void AWTRWeapon::HandleEquipped() 
+{
     AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     WeaponMesh->SetSimulatePhysics(false);
@@ -212,15 +243,6 @@ void AWTRWeapon::HandleStateEquipped()
     EnableCustomDepth(false);
 }
 
-void AWTRWeapon::HandleStateEquippedSecond()
-{
-    HandleStateEquipped();
-
-    WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
-    WeaponMesh->MarkRenderStateDirty();
-    EnableCustomDepth(true);
-}
-
 void AWTRWeapon::HandleStateDropped()
 {
     AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -236,6 +258,14 @@ void AWTRWeapon::HandleStateDropped()
     WeaponMesh->SetCustomDepthStencilValue(CUSTOM_DEPTH_BLUE);
     WeaponMesh->MarkRenderStateDirty();
     EnableCustomDepth(true);
+
+    WTROwnerPlayerController =
+        (WTROwnerPlayerController == nullptr) ? UWTRTools::GetPlayerControllerByActor(GetOwner()) : WTROwnerPlayerController;
+
+    if (WTROwnerPlayerController && HasAuthority() && bUseServerSideRewind && WTROwnerPlayerController->IsPingHighDelegate.IsBound())
+    {
+        WTROwnerPlayerController->IsPingHighDelegate.RemoveDynamic(this, &AWTRWeapon::OnPingHigh);
+    }
 }
 
 void AWTRWeapon::OnRep_Owner()
@@ -298,6 +328,11 @@ void AWTRWeapon::OnWeaponMeshEndOverlap(
     if (OverlapWeapon) return;
 
     bOverlapOtherStaticMeshes = false;
+}
+
+void AWTRWeapon::OnPingHigh(bool bHighPing)
+{
+    bUseServerSideRewind = !bHighPing;
 }
 
 void AWTRWeapon::SetShowWidget(bool bShowWidget)
