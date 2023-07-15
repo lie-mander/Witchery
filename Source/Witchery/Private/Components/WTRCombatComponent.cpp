@@ -238,8 +238,12 @@ void UWTRCombatComponent::OnRep_EquippedWeapon()
     PlayPickupSound(EquippedWeapon);
     SetCharacterSettingsWhenEquip();
     AttachWeaponByTypeToRightHand(EquippedWeapon);
-    UpdateHUDWeaponType();
-    UpdateHUDAmmo();
+
+    if (CombatState != ECombatState::ECS_SwapingWeapons)
+    {
+        UpdateHUDWeaponType();
+        UpdateHUDAmmo();
+    }
 }
 
 void UWTRCombatComponent::OnRep_SecondWeapon()
@@ -417,6 +421,7 @@ void UWTRCombatComponent::HandleSwapWeapon()
     UpdateCarriedAmmoAndHUD();
     ReloadEmptyWeapon();
     AttachWeaponByTypeToRightHand(EquippedWeapon);
+    UpdateHUDWeaponType();
     UpdateHUDAmmo();
 
     if (Character && Character->HasAuthority())
@@ -547,7 +552,7 @@ void UWTRCombatComponent::HandleHitScanWeaponFire()
 
     HitTarget = (EquippedWeapon->bUseScatter) ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
     LocalFire(HitTarget);
-    Server_Fire(HitTarget);
+    Server_Fire(HitTarget, EquippedWeapon->GetWeaponFiringDelay());
 }
 
 void UWTRCombatComponent::HandleProjectileWeaponFire()
@@ -556,7 +561,7 @@ void UWTRCombatComponent::HandleProjectileWeaponFire()
 
     HitTarget = (EquippedWeapon->bUseScatter) ? EquippedWeapon->TraceEndWithScatter(HitTarget) : HitTarget;
     LocalFire(HitTarget);
-    Server_Fire(HitTarget);
+    Server_Fire(HitTarget, EquippedWeapon->GetWeaponFiringDelay());
 }
 
 void UWTRCombatComponent::HandleShotgunWeaponFire()
@@ -570,14 +575,14 @@ void UWTRCombatComponent::HandleShotgunWeaponFire()
         Shotgun->ShotgunTraceEndWithScatter(HitTarget, HitTargets);
 
         LocalFireShotgun(HitTargets);
-        Server_FireShotgun(HitTargets);
+        Server_FireShotgun(HitTargets, Shotgun->GetWeaponFiringDelay());
     }
 }
 
 void UWTRCombatComponent::HandleFlamethrowerWeaponFire()
 {
     LocalFire(HitTarget);
-    Server_Fire(HitTarget);
+    Server_Fire(HitTarget, EquippedWeapon->GetWeaponFiringDelay());
 }
 
 void UWTRCombatComponent::FireTimerStart()
@@ -642,9 +647,19 @@ void UWTRCombatComponent::LocalFireShotgun(const TArray<FVector_NetQuantize>& Tr
     }
 }
 
-void UWTRCombatComponent::Server_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
+void UWTRCombatComponent::Server_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget, float Check_FireDelay)
 {
     Multicast_Fire(TraceHitTarget);
+}
+
+bool UWTRCombatComponent::Server_Fire_Validate(const FVector_NetQuantize& TraceHitTarget, float Check_FireDelay)
+{
+    if (EquippedWeapon)
+    {
+        bool bNearlyFireDelay = FMath::IsNearlyEqual(EquippedWeapon->GetWeaponFiringDelay(), Check_FireDelay, 0.001f);
+        return bNearlyFireDelay;
+    }
+    return true;
 }
 
 void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& TraceHitTarget)
@@ -660,9 +675,19 @@ void UWTRCombatComponent::Multicast_Fire_Implementation(const FVector_NetQuantiz
     LocalFire(TraceHitTarget);
 }
 
-void UWTRCombatComponent::Server_FireShotgun_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)
+void UWTRCombatComponent::Server_FireShotgun_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets, float Check_FireDelay)
 {
     Multicast_FireShotgun(TraceHitTargets);
+}
+
+bool UWTRCombatComponent::Server_FireShotgun_Validate(const TArray<FVector_NetQuantize>& TraceHitTargets, float Check_FireDelay) 
+{
+    if (EquippedWeapon)
+    {
+        bool bNearlyFireDelay = FMath::IsNearlyEqual(EquippedWeapon->GetWeaponFiringDelay(), Check_FireDelay, 0.001f);
+        return bNearlyFireDelay;
+    }
+    return true;
 }
 
 void UWTRCombatComponent::Multicast_FireShotgun_Implementation(const TArray<FVector_NetQuantize>& TraceHitTargets)

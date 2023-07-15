@@ -277,6 +277,11 @@ void AWTRWeapon::OnRep_Owner()
         WTROwnerPlayerController = nullptr;
         WTROwnerCharacter = nullptr;
     }
+
+    if (WeaponState == EWeaponState::EWS_Equipped)
+    {
+        SetHUDAmmo();
+    }
 }
 
 void AWTRWeapon::Dropped()

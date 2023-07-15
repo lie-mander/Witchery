@@ -80,11 +80,11 @@ protected:
     UFUNCTION(Server, Reliable)
     void Server_Reload();
 
-    UFUNCTION(Server, Reliable)
-    void Server_Fire(const FVector_NetQuantize& TraceHitTarget);
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_Fire(const FVector_NetQuantize& TraceHitTarget, float Check_FireDelay);
 
-    UFUNCTION(Server, Reliable)
-    void Server_FireShotgun(const TArray<FVector_NetQuantize>& TraceHitTargets);
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_FireShotgun(const TArray<FVector_NetQuantize>& TraceHitTargets, float Check_FireDelay);
 
     UFUNCTION(Server, Reliable)
     void Server_StopFire();
