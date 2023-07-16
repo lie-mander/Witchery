@@ -46,7 +46,10 @@ public:
     void SetHUD_FPS();
     void SetHUDGrenades(int32 Grenades);
 
+    FORCEINLINE FName GetMatchState() const { return MatchState; }
+
     FIsPingHigh IsPingHighDelegate;
+    FOnMatchStateChanged OnMatchStateChanged;
 
     float SingleTripTime = 0.f;
 
@@ -78,6 +81,9 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Debug")
     bool bShowFPS = false;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Debug")
+    bool bShowDelayInit = false;
+
     /*
      * Sound
      */
@@ -88,7 +94,7 @@ private:
      * Match states
      */
     UPROPERTY(ReplicatedUsing = OnRep_MatchState)
-    FName MatchState;
+    FName MatchState = NAME_None;
 
     UFUNCTION()
     void OnRep_MatchState();
@@ -131,6 +137,9 @@ private:
     int32 DelayInit_WeaponAmmo = 0;
     int32 DelayInit_CarriedAmmo = 0;
     EWeaponType DelayInit_WeaponType = EWeaponType::EWT_MAX;
+
+    bool bDelayInit_AnnouncementWidget = false;
+    bool bDelayInit_CharacterOverlayDelayInit = false;
 
     /*
      * MatchType timers
@@ -210,4 +219,5 @@ private:
     void PingTick(float DeltaTime);
     void ShowPing();
     void HidePing();
+    void DelayInitCharacterOverlay();
 };

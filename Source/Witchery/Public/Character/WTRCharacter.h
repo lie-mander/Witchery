@@ -368,6 +368,8 @@ private:
     float DelaySwapButton = 0.4f;
 
     bool bCanSwap = true;
+    bool bDelayInitHUD_Controller = false;
+    bool bDelayInitHUD_PlayerState = false;
 
     FTimerHandle SwapButtonTimerHandle;
 
@@ -405,6 +407,7 @@ private:
     void UpdateIfIsNotStanding();
     void HideCharacterWithWeaponIfCameraClose();
     void DropOrDestroyWeapons();
+    void DelayInitHUD();
     float CalculateSpeed() const;
     AWTRGameMode* GetWTRGameMode() const;
 
@@ -416,4 +419,5 @@ private:
         AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
     void OnReloadFinishedNotifyPlayed(USkeletalMeshComponent* MeshComp);
+    void OnMatchStateChanged(const FName& State);
 };

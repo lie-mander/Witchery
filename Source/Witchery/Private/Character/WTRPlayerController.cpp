@@ -18,6 +18,8 @@
 #include "WTRPlayerState.h"
 #include "Sound/SoundClass.h"
 
+DECLARE_LOG_CATEGORY_CLASS(WTR_PlayerController, All, All);
+
 void AWTRPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -49,50 +51,45 @@ void AWTRPlayerController::Tick(float DeltaTime)
 
 void AWTRPlayerController::DelayInit()
 {
-    if (!CharacterOverlay)
+    if (bDelayInit_AnnouncementWidget)
     {
         WTR_HUD = GetWTR_HUD();
-        if (WTR_HUD)
-        {
-            CharacterOverlay = Cast<UWTRCharacterOverlayWidget>(WTR_HUD->CharacterOverlayWidget);
-
-            if (CharacterOverlay)
-            {
-                SetHUDHealth(DelayInit_CurrentHealth, DelayInit_MaxHealth);
-                SetHUDShield(DelayInit_CurrentShield, DelayInit_MaxShield);
-                SetHUDScore(DelayInit_ScoreAmount);
-                SetHUDDefeats(DelayInit_DefeatsAmount);
-                SetHUDWeaponAmmo(DelayInit_WeaponAmmo);
-                SetHUDCarriedAmmo(DelayInit_CarriedAmmo);
-                SetHUDWeaponType(DelayInit_WeaponType);
-
-                WTRCharacter = Cast<AWTRCharacter>(GetPawn());
-                if (WTRCharacter && WTRCharacter->GetCombatComponent())
-                {
-                    SetHUDGrenades(WTRCharacter->GetCombatComponent()->GetCurrentGrenades());
-                }
-
-                if (!bShowFPS)
-                {
-                    CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Hidden);
-                }
-                else
-                {
-                    TimeToFPSUpdate = TimeFPSUpdateFrequency;
-                    CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Visible);
-                }
-            }
-        }
-    }
-
-    if (!AnnouncementWidget)
-    {
-        WTR_HUD = GetWTR_HUD();
-        if (IsLocalController() && WTR_HUD && (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown) &&
-            !WTR_HUD->AnnouncementWidget)
+        if (WTR_HUD && IsLocalController())
         {
             WTR_HUD->AddAnnouncement();
             AnnouncementWidget = Cast<UWTRAnnouncementWidget>(WTR_HUD->AnnouncementWidget);
+
+            if (bShowDelayInit && GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(
+                    -1, 5.f, FColor::Green, FString::Printf(TEXT("AnnouncementWidget created [DelayInit]")), false);
+            }
+
+            bDelayInit_AnnouncementWidget = false;
+        }
+    }
+
+    if (bDelayInit_CharacterOverlayDelayInit)
+    {
+        WTR_HUD = GetWTR_HUD();
+        if (WTR_HUD && IsLocalController())
+        {
+            WTR_HUD->AddCharacterOverlay();
+            CharacterOverlay = Cast<UWTRCharacterOverlayWidget>(WTR_HUD->CharacterOverlayWidget);
+
+            if (bShowDelayInit && GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(
+                    -1, 5.f, FColor::Green, FString::Printf(TEXT("CharacterOverlayWidget created [DelayInit]")), false);
+            }
+
+            if (bShowDelayInit && GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(
+                    -1, 5.f, FColor::Yellow, FString::Printf(TEXT("CharacterOverlayWidget delay init variables [DelayInit]")), false);
+            }
+
+            bDelayInit_CharacterOverlayDelayInit = false;
         }
     }
 
@@ -101,6 +98,11 @@ void AWTRPlayerController::DelayInit()
         WTRGameMode = (WTRGameMode == nullptr) ? Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this)) : WTRGameMode;
         if (WTRGameMode)
         {
+            if (bShowDelayInit && GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(
+                    0, 5.f, FColor::Cyan, FString::Printf(TEXT("GameMode find [DelayInit, WTRGameMode]")), false);
+            }
             Server_CheckMatchState();
         }
     }
@@ -126,17 +128,7 @@ void AWTRPlayerController::Client_ApplyMatchState_Implementation(
     WarmupTime = TimeofWarmup;
     MatchTime = TimeOfMatch;
     CooldownTime = TimeOfCooldown;
-    MatchState = State;
-
-    if (IsLocalController() && WTR_HUD && (MatchState == MatchState::WaitingToStart || MatchState == MatchState::Cooldown) &&
-        !WTR_HUD->AnnouncementWidget)
-    {
-        WTR_HUD->AddAnnouncement();
-    }
-    else if (IsLocalController() && WTR_HUD && MatchState == MatchState::InProgress && !WTR_HUD->CharacterOverlayWidget)
-    {
-        WTR_HUD->AddCharacterOverlay();
-    }
+    // MatchState = State;
 }
 
 void AWTRPlayerController::SetMatchState(const FName& State)
@@ -146,7 +138,7 @@ void AWTRPlayerController::SetMatchState(const FName& State)
     {
         HandleMatchStateWaitingToStart();
     }
-    if (MatchState == MatchState::InProgress)
+    else if (MatchState == MatchState::InProgress)
     {
         HandleMatchStateInProgress();
     }
@@ -162,7 +154,7 @@ void AWTRPlayerController::OnRep_MatchState()
     {
         HandleMatchStateWaitingToStart();
     }
-    if (MatchState == MatchState::InProgress)
+    else if (MatchState == MatchState::InProgress)
     {
         HandleMatchStateInProgress();
     }
@@ -264,18 +256,18 @@ void AWTRPlayerController::SetHUDHealth(float CurrentHealth, float MaxHealth)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                     //
-                           WTR_HUD->CharacterOverlayWidget &&             //
-                           WTR_HUD->CharacterOverlayWidget->HealthBar &&  // HealthBar
-                           WTR_HUD->CharacterOverlayWidget->HealthText;   // HealthText
+    const bool bHUDValid = WTR_HUD &&                      //
+                           CharacterOverlay &&             //
+                           CharacterOverlay->HealthBar &&  // HealthBar
+                           CharacterOverlay->HealthText;   // HealthText
 
     if (bHUDValid)
     {
         const float HealthPercent = CurrentHealth / MaxHealth;
-        WTR_HUD->CharacterOverlayWidget->HealthBar->SetPercent(HealthPercent);
+        CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 
         const FString HealthText = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(CurrentHealth), FMath::CeilToInt(MaxHealth));
-        WTR_HUD->CharacterOverlayWidget->HealthText->SetText(FText::FromString(HealthText));
+        CharacterOverlay->HealthText->SetText(FText::FromString(HealthText));
     }
     else
     {
@@ -288,18 +280,18 @@ void AWTRPlayerController::SetHUDShield(float CurrentShield, float MaxShield)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                     //
-                           WTR_HUD->CharacterOverlayWidget &&             //
-                           WTR_HUD->CharacterOverlayWidget->ShieldBar &&  // ShieldBar
-                           WTR_HUD->CharacterOverlayWidget->ShieldText;   // ShieldText
+    const bool bHUDValid = WTR_HUD &&                      //
+                           CharacterOverlay &&             //
+                           CharacterOverlay->ShieldBar &&  // ShieldBar
+                           CharacterOverlay->ShieldText;   // ShieldText
 
     if (bHUDValid)
     {
         const float ShieldPercent = CurrentShield / MaxShield;
-        WTR_HUD->CharacterOverlayWidget->ShieldBar->SetPercent(ShieldPercent);
+        CharacterOverlay->ShieldBar->SetPercent(ShieldPercent);
 
         const FString ShieldText = FString::Printf(TEXT("%d / %d"), FMath::CeilToInt(CurrentShield), FMath::CeilToInt(MaxShield));
-        WTR_HUD->CharacterOverlayWidget->ShieldText->SetText(FText::FromString(ShieldText));
+        CharacterOverlay->ShieldText->SetText(FText::FromString(ShieldText));
     }
     else
     {
@@ -312,14 +304,14 @@ void AWTRPlayerController::SetHUDScore(float ScoreAmount)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                   //
-                           WTR_HUD->CharacterOverlayWidget &&           //
-                           WTR_HUD->CharacterOverlayWidget->ScoreText;  // ScoreText
+    const bool bHUDValid = WTR_HUD &&                    //
+                           CharacterOverlay &&           //
+                           CharacterOverlay->ScoreText;  // ScoreText
 
     if (bHUDValid)
     {
         const FString ScoreText = FString::Printf(TEXT("%d"), FMath::FloorToInt(ScoreAmount));
-        WTR_HUD->CharacterOverlayWidget->ScoreText->SetText(FText::FromString(ScoreText));
+        CharacterOverlay->ScoreText->SetText(FText::FromString(ScoreText));
     }
     else
     {
@@ -331,14 +323,14 @@ void AWTRPlayerController::SetHUDDefeats(int32 DefeatsAmount)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                     //
-                           WTR_HUD->CharacterOverlayWidget &&             //
-                           WTR_HUD->CharacterOverlayWidget->DefeatsText;  // DefeatsText
+    const bool bHUDValid = WTR_HUD &&                      //
+                           CharacterOverlay &&             //
+                           CharacterOverlay->DefeatsText;  // DefeatsText
 
     if (bHUDValid)
     {
         const FString DefeatsText = FString::Printf(TEXT("%d"), DefeatsAmount);
-        WTR_HUD->CharacterOverlayWidget->DefeatsText->SetText(FText::FromString(DefeatsText));
+        CharacterOverlay->DefeatsText->SetText(FText::FromString(DefeatsText));
     }
     else
     {
@@ -350,14 +342,14 @@ void AWTRPlayerController::SetHUDDeathMessage(bool bVisible)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                          //
-                           WTR_HUD->CharacterOverlayWidget &&                  //
-                           WTR_HUD->CharacterOverlayWidget->DeathMessageText;  // DeathMessageText
+    const bool bHUDValid = WTR_HUD &&                           //
+                           CharacterOverlay &&                  //
+                           CharacterOverlay->DeathMessageText;  // DeathMessageText
 
     if (bHUDValid)
     {
         const ESlateVisibility SlateVisibility = bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
-        WTR_HUD->CharacterOverlayWidget->DeathMessageText->SetVisibility(SlateVisibility);
+        CharacterOverlay->DeathMessageText->SetVisibility(SlateVisibility);
     }
 }
 
@@ -365,14 +357,14 @@ void AWTRPlayerController::SetHUDWeaponAmmo(int32 AmmoAmount)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                        //
-                           WTR_HUD->CharacterOverlayWidget &&                //
-                           WTR_HUD->CharacterOverlayWidget->WeaponAmmoText;  // WeaponAmmoText
+    const bool bHUDValid = WTR_HUD &&                         //
+                           CharacterOverlay &&                //
+                           CharacterOverlay->WeaponAmmoText;  // WeaponAmmoText
 
     if (bHUDValid)
     {
         const FString AmmoText = FString::Printf(TEXT("%d"), AmmoAmount);
-        WTR_HUD->CharacterOverlayWidget->WeaponAmmoText->SetText(FText::FromString(AmmoText));
+        CharacterOverlay->WeaponAmmoText->SetText(FText::FromString(AmmoText));
     }
     else
     {
@@ -384,14 +376,14 @@ void AWTRPlayerController::SetHUDCarriedAmmo(int32 AmmoAmount)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                         //
-                           WTR_HUD->CharacterOverlayWidget &&                 //
-                           WTR_HUD->CharacterOverlayWidget->CarriedAmmoText;  // CarriedAmmoText
+    const bool bHUDValid = WTR_HUD &&                          //
+                           CharacterOverlay &&                 //
+                           CharacterOverlay->CarriedAmmoText;  // CarriedAmmoText
 
     if (bHUDValid)
     {
         const FString AmmoText = FString::Printf(TEXT("%d"), AmmoAmount);
-        WTR_HUD->CharacterOverlayWidget->CarriedAmmoText->SetText(FText::FromString(AmmoText));
+        CharacterOverlay->CarriedAmmoText->SetText(FText::FromString(AmmoText));
     }
     else
     {
@@ -403,9 +395,9 @@ void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                        //
-                           WTR_HUD->CharacterOverlayWidget &&                //
-                           WTR_HUD->CharacterOverlayWidget->WeaponTypeText;  // WeaponTypeText
+    const bool bHUDValid = WTR_HUD &&                         //
+                           CharacterOverlay &&                //
+                           CharacterOverlay->WeaponTypeText;  // WeaponTypeText
 
     if (bHUDValid)
     {
@@ -449,7 +441,7 @@ void AWTRPlayerController::SetHUDWeaponType(EWeaponType Type)
                 break;
         }
 
-        WTR_HUD->CharacterOverlayWidget->WeaponTypeText->SetText(FText::FromString(WeaponTypeText));
+        CharacterOverlay->WeaponTypeText->SetText(FText::FromString(WeaponTypeText));
     }
     else
     {
@@ -461,29 +453,29 @@ void AWTRPlayerController::SetHUDMatchCountdownTime(float Time)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                            //
-                           WTR_HUD->CharacterOverlayWidget &&                    //
-                           WTR_HUD->CharacterOverlayWidget->Blinking &&          //
-                           WTR_HUD->CharacterOverlayWidget->MatchCountdownText;  // MatchCountdownText
+    const bool bHUDValid = WTR_HUD &&                             //
+                           CharacterOverlay &&                    //
+                           CharacterOverlay->Blinking &&          //
+                           CharacterOverlay->MatchCountdownText;  // MatchCountdownText
 
     if (bHUDValid)
     {
         if (Time < 0.f)
         {
             GEngine->AddOnScreenDebugMessage(14, 1.f, FColor::Red, "Time < 0.f");
-            WTR_HUD->CharacterOverlayWidget->MatchCountdownText->SetText(FText::FromString("00:00"));
+            CharacterOverlay->MatchCountdownText->SetText(FText::FromString("00:00"));
             return;
         }
 
         if (Time <= BlinkStartTime && Time >= 0.f)
         {
-            WTR_HUD->CharacterOverlayWidget->PlayAnimation(WTR_HUD->CharacterOverlayWidget->Blinking);
+            CharacterOverlay->PlayAnimation(CharacterOverlay->Blinking);
         }
 
         FString TimeString = UKismetStringLibrary::TimeSecondsToString(Time);
         TimeString = UKismetStringLibrary::GetSubstring(TimeString, 0, 5);
 
-        WTR_HUD->CharacterOverlayWidget->MatchCountdownText->SetText(FText::FromString(TimeString));
+        CharacterOverlay->MatchCountdownText->SetText(FText::FromString(TimeString));
     }
 }
 
@@ -491,23 +483,23 @@ void AWTRPlayerController::SetHUDWarmupTime(float Time)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                //
-                           WTR_HUD->AnnouncementWidget &&            //
-                           WTR_HUD->AnnouncementWidget->WarmupText;  // WarmupText
+    const bool bHUDValid = WTR_HUD &&                       //
+                           AnnouncementWidget &&            //
+                           AnnouncementWidget->WarmupText;  // WarmupText
 
     if (bHUDValid)
     {
         if (Time < 0.f)
         {
             GEngine->AddOnScreenDebugMessage(14, 1.f, FColor::Red, "Time < 0.f");
-            WTR_HUD->AnnouncementWidget->WarmupText->SetText(FText::FromString("00:00"));
+            AnnouncementWidget->WarmupText->SetText(FText::FromString("00:00"));
             return;
         }
 
         FString TimeString = UKismetStringLibrary::TimeSecondsToString(Time);
         TimeString = UKismetStringLibrary::GetSubstring(TimeString, 0, 5);
 
-        WTR_HUD->AnnouncementWidget->WarmupText->SetText(FText::FromString(TimeString));
+        AnnouncementWidget->WarmupText->SetText(FText::FromString(TimeString));
     }
 }
 
@@ -515,14 +507,14 @@ void AWTRPlayerController::SetHUD_FPS()
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                  //
-                           WTR_HUD->CharacterOverlayWidget &&          //
-                           WTR_HUD->CharacterOverlayWidget->FPS_Text;  // FPS_Text
+    const bool bHUDValid = WTR_HUD &&                   //
+                           CharacterOverlay &&          //
+                           CharacterOverlay->FPS_Text;  // FPS_Text
 
     if (bHUDValid)
     {
         const FString FPS_Text = FString::Printf(TEXT("%d"), FMath::FloorToInt(FPS));
-        WTR_HUD->CharacterOverlayWidget->FPS_Text->SetText(FText::FromString(FPS_Text));
+        CharacterOverlay->FPS_Text->SetText(FText::FromString(FPS_Text));
     }
 }
 
@@ -530,14 +522,14 @@ void AWTRPlayerController::SetHUDGrenades(int32 Grenades)
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                     //
-                           WTR_HUD->CharacterOverlayWidget &&             //
-                           WTR_HUD->CharacterOverlayWidget->GrenadeText;  // GrenadeText
+    const bool bHUDValid = WTR_HUD &&                      //
+                           CharacterOverlay &&             //
+                           CharacterOverlay->GrenadeText;  // GrenadeText
 
     if (bHUDValid)
     {
         const FString GrenadeText = FString::Printf(TEXT("%d"), Grenades);
-        WTR_HUD->CharacterOverlayWidget->GrenadeText->SetText(FText::FromString(GrenadeText));
+        CharacterOverlay->GrenadeText->SetText(FText::FromString(GrenadeText));
     }
 }
 
@@ -631,20 +623,15 @@ void AWTRPlayerController::ShowFPS(float DeltaTime)
 
 void AWTRPlayerController::PingTick(float DeltaTime)
 {
-    const bool bPingAnimPlaying = WTR_HUD &&                                                                                   //
-                                  WTR_HUD->CharacterOverlayWidget &&                                                           //
-                                  WTR_HUD->CharacterOverlayWidget->Ping &&                                                     //
-                                  WTR_HUD->CharacterOverlayWidget->IsAnimationPlaying(WTR_HUD->CharacterOverlayWidget->Ping);  //
+    const bool bPingAnimPlaying = WTR_HUD &&                                                     //
+                                  CharacterOverlay &&                                            //
+                                  CharacterOverlay->Ping &&                                      //
+                                  CharacterOverlay->IsAnimationPlaying(CharacterOverlay->Ping);  //
 
     ShowPingFrequencyRuntime += DeltaTime;
     if (ShowPingFrequencyRuntime >= ShowPingFrequency && !bPingAnimPlaying)
     {
         PlayerState = (PlayerState == nullptr) ? GetPlayerState<APlayerState>() : PlayerState;
-
-        if (PlayerState)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Ping: %f"), PlayerState->GetPingInMilliseconds());
-        }
 
         if (PlayerState && PlayerState->GetPingInMilliseconds() >= PingThreshold)
         {
@@ -673,15 +660,15 @@ void AWTRPlayerController::ShowPing()
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                     //
-                           WTR_HUD->CharacterOverlayWidget &&             //
-                           WTR_HUD->CharacterOverlayWidget->PingImage &&  // PingImage
-                           WTR_HUD->CharacterOverlayWidget->Ping;         // Ping
+    const bool bHUDValid = WTR_HUD &&                      //
+                           CharacterOverlay &&             //
+                           CharacterOverlay->PingImage &&  // PingImage
+                           CharacterOverlay->Ping;         // Ping
 
     if (bHUDValid)
     {
-        WTR_HUD->CharacterOverlayWidget->PingImage->SetOpacity(1.f);
-        WTR_HUD->CharacterOverlayWidget->PlayAnimation(WTR_HUD->CharacterOverlayWidget->Ping, 0.f, static_cast<int32>(ShowPingDuration));
+        CharacterOverlay->PingImage->SetOpacity(1.f);
+        CharacterOverlay->PlayAnimation(CharacterOverlay->Ping, 0.f, static_cast<int32>(ShowPingDuration));
     }
 }
 
@@ -689,22 +676,22 @@ void AWTRPlayerController::HidePing()
 {
     WTR_HUD = GetWTR_HUD();
 
-    const bool bHUDValid = WTR_HUD &&                                     //
-                           WTR_HUD->CharacterOverlayWidget &&             //
-                           WTR_HUD->CharacterOverlayWidget->PingImage &&  // PingImage
-                           WTR_HUD->CharacterOverlayWidget->Ping;         // Ping
+    const bool bHUDValid = WTR_HUD &&                      //
+                           CharacterOverlay &&             //
+                           CharacterOverlay->PingImage &&  // PingImage
+                           CharacterOverlay->Ping;         // Ping
 
     if (bHUDValid)
     {
-        WTR_HUD->CharacterOverlayWidget->PingImage->SetOpacity(0.f);
-        if (WTR_HUD->CharacterOverlayWidget->IsAnimationPlaying(WTR_HUD->CharacterOverlayWidget->Ping))
+        CharacterOverlay->PingImage->SetOpacity(0.f);
+        if (CharacterOverlay->IsAnimationPlaying(CharacterOverlay->Ping))
         {
-            WTR_HUD->CharacterOverlayWidget->StopAnimation(WTR_HUD->CharacterOverlayWidget->Ping);
+            CharacterOverlay->StopAnimation(CharacterOverlay->Ping);
         }
     }
 }
 
-void AWTRPlayerController::Server_ReportHighPingStatus_Implementation(bool bHighPing) 
+void AWTRPlayerController::Server_ReportHighPingStatus_Implementation(bool bHighPing)
 {
     IsPingHighDelegate.Broadcast(bHighPing);
 }
@@ -715,33 +702,93 @@ void AWTRPlayerController::HandleMatchStateWaitingToStart()
     {
         TimeOfMapCreation = GetWorld()->GetTimeSeconds();
     }
+
+    WTR_HUD = GetWTR_HUD();
+    if (WTR_HUD && IsLocalController())
+    {
+        WTR_HUD->AddAnnouncement();
+        AnnouncementWidget = Cast<UWTRAnnouncementWidget>(WTR_HUD->AnnouncementWidget);
+
+        if (bShowDelayInit && GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(
+                -1, 5.f, FColor::Green, FString::Printf(TEXT("AnnouncementWidget created [HandleMatchStateWaitingToStart]")), false);
+        }
+    }
+    else if (!WTR_HUD && IsLocalController())
+    {
+        bDelayInit_AnnouncementWidget = true;
+
+        if (bShowDelayInit && GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
+                FString::Printf(TEXT("AnnouncementWidget can`t created! WTR_HUD is NULL [HandleMatchStateWaitingToStart]")), false);
+        }
+    }
+  
+    if (IsLocalController())
+    {
+        OnMatchStateChanged.Broadcast(MatchState::WaitingToStart);
+    }
 }
 
 void AWTRPlayerController::HandleMatchStateInProgress()
 {
     WTR_HUD = GetWTR_HUD();
-    if (WTR_HUD)
+    if (WTR_HUD && IsLocalController())
     {
-        if (WTR_HUD->AnnouncementWidget)
+        if (AnnouncementWidget)
         {
-            WTR_HUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Hidden);
+            AnnouncementWidget->SetVisibility(ESlateVisibility::Hidden);
         }
-        WTR_HUD->AddCharacterOverlay();
+
+        if (!CharacterOverlay)
+        {
+            WTR_HUD->AddCharacterOverlay();
+            CharacterOverlay = Cast<UWTRCharacterOverlayWidget>(WTR_HUD->CharacterOverlayWidget);
+
+            if (bShowDelayInit && GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(
+                    -1, 5.f, FColor::Green, FString::Printf(TEXT("CharacterOverlayWidget created [HandleMatchStateInProgress]")), false);
+            }
+        }
+    }
+    else if (!WTR_HUD && IsLocalController())
+    {
+        bDelayInit_CharacterOverlayDelayInit = true;
+
+        if (bShowDelayInit && GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
+                FString::Printf(TEXT("CharacterOverlayWidget can`t created! WTR_HUD is NULL [HandleMatchStateInProgress]")), false);
+        }
+    }
+
+    if (IsLocalController())
+    {
+        OnMatchStateChanged.Broadcast(MatchState::InProgress);
     }
 }
 
 void AWTRPlayerController::HandleMatchCooldown()
 {
     WTR_HUD = GetWTR_HUD();
-    if (WTR_HUD && WTR_HUD->CharacterOverlayWidget)
+    if (WTR_HUD && CharacterOverlay && IsLocalController())
     {
-        WTR_HUD->CharacterOverlayWidget->RemoveFromParent();
+        CharacterOverlay->RemoveFromParent();
 
-        const bool bWTR_HUD =                                 //
-            WTR_HUD->AnnouncementWidget &&                    //
-            WTR_HUD->AnnouncementWidget->AnnouncementText &&  //
-            WTR_HUD->AnnouncementWidget->InfoText &&          //
-            WTR_HUD->AnnouncementWidget->TopPlayersText;
+        if (!AnnouncementWidget)
+        {
+            WTR_HUD->AddAnnouncement();
+            AnnouncementWidget = Cast<UWTRAnnouncementWidget>(WTR_HUD->AnnouncementWidget);
+        }
+
+        const bool bWTR_HUD =                        //
+            AnnouncementWidget &&                    //
+            AnnouncementWidget->AnnouncementText &&  //
+            AnnouncementWidget->InfoText &&          //
+            AnnouncementWidget->TopPlayersText;
 
         if (bWTR_HUD)
         {
@@ -775,11 +822,11 @@ void AWTRPlayerController::HandleMatchCooldown()
                 }
             }
 
-            WTR_HUD->AnnouncementWidget->AnnouncementText->SetText(FText::FromString(AnnounCooldownText));
-            WTR_HUD->AnnouncementWidget->InfoText->SetText(FText::FromString(AnnounInfoText));
-            WTR_HUD->AnnouncementWidget->TopPlayersText->SetText(FText::FromString(TopPlayersText));
+            AnnouncementWidget->AnnouncementText->SetText(FText::FromString(AnnounCooldownText));
+            AnnouncementWidget->InfoText->SetText(FText::FromString(AnnounInfoText));
+            AnnouncementWidget->TopPlayersText->SetText(FText::FromString(TopPlayersText));
 
-            WTR_HUD->AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
+            AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
         }
     }
 
@@ -793,6 +840,51 @@ void AWTRPlayerController::HandleMatchCooldown()
         {
             OwnerCharacter->UnCrouch();
         }
+    }
+
+    if (IsLocalController())
+    {
+        OnMatchStateChanged.Broadcast(MatchState::Cooldown);
+    }
+}
+
+void AWTRPlayerController::DelayInitCharacterOverlay()
+{
+    if (bShowDelayInit && GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald,
+            FString::Printf(TEXT("DelayInit_CurrentHealth = %.2f, DelayInit_MaxHealth = %.2f\n"
+                                 "DelayInit_CurrentShield = %.2f, DelayInit_MaxShield = %.2f\n"
+                                 "DelayInit_ScoreAmount = %.1f, DelayInit_DefeatsAmount = %d\n"
+                                 "DelayInit_WeaponAmmo = %d, DelayInit_CarriedAmmo = %d\n"
+                                 "DelayInit_WeaponType = %d\n"),
+                DelayInit_CurrentHealth, DelayInit_MaxHealth, DelayInit_CurrentShield, DelayInit_MaxShield, DelayInit_ScoreAmount,
+                DelayInit_DefeatsAmount, DelayInit_WeaponAmmo, DelayInit_CarriedAmmo, DelayInit_WeaponType),
+            false);
+    }
+
+    SetHUDHealth(DelayInit_CurrentHealth, DelayInit_MaxHealth);
+    SetHUDShield(DelayInit_CurrentShield, DelayInit_MaxShield);
+    SetHUDScore(DelayInit_ScoreAmount);
+    SetHUDDefeats(DelayInit_DefeatsAmount);
+    SetHUDWeaponAmmo(DelayInit_WeaponAmmo);
+    SetHUDCarriedAmmo(DelayInit_CarriedAmmo);
+    SetHUDWeaponType(DelayInit_WeaponType);
+
+    WTRCharacter = Cast<AWTRCharacter>(GetPawn());
+    if (WTRCharacter && WTRCharacter->GetCombatComponent())
+    {
+        SetHUDGrenades(WTRCharacter->GetCombatComponent()->GetCurrentGrenades());
+    }
+
+    if (!bShowFPS)
+    {
+        CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Hidden);
+    }
+    else
+    {
+        TimeToFPSUpdate = TimeFPSUpdateFrequency;
+        CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Visible);
     }
 }
 

@@ -198,6 +198,7 @@ void AWTRCharacter::Tick(float DeltaTime)
     RotateInPlace(DeltaTime);
     HideCharacterWithWeaponIfCameraClose();
     PullInit();
+    DelayInitHUD();
 }
 
 void AWTRCharacter::BeginPlay()
@@ -263,6 +264,15 @@ void AWTRCharacter::BeginPlay()
     if (GetWTRGameMode() && GetWTRGameMode()->GetMatchState() == MatchState::Cooldown)
     {
         bDisableGameplay = true;
+    }
+
+    if (WTRPlayerController)
+    {
+        if (WTRPlayerController && WTRPlayerController->IsLocalController())
+        {
+            WTRPlayerController->OnMatchStateChanged.AddUObject(this, &AWTRCharacter::OnMatchStateChanged);
+            OnMatchStateChanged(WTRPlayerController->GetMatchState());
+        }
     }
 }
 
@@ -352,6 +362,109 @@ void AWTRCharacter::PullInit()
                 OverheadText->SetTextRenderColor(FColor::MakeRandomColor());
             }
         }
+    }
+
+    if (!WTRPlayerController)
+    {
+        WTRPlayerController = Cast<AWTRPlayerController>(Controller);
+        if (WTRPlayerController && WTRPlayerController->IsLocalController())
+        {
+            WTRPlayerController->OnMatchStateChanged.AddUObject(this, &AWTRCharacter::OnMatchStateChanged);
+            OnMatchStateChanged(WTRPlayerController->GetMatchState());
+        }
+    }
+}
+
+void AWTRCharacter::OnMatchStateChanged(const FName& State)
+{
+    if (State == MatchState::InProgress)
+    {
+        WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
+
+        if (WTRPlayerController)
+        {
+            WTRPlayerController->SetHUDHealth(Health, MaxHealth);
+            WTRPlayerController->SetHUDShield(Shield, MaxShield);
+
+            WTRPlayerState = (WTRPlayerState == nullptr) ? Cast<AWTRPlayerState>(WTRPlayerController->PlayerState) : WTRPlayerState;
+            if (WTRPlayerState)
+            {
+                WTRPlayerController->SetHUDScore(WTRPlayerState->GetScore());
+                WTRPlayerController->SetHUDDefeats(WTRPlayerState->GetDefeats());
+            }
+            else
+            {
+                bDelayInitHUD_PlayerState = true;
+            }
+
+            if (Combat)
+            {
+                WTRPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
+                WTRPlayerController->SetHUDGrenades(Combat->GetCurrentGrenades());
+
+                if (Combat->EquippedWeapon)
+                {
+                    WTRPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
+                    WTRPlayerController->SetHUDWeaponType(Combat->EquippedWeapon->GetWeaponType());
+                }
+            }
+        }
+        else
+        {
+            bDelayInitHUD_Controller = true;
+        }
+    }
+}
+
+void AWTRCharacter::DelayInitHUD()
+{
+    if (bDelayInitHUD_Controller)
+    {
+        WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
+
+        if (WTRPlayerController)
+        {
+            WTRPlayerController->SetHUDHealth(Health, MaxHealth);
+            WTRPlayerController->SetHUDShield(Shield, MaxShield);
+
+            WTRPlayerState = (WTRPlayerState == nullptr) ? Cast<AWTRPlayerState>(WTRPlayerController->PlayerState) : WTRPlayerState;
+            if (WTRPlayerState)
+            {
+                WTRPlayerController->SetHUDScore(WTRPlayerState->GetScore());
+                WTRPlayerController->SetHUDDefeats(WTRPlayerState->GetDefeats());
+            }
+
+            if (Combat)
+            {
+                WTRPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
+                WTRPlayerController->SetHUDGrenades(Combat->GetCurrentGrenades());
+
+                if (Combat->EquippedWeapon)
+                {
+                    WTRPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
+                    WTRPlayerController->SetHUDWeaponType(Combat->EquippedWeapon->GetWeaponType());
+                }
+            }
+
+            bDelayInitHUD_Controller = false;
+        }
+    }
+
+    if (bDelayInitHUD_PlayerState)
+    {
+        WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
+
+        if (WTRPlayerController)
+        {
+            WTRPlayerState = (WTRPlayerState == nullptr) ? Cast<AWTRPlayerState>(WTRPlayerController->PlayerState) : WTRPlayerState;
+            if (WTRPlayerState)
+            {
+                WTRPlayerController->SetHUDScore(WTRPlayerState->GetScore());
+                WTRPlayerController->SetHUDDefeats(WTRPlayerState->GetDefeats());
+            }
+        }
+
+        bDelayInitHUD_PlayerState = false;
     }
 }
 

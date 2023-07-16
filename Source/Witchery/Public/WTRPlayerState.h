@@ -24,6 +24,8 @@ public:
     void AddToScore(float ScoreToAdd);
     void AddToDefeats(int32 DefeatsToAdd);
 
+    FORCEINLINE int32 GetDefeats() const { return Defeats; }
+
 private:
     UPROPERTY()
     AWTRCharacter* WTRCharacter;

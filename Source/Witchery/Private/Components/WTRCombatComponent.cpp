@@ -85,7 +85,14 @@ void UWTRCombatComponent::InitCarriedAmmoMap()
 
 void UWTRCombatComponent::DrawCrosshair(float DeltaTime)
 {
-    if (!Character || !Controller || !HUD) return;
+    Character = (Character == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : Character;
+    if (!Character) return;
+
+    Controller = (Controller == nullptr) ? Cast<AWTRPlayerController>(Character->Controller) : Controller;
+    if (!Controller) return;
+
+    HUD = (HUD == nullptr) ? Cast<AWTR_HUD>(Controller->GetHUD()) : HUD;
+    if (!HUD) return;
 
     if (Character->IsDisableGameplay() && EquippedWeapon)
     {
@@ -610,7 +617,7 @@ void UWTRCombatComponent::FireTimerUpdate()
 void UWTRCombatComponent::LocalFire(const FVector_NetQuantize& TraceHitTarget)
 {
     if (Character && EquippedWeapon && EquippedWeapon->GetWeaponType() != EWeaponType::EWT_Flamethrower &&
-             CombatState == ECombatState::ECS_Unoccupied)
+        CombatState == ECombatState::ECS_Unoccupied)
     {
         Character->PlayFireMontage(bIsAiming);
         EquippedWeapon->Fire(TraceHitTarget);
@@ -680,7 +687,7 @@ void UWTRCombatComponent::Server_FireShotgun_Implementation(const TArray<FVector
     Multicast_FireShotgun(TraceHitTargets);
 }
 
-bool UWTRCombatComponent::Server_FireShotgun_Validate(const TArray<FVector_NetQuantize>& TraceHitTargets, float Check_FireDelay) 
+bool UWTRCombatComponent::Server_FireShotgun_Validate(const TArray<FVector_NetQuantize>& TraceHitTargets, float Check_FireDelay)
 {
     if (EquippedWeapon)
     {

@@ -19,7 +19,9 @@ class AWTRCharacter;
 
 // Delegates
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotifyPlayed, class USkeletalMeshComponent*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChanged, const FName& State);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FIsPingHigh, bool, bHighPing);
+
 
     // Animation
     UENUM(BlueprintType) enum class ETurningInPlace : uint8

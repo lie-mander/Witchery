@@ -26,6 +26,11 @@ void AWTRGameMode::BeginPlay()
     {
         TimeOfMapCreation = GetWorld()->GetTimeSeconds();
     }
+
+    if (!bDelayedStart)
+    {
+        WarmupTime = 0.f;
+    }
 }
 
 void AWTRGameMode::Tick(float DeltaTime)
