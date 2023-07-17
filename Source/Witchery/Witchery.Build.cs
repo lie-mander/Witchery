@@ -13,7 +13,10 @@ public class Witchery : ModuleRules
             "CoreUObject",
             "Engine",
             "InputCore",
-            "Niagara"
+            "Niagara",
+            "MultiplayerSessions",
+            "OnlineSubsystem",
+            "OnlineSubsystemSteam"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });
