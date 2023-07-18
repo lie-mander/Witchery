@@ -13,6 +13,8 @@ class AWTRGameMode;
 class UWTRCharacterOverlayWidget;
 class UWTRAnnouncementWidget;
 class USoundClass;
+class UUserWidget;
+class UWTRReturnToMainMenu;
 
 UCLASS()
 class WITCHERY_API AWTRPlayerController : public APlayerController
@@ -55,6 +57,7 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+    virtual void SetupInputComponent() override;
 
 private:
     /*
@@ -176,6 +179,14 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
     float BlinkStartTime = 30.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
+    TSubclassOf<UUserWidget> ReturnToMainMenuWidgetClass;
+
+    UPROPERTY()
+    UWTRReturnToMainMenu* ReturnToMainMenuWidget;
+
+    bool bReturnToMainMenuOpen = false;
+
     /*
      * FPS timer
      */
@@ -220,4 +231,5 @@ private:
     void ShowPing();
     void HidePing();
     void DelayInitCharacterOverlay();
+    void OnQuitButtonPressed();
 };

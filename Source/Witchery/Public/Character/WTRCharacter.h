@@ -118,12 +118,9 @@ protected:
     void OnCrouchButtonPressed();
     void OnAimButtonPressed();
     void OnAimButtonReleased();
-    void OnPauseButtonPressed();
     void OnFireButtonPressed();
     void OnFireButtonReleased();
     void OnReloadButtonPressed();
-    void OnAudioUpButtonPressed();
-    void OnAudioDownButtonPressed();
     void OnGrenadeButtonPressed();
     void OnWeaponSwapButtonPressed();
 

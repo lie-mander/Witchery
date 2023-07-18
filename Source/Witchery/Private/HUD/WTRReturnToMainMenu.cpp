@@ -10,6 +10,7 @@ void UWTRReturnToMainMenu::MenuSetup()
 {
     if (!GetWorld()) return;
 
+    AddToViewport();
     SetVisibility(ESlateVisibility::Visible);
     SetIsFocusable(true);
 
@@ -26,14 +27,14 @@ void UWTRReturnToMainMenu::MenuSetup()
     if (GameInstance)
     {
         MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
-        if (MultiplayerSessionsSubsystem)
+        if (MultiplayerSessionsSubsystem && !MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())
         {
             MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.AddDynamic(
                 this, &UWTRReturnToMainMenu::OnDestroySessionComplete);
         }
     }
 
-    if (ReturnButton)
+    if (ReturnButton && !ReturnButton->OnClicked.IsBound())
     {
         ReturnButton->OnClicked.AddDynamic(this, &UWTRReturnToMainMenu::OnReturnButtonClicked);
     }
@@ -48,7 +49,17 @@ void UWTRReturnToMainMenu::MenuTearDown()
     {
         FInputModeGameOnly InputMode;
         PlayerController->SetInputMode(InputMode);
-        PlayerController->SetShowMouseCursor(true);
+        PlayerController->SetShowMouseCursor(false);
+    }
+
+    if (MultiplayerSessionsSubsystem && MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())
+    {
+        MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.RemoveDynamic(this, &UWTRReturnToMainMenu::OnDestroySessionComplete);
+    }
+
+    if (ReturnButton && ReturnButton->OnClicked.IsBound())
+    {
+        ReturnButton->OnClicked.RemoveDynamic(this, &UWTRReturnToMainMenu::OnReturnButtonClicked);
     }
 }
 

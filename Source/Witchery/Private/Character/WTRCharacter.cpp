@@ -287,10 +287,7 @@ void AWTRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
     PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &ThisClass::OnAimButtonReleased);
     PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Pressed, this, &ThisClass::OnFireButtonPressed);
     PlayerInputComponent->BindAction("Fire", EInputEvent::IE_Released, this, &ThisClass::OnFireButtonReleased);
-    PlayerInputComponent->BindAction("Pause", EInputEvent::IE_Pressed, this, &ThisClass::OnPauseButtonPressed);
     PlayerInputComponent->BindAction("Reload", EInputEvent::IE_Pressed, this, &ThisClass::OnReloadButtonPressed);
-    PlayerInputComponent->BindAction("AudioUp", EInputEvent::IE_Pressed, this, &ThisClass::OnAudioUpButtonPressed);
-    PlayerInputComponent->BindAction("AudioDown", EInputEvent::IE_Pressed, this, &ThisClass::OnAudioDownButtonPressed);
     PlayerInputComponent->BindAction("Grenade", EInputEvent::IE_Pressed, this, &ThisClass::OnGrenadeButtonPressed);
     PlayerInputComponent->BindAction("WeaponSwap", EInputEvent::IE_Pressed, this, &ThisClass::OnWeaponSwapButtonPressed);
 
@@ -891,24 +888,6 @@ void AWTRCharacter::OnReloadButtonPressed()
     }
 }
 
-void AWTRCharacter::OnAudioUpButtonPressed()
-{
-    WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
-    if (WTRPlayerController)
-    {
-        WTRPlayerController->VolumeUp();
-    }
-}
-
-void AWTRCharacter::OnAudioDownButtonPressed()
-{
-    WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
-    if (WTRPlayerController)
-    {
-        WTRPlayerController->TurnDownTheVolume();
-    }
-}
-
 void AWTRCharacter::OnGrenadeButtonPressed()
 {
     if (bDisableGameplay) return;
@@ -959,12 +938,6 @@ void AWTRCharacter::Server_OnWeaponSwapButtonPressed_Implementation()
 void AWTRCharacter::SwapButtonTimerFinished()
 {
     bCanSwap = true;
-}
-
-void AWTRCharacter::OnPauseButtonPressed()
-{
-    const auto PlayerController = Cast<APlayerController>(Controller);
-    UKismetSystemLibrary::QuitGame(GetWorld(), PlayerController, EQuitPreference::Quit, true);
 }
 
 void AWTRCharacter::OnReloadFinishedNotifyPlayed(USkeletalMeshComponent* MeshComp)

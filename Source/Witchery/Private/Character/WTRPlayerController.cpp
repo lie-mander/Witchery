@@ -5,6 +5,7 @@
 #include "HUD/WTR_HUD.h"
 #include "HUD/WTRCharacterOverlayWidget.h"
 #include "HUD/WTRAnnouncementWidget.h"
+#include "HUD/WTRReturnToMainMenu.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/WTRCombatComponent.h"
@@ -33,6 +34,17 @@ void AWTRPlayerController::BeginPlay()
     Super::BeginPlay();
 
     WTR_HUD = Cast<AWTR_HUD>(GetHUD());
+}
+
+void AWTRPlayerController::SetupInputComponent()
+{
+    Super::SetupInputComponent();
+
+    if (!InputComponent) return;
+
+    InputComponent->BindAction("AudioUp", EInputEvent::IE_Pressed, this, &ThisClass::VolumeUp);
+    InputComponent->BindAction("AudioDown", EInputEvent::IE_Pressed, this, &ThisClass::TurnDownTheVolume);
+    InputComponent->BindAction("Quit", EInputEvent::IE_Pressed, this, &ThisClass::OnQuitButtonPressed);
 }
 
 void AWTRPlayerController::Tick(float DeltaTime)
@@ -725,7 +737,7 @@ void AWTRPlayerController::HandleMatchStateWaitingToStart()
                 FString::Printf(TEXT("AnnouncementWidget can`t created! WTR_HUD is NULL [HandleMatchStateWaitingToStart]")), false);
         }
     }
-  
+
     if (IsLocalController())
     {
         OnMatchStateChanged.Broadcast(MatchState::WaitingToStart);
@@ -885,6 +897,29 @@ void AWTRPlayerController::DelayInitCharacterOverlay()
     {
         TimeToFPSUpdate = TimeFPSUpdateFrequency;
         CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Visible);
+    }
+}
+
+void AWTRPlayerController::OnQuitButtonPressed()
+{
+    if (!ReturnToMainMenuWidgetClass) return;
+
+    if (!ReturnToMainMenuWidget)
+    {
+        ReturnToMainMenuWidget = CreateWidget<UWTRReturnToMainMenu>(this, ReturnToMainMenuWidgetClass);
+    }
+
+    if (ReturnToMainMenuWidget)
+    {
+        bReturnToMainMenuOpen = !bReturnToMainMenuOpen;
+        if (bReturnToMainMenuOpen)
+        {
+            ReturnToMainMenuWidget->MenuSetup();
+        }
+        else
+        {
+            ReturnToMainMenuWidget->MenuTearDown();
+        }
     }
 }
 
