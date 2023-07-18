@@ -101,7 +101,7 @@ void AWTRGameMode::PlayerEliminated(
 
     if (EliminatedCharacter)
     {
-        EliminatedCharacter->Elim();
+        EliminatedCharacter->Elim(false);
     }
 }
 
@@ -121,5 +121,25 @@ void AWTRGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AController* 
         const int32 PlayerStartIndex = FMath::RandRange(0, PlayerStarts.Num() - 1);
 
         RestartPlayerAtPlayerStart(EliminatedController, PlayerStarts[PlayerStartIndex]);
+    }
+}
+
+void AWTRGameMode::LeaveGame(AWTRPlayerState* LeavingPlayerState)
+{
+    if (!LeavingPlayerState) return;
+
+    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+    if (WTRGameState)
+    {
+        if (WTRGameState->GetTopPlayers().Contains(LeavingPlayerState))
+        {
+            WTRGameState->GetTopPlayers().Remove(LeavingPlayerState);
+        }
+    }
+
+    AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(LeavingPlayerState->GetPawn());
+    if (WTRCharacter)
+    {
+        WTRCharacter->Elim(true);
     }
 }

@@ -21,6 +21,7 @@ class AWTRCharacter;
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnNotifyPlayed, class USkeletalMeshComponent*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChanged, const FName& State);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FIsPingHigh, bool, bHighPing);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeaveGame);
 
 
     // Animation

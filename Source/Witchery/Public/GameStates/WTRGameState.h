@@ -18,7 +18,7 @@ public:
 
     void UpdateTopPlayers(AWTRPlayerState* PlayerState);
 
-    FORCEINLINE TArray<AWTRPlayerState*> GetTopPlayers() const { return TopPlayers; }
+    FORCEINLINE TArray<AWTRPlayerState*> GetTopPlayers() { return TopPlayers; }
 
 private:
     UPROPERTY(Replicated)

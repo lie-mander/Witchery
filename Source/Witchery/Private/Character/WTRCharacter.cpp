@@ -971,7 +971,16 @@ void AWTRCharacter::SetOverlappingWeapon(AWTRWeapon* Weapon)
     }
 }
 
-void AWTRCharacter::Elim()
+void AWTRCharacter::Server_LeaveGame_Implementation()
+{
+    WTRPlayerState = (WTRPlayerState == nullptr) ? GetPlayerState<AWTRPlayerState>() : WTRPlayerState;
+    if (GetWTRGameMode() && WTRPlayerState)
+    {
+        GetWTRGameMode()->LeaveGame(WTRPlayerState);
+    }
+}
+
+void AWTRCharacter::Elim(bool bIsLeave)
 {
     DropOrDestroyWeapons();
 
@@ -983,17 +992,13 @@ void AWTRCharacter::Elim()
         WTRPlayerController->SetHUDWeaponType(EWeaponType::EWT_MAX);
     }
 
-    GetWorldTimerManager().SetTimer(                //
-        EliminatedTimerHandle,                      //
-        this,                                       //
-        &AWTRCharacter::OnEliminatedTimerFinished,  //
-        EliminatedTimerDelay);
-
-    Multicast_Elim();
+    Multicast_Elim(bIsLeave);
 }
 
-void AWTRCharacter::Multicast_Elim_Implementation()
+void AWTRCharacter::Multicast_Elim_Implementation(bool bIsLeave)
 {
+    bIsLeaving = bIsLeave;
+
     PlayEliminationMontage();
     bElimmed = true;
 
@@ -1061,11 +1066,15 @@ void AWTRCharacter::Multicast_Elim_Implementation()
     }
 
     // Show DeathMessage (will hidden in WTRPlayerController.cpp in OnPossess() function)
+    if (WTRPlayerController && !bIsLeaving)
+    {
+        WTRPlayerController->SetHUDDeathMessage(true);
+    }
+
     // Set weapon ammo to 0
     // Set weapon type to NONE
     if (WTRPlayerController)
     {
-        WTRPlayerController->SetHUDDeathMessage(true);
         WTRPlayerController->SetHUDWeaponAmmo(0);
         WTRPlayerController->SetHUDWeaponType(EWeaponType::EWT_MAX);
     }
@@ -1079,13 +1088,23 @@ void AWTRCharacter::Multicast_Elim_Implementation()
     {
         OverheadText->SetVisibility(false);
     }
+
+    GetWorldTimerManager().SetTimer(                //
+        EliminatedTimerHandle,                      //
+        this,                                       //
+        &AWTRCharacter::OnEliminatedTimerFinished,  //
+        EliminatedTimerDelay);
 }
 
 void AWTRCharacter::OnEliminatedTimerFinished()
 {
-    if (GetWTRGameMode())
+    if (GetWTRGameMode() && !bIsLeaving)
     {
         GetWTRGameMode()->RequestRespawn(this, Controller);
+    }
+    else if (bIsLeaving && IsLocallyControlled())
+    {
+        OnLeaveGame.Broadcast();
     }
 
     Multicast_OnDestroyed();

@@ -45,7 +45,7 @@ public:
 
     void UpdateHUDHealth();
     void UpdateHUDShield();
-    void Elim();
+    void Elim(bool bIsLeave);
     void PlayFireMontage(bool bAiming);
     void PlayReloadMontage();
     void StopReloadMontage();
@@ -92,7 +92,7 @@ public:
     FORCEINLINE UWTRCombatComponent* GetCombatComponent() const { return Combat; }
 
     UFUNCTION(NetMulticast, Reliable)
-    void Multicast_Elim();
+    void Multicast_Elim(bool bIsLeave);
 
     UFUNCTION(BlueprintImplementableEvent)
     void SetShowScopeAnimation(bool bShowScope);
@@ -101,6 +101,14 @@ public:
     TMap<FName, UBoxComponent*> HitBoxesMap;
 
     bool bFinishedSwapping = true;
+
+    /*
+     * Leave game
+     */
+    FOnLeaveGame OnLeaveGame;
+
+    UFUNCTION(Server, Reliable)
+    void Server_LeaveGame();
 
 protected:
     /*
@@ -244,6 +252,11 @@ private:
     FTimerHandle EliminatedTimerHandle;
 
     void OnEliminatedTimerFinished();
+
+    /*
+     * Leave game
+     */
+    bool bIsLeaving = false;
 
     /*
      * Dissolve

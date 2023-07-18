@@ -5,6 +5,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Components/Button.h"
 #include "MultiplayerSessionsSubsystem.h"
+#include "Character/WTRCharacter.h"
 
 void UWTRReturnToMainMenu::MenuSetup()
 {
@@ -54,7 +55,8 @@ void UWTRReturnToMainMenu::MenuTearDown()
 
     if (MultiplayerSessionsSubsystem && MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.IsBound())
     {
-        MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.RemoveDynamic(this, &UWTRReturnToMainMenu::OnDestroySessionComplete);
+        MultiplayerSessionsSubsystem->MultiplayerOnDestroySessionComplete.RemoveDynamic(
+            this, &UWTRReturnToMainMenu::OnDestroySessionComplete);
     }
 
     if (ReturnButton && ReturnButton->OnClicked.IsBound())
@@ -70,6 +72,35 @@ void UWTRReturnToMainMenu::OnReturnButtonClicked()
         ReturnButton->SetIsEnabled(false);
     }
 
+    if (GetWorld())
+    {
+        PlayerController = (PlayerController == nullptr) ? GetWorld()->GetFirstPlayerController() : PlayerController;
+        if (PlayerController)
+        {
+            AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(PlayerController->GetPawn());
+            if (WTRCharacter)
+            {
+                WTRCharacter->Server_LeaveGame();
+
+                if (!WTRCharacter->OnLeaveGame.IsBound())
+                {
+                    WTRCharacter->OnLeaveGame.AddDynamic(this, &UWTRReturnToMainMenu::OnPlayerLeftGame);
+                }
+            }
+            else
+            {
+                ReturnButton->SetIsEnabled(true);
+            }
+        }
+        else
+        {
+            ReturnButton->SetIsEnabled(true);
+        }
+    }
+}
+
+void UWTRReturnToMainMenu::OnPlayerLeftGame()
+{
     if (MultiplayerSessionsSubsystem)
     {
         MultiplayerSessionsSubsystem->DestroySession();

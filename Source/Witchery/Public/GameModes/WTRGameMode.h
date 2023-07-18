@@ -8,6 +8,7 @@
 
 class AWTRCharacter;
 class AWTRPlayerController;
+class AWTRPlayerState;
 
 namespace MatchState
 {
@@ -24,6 +25,7 @@ public:
     virtual void PlayerEliminated(
         AWTRCharacter* EliminatedCharacter, AWTRPlayerController* VictimController, AWTRPlayerController* AttackerController);
     virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
+    virtual void LeaveGame(AWTRPlayerState* LeavingPlayerState);
     virtual void Tick(float DeltaTime);
 
     FORCEINLINE float GetWarmupTime() const { return WarmupTime; }

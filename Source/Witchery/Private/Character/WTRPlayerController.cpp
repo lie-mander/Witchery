@@ -804,7 +804,7 @@ void AWTRPlayerController::HandleMatchCooldown()
 
         if (bWTR_HUD)
         {
-            const AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+            AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
             const AWTRPlayerState* WTRPlayerState = GetPlayerState<AWTRPlayerState>();
 
             FString TopPlayersText = "";

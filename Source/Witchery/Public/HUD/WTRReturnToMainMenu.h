@@ -34,4 +34,7 @@ private:
 
     UFUNCTION()
     void OnDestroySessionComplete(bool bWasSuccessful);
+
+    UFUNCTION()
+    void OnPlayerLeftGame();
 };
