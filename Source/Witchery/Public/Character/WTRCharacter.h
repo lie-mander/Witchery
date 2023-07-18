@@ -24,6 +24,8 @@ class UWTRBuffComponent;
 class UWTRLagCompensationComponent;
 class AWTR_HUD;
 class AWTRGameMode;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class WITCHERY_API AWTRCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -93,6 +95,12 @@ public:
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_Elim(bool bIsLeave);
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_GetLead();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_LostLead();
 
     UFUNCTION(BlueprintImplementableEvent)
     void SetShowScopeAnimation(bool bShowScope);
@@ -294,6 +302,15 @@ private:
 
     UPROPERTY()
     UParticleSystemComponent* ElimBotParticleSysComponent;
+
+    /*
+    * Lead crown
+    */
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Lead crown")
+    UNiagaraSystem* CrownSystem;
+
+    UPROPERTY()
+    UNiagaraComponent* CrownComponent;
 
     /*
      * Grenade

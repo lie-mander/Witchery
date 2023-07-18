@@ -26,6 +26,7 @@ void AWTRGameState::UpdateTopPlayers(AWTRPlayerState* PlayerState)
     }
     else if (PlayerState->GetScore() > TopScore)
     {
+        TopPlayers.Empty();
         TopPlayers.AddUnique(PlayerState);
         TopScore = PlayerState->GetScore();
     }

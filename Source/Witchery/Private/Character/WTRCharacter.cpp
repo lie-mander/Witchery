@@ -23,12 +23,15 @@
 #include "HUD/OverheadWidget.h"
 #include "HUD/WTR_HUD.h"
 #include "GameModes/WTRGameMode.h"
+#include "GameStates/WTRGameState.h"
 #include "Sound/SoundCue.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "WTRPlayerState.h"
 #include "WTRTypes.h"
 #include "WTRTools.h"
 #include "Animation/Notifies/WTRReloadFinishedAnimNotify.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 AWTRCharacter::AWTRCharacter()
 {
@@ -358,6 +361,16 @@ void AWTRCharacter::PullInit()
                 OverheadText->SetText(FText::FromString(Username));
                 OverheadText->SetTextRenderColor(FColor::MakeRandomColor());
             }
+
+            // Spawn crown if character is lead
+            AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+            if (WTRGameState)
+            {
+                if (WTRGameState->GetTopPlayers().Contains(WTRPlayerState))
+                {
+                    Multicast_GetLead();
+                }
+            }
         }
     }
 
@@ -383,11 +396,11 @@ void AWTRCharacter::OnMatchStateChanged(const FName& State)
             WTRPlayerController->SetHUDHealth(Health, MaxHealth);
             WTRPlayerController->SetHUDShield(Shield, MaxShield);
 
-            WTRPlayerState = (WTRPlayerState == nullptr) ? Cast<AWTRPlayerState>(WTRPlayerController->PlayerState) : WTRPlayerState;
-            if (WTRPlayerState)
+            AWTRPlayerState* TempPlayerState = Cast<AWTRPlayerState>(WTRPlayerController->PlayerState);
+            if (TempPlayerState)
             {
-                WTRPlayerController->SetHUDScore(WTRPlayerState->GetScore());
-                WTRPlayerController->SetHUDDefeats(WTRPlayerState->GetDefeats());
+                WTRPlayerController->SetHUDScore(TempPlayerState->GetScore());
+                WTRPlayerController->SetHUDDefeats(TempPlayerState->GetDefeats());
             }
             else
             {
@@ -424,11 +437,11 @@ void AWTRCharacter::DelayInitHUD()
             WTRPlayerController->SetHUDHealth(Health, MaxHealth);
             WTRPlayerController->SetHUDShield(Shield, MaxShield);
 
-            WTRPlayerState = (WTRPlayerState == nullptr) ? Cast<AWTRPlayerState>(WTRPlayerController->PlayerState) : WTRPlayerState;
-            if (WTRPlayerState)
+            AWTRPlayerState* TempPlayerState = Cast<AWTRPlayerState>(WTRPlayerController->PlayerState);
+            if (TempPlayerState)
             {
-                WTRPlayerController->SetHUDScore(WTRPlayerState->GetScore());
-                WTRPlayerController->SetHUDDefeats(WTRPlayerState->GetDefeats());
+                WTRPlayerController->SetHUDScore(TempPlayerState->GetScore());
+                WTRPlayerController->SetHUDDefeats(TempPlayerState->GetDefeats());
             }
 
             if (Combat)
@@ -453,11 +466,11 @@ void AWTRCharacter::DelayInitHUD()
 
         if (WTRPlayerController)
         {
-            WTRPlayerState = (WTRPlayerState == nullptr) ? Cast<AWTRPlayerState>(WTRPlayerController->PlayerState) : WTRPlayerState;
-            if (WTRPlayerState)
+            AWTRPlayerState* TempPlayerState = Cast<AWTRPlayerState>(WTRPlayerController->PlayerState);
+            if (TempPlayerState)
             {
-                WTRPlayerController->SetHUDScore(WTRPlayerState->GetScore());
-                WTRPlayerController->SetHUDDefeats(WTRPlayerState->GetDefeats());
+                WTRPlayerController->SetHUDScore(TempPlayerState->GetScore());
+                WTRPlayerController->SetHUDDefeats(TempPlayerState->GetDefeats());
             }
         }
 
@@ -1079,6 +1092,11 @@ void AWTRCharacter::Multicast_Elim_Implementation(bool bIsLeave)
         WTRPlayerController->SetHUDWeaponType(EWeaponType::EWT_MAX);
     }
 
+    if (CrownComponent)
+    {
+        CrownComponent->DestroyComponent();
+    }
+
     if (GrenadeMesh)
     {
         GrenadeMesh->SetVisibility(false);
@@ -1254,6 +1272,36 @@ void AWTRCharacter::OnRep_OverlappingWeapon(AWTRWeapon* LastWeapon)
     if (LastWeapon)
     {
         LastWeapon->SetShowWidget(false);
+    }
+}
+
+void AWTRCharacter::Multicast_GetLead_Implementation()
+{
+    if (!CrownSystem) return;
+
+    if (!CrownComponent && GetCapsuleComponent())
+    {
+        CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
+            CrownSystem,                                                //
+            GetCapsuleComponent(),                                      //
+            FName(),                                                    //
+            GetActorLocation() + FVector(0.f, 0.f, 110.f),              //
+            GetActorRotation(),                                         //
+            EAttachLocation::KeepWorldPosition,                         //
+            false                                                       //
+        );
+    }
+    if (CrownComponent)
+    {
+        CrownComponent->Activate();
+    }
+}
+
+void AWTRCharacter::Multicast_LostLead_Implementation()
+{
+    if (CrownComponent)
+    {
+        CrownComponent->DestroyComponent();
     }
 }
 

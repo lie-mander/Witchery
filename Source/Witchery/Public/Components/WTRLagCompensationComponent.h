@@ -83,6 +83,12 @@ private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | RewindTime")
     float MaxRecordTime = 4.f;
 
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | RewindTime")
+    bool bDebugLagCompensation = false;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | RewindTime")
+    bool bDebugRecord = false;
+
     TDoubleLinkedList<FFramePackage> FrameHistory;
 
     void RecordFrameHistory();

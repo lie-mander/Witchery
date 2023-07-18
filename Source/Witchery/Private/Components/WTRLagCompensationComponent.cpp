@@ -167,7 +167,10 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
 
     if (RewindHitResult.bBlockingHit)
     {
-        DrawHitBoxComponent(RewindHitResult, FColor::Red);
+        if (bDebugLagCompensation)
+        {
+            DrawHitBoxComponent(RewindHitResult, FColor::Red);
+        }
 
         // We have headshot, can return early
         EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
@@ -198,7 +201,10 @@ FServerSideRewindResult UWTRLagCompensationComponent::ConfrimHit(const FFramePac
 
         if (RewindHitResult.bBlockingHit)
         {
-            DrawHitBoxComponent(RewindHitResult, FColor::Green);
+            if (bDebugLagCompensation)
+            {
+                DrawHitBoxComponent(RewindHitResult, FColor::Green);
+            }
 
             // We have confirmed hit, but not headshot. Can return
             EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
@@ -243,7 +249,7 @@ FServerSideRewindResult UWTRLagCompensationComponent::ProjectileConfirmHit(const
     PathParams.StartLocation = TraceStart;
     PathParams.LaunchVelocity = LaunchVelocity;
     PathParams.DrawDebugTime = 5.f;
-    PathParams.DrawDebugType = EDrawDebugTrace::ForDuration;
+    PathParams.DrawDebugType = bDebugLagCompensation ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
     PathParams.ProjectileRadius = 5.f;
     PathParams.SimFrequency = 15.f;
     PathParams.ActorsToIgnore.Add(GetOwner());
@@ -255,7 +261,10 @@ FServerSideRewindResult UWTRLagCompensationComponent::ProjectileConfirmHit(const
 
     if (PathResult.HitResult.bBlockingHit)
     {
-        DrawHitBoxComponent(PathResult.HitResult, FColor::Red);
+        if (bDebugLagCompensation)
+        {
+            DrawHitBoxComponent(PathResult.HitResult, FColor::Red);
+        }
 
         // We have headshot, can return early
         EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
@@ -282,7 +291,10 @@ FServerSideRewindResult UWTRLagCompensationComponent::ProjectileConfirmHit(const
 
         if (PathResult.HitResult.bBlockingHit)
         {
-            DrawHitBoxComponent(PathResult.HitResult, FColor::Green);
+            if (bDebugLagCompensation)
+            {
+                DrawHitBoxComponent(PathResult.HitResult, FColor::Green);
+            }
 
             // We have confirmed hit, but not headshot. Can return
             EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
@@ -349,7 +361,10 @@ FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShorgunConfirmHits(
         AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(RewindHitResult.GetActor());
         if (RewindHitResult.bBlockingHit && WTRCharacter)
         {
-            DrawHitBoxComponent(RewindHitResult, FColor::Red);
+            if (bDebugLagCompensation)
+            {
+                DrawHitBoxComponent(RewindHitResult, FColor::Red);
+            }
 
             // If we already have character in map - increment hits to him
             if (ShotgunResult.HeadShots.Contains(WTRCharacter))
@@ -404,7 +419,10 @@ FShotgunServerSideRewindResult UWTRLagCompensationComponent::ShorgunConfirmHits(
         AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(RewindHitResult.GetActor());
         if (RewindHitResult.bBlockingHit && WTRCharacter)
         {
-            DrawHitBoxComponent(RewindHitResult, FColor::Green);
+            if (bDebugLagCompensation)
+            {
+                DrawHitBoxComponent(RewindHitResult, FColor::Green);
+            }
 
             // If we already have character in map - increment hits to him
             if (ShotgunResult.BodyShots.Contains(WTRCharacter))
@@ -528,7 +546,11 @@ void UWTRLagCompensationComponent::RecordFrameHistory()
         }
 
         SaveThisFrame();
-        // ShowFramePackage(FrameHistory.GetHead()->GetValue(), FColor::Orange);
+
+        if (bDebugRecord)
+        {
+            ShowFramePackage(FrameHistory.GetHead()->GetValue(), FColor::Orange);
+        }
     }
 }
 

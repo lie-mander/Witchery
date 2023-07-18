@@ -91,8 +91,16 @@ void AWTRGameMode::PlayerEliminated(
 
     if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState && WTRGameState)
     {
+        TArray<AWTRPlayerState*> PrewLeadPlayers;
+        for (auto PrewLeadPlayer : WTRGameState->GetTopPlayers())
+        {
+            PrewLeadPlayers.Add(PrewLeadPlayer);
+        }
+
         AttackerPlayerState->AddToScore(1.f);
         WTRGameState->UpdateTopPlayers(AttackerPlayerState);
+
+        UpdateCrowns(PrewLeadPlayers, AttackerPlayerState);
     }
     if (VictimPlayerState)
     {
@@ -141,5 +149,32 @@ void AWTRGameMode::LeaveGame(AWTRPlayerState* LeavingPlayerState)
     if (WTRCharacter)
     {
         WTRCharacter->Elim(true);
+    }
+}
+
+void AWTRGameMode::UpdateCrowns(TArray<AWTRPlayerState*>& PrewLeadPlayers, AWTRPlayerState* AttackerPlayerState)
+{
+    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+    if (!WTRGameState) return;
+
+    if (WTRGameState->GetTopPlayers().Contains(AttackerPlayerState))
+    {
+        AWTRCharacter* Leader = Cast<AWTRCharacter>(AttackerPlayerState->GetPawn());
+        if (Leader)
+        {
+            Leader->Multicast_GetLead();
+        }
+    }
+
+    for (auto PrewLeadPlayer : PrewLeadPlayers)
+    {
+        if (!WTRGameState->GetTopPlayers().Contains(PrewLeadPlayer))
+        {
+            AWTRCharacter* Loser = Cast<AWTRCharacter>(PrewLeadPlayer->GetPawn());
+            if (Loser)
+            {
+                Loser->Multicast_LostLead();
+            }
+        }
     }
 }

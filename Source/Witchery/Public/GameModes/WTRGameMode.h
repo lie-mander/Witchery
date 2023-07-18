@@ -50,4 +50,6 @@ private:
 
     float CountdownTime = 0.f;
     float TimeOfMapCreation = 0.f;
+
+    void UpdateCrowns(TArray<AWTRPlayerState*>& PrewLeadPlayers, AWTRPlayerState* AttackerPlayerState);
 };
