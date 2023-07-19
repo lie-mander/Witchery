@@ -176,6 +176,46 @@ void AWTRPlayerController::OnRep_MatchState()
     }
 }
 
+void AWTRPlayerController::BroadcastElim(const APlayerState* AttackerState, const APlayerState* VictimState) 
+{
+    if (!AttackerState || !VictimState) return;
+
+    Client_ElimAnnouncement(AttackerState, VictimState);
+}
+
+void AWTRPlayerController::Client_ElimAnnouncement_Implementation(const APlayerState* AttackerState, const APlayerState* VictimState)
+{
+    WTR_HUD = GetWTR_HUD();
+    const APlayerState* Self = GetPlayerState<APlayerState>();
+    if (!AttackerState || !VictimState || !WTR_HUD || !Self) return;
+
+    if (AttackerState == Self && VictimState != Self)
+    {
+        WTR_HUD->AddElimAnnouncement(FString("You"), VictimState->GetPlayerName());
+        return;
+    }
+
+    if (AttackerState != Self && VictimState == Self)
+    {
+        WTR_HUD->AddElimAnnouncement(AttackerState->GetPlayerName(), FString("you"));
+        return;
+    }
+
+    if (AttackerState == Self && VictimState == Self)
+    {
+        WTR_HUD->AddElimAnnouncement(FString("You"), FString("yourself"));
+        return;
+    }
+
+    if (AttackerState != Self && VictimState != Self && AttackerState == VictimState)
+    {
+        WTR_HUD->AddElimAnnouncement(AttackerState->GetPlayerName(), FString("themselves"));
+        return;
+    }
+
+    WTR_HUD->AddElimAnnouncement(AttackerState->GetPlayerName(), VictimState->GetPlayerName());
+}
+
 void AWTRPlayerController::UpdateSyncTime(float DeltaTime)
 {
     TimeToSyncUpdate += DeltaTime;

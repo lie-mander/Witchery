@@ -10,6 +10,7 @@
 class AWTR_HUD;
 class AWTRCharacter;
 class AWTRGameMode;
+class APlayerState;
 class UWTRCharacterOverlayWidget;
 class UWTRAnnouncementWidget;
 class USoundClass;
@@ -31,6 +32,7 @@ public:
     virtual float GetServerTime();
 
     void SetMatchState(const FName& State);
+    void BroadcastElim(const APlayerState* AttackerState, const APlayerState* VictimState);
 
     void TurnDownTheVolume();
     void VolumeUp();
@@ -198,19 +200,19 @@ private:
     float FPS = 0.f;
 
     /*
-    * Ping
-    */
+     * Ping
+     */
 
     /*We are showing ping every Frequency and after that waiting Duration*/
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Ping")
     float ShowPingFrequency = 5.f;
-    
+
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Ping")
     float ShowPingDuration = 7.f;
-    
+
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Ping")
     float PingThreshold = 50.f;
-    
+
     float ShowPingFrequencyRuntime = 0.f;
     float ShowPingDurationRuntime = 0.f;
 
@@ -222,6 +224,9 @@ private:
      */
     UFUNCTION(Client, Reliable)
     void Client_OnPossess();
+
+    UFUNCTION(Client, Reliable)
+    void Client_ElimAnnouncement(const APlayerState* AttackerState, const APlayerState* VictimState);
 
     AWTR_HUD* GetWTR_HUD();
     void SetHUDTime();

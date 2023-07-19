@@ -111,6 +111,18 @@ void AWTRGameMode::PlayerEliminated(
     {
         EliminatedCharacter->Elim(false);
     }
+
+    if (AttackerPlayerState && VictimPlayerState)
+    {
+        for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+        {
+            AWTRPlayerController* WTRController = Cast<AWTRPlayerController>(*It);
+            if (WTRController)
+            {
+                WTRController->BroadcastElim(AttackerPlayerState, VictimPlayerState);
+            }
+        }
+    }
 }
 
 void AWTRGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController)

@@ -10,6 +10,7 @@
 class UTexture2D;
 class UWTRCharacterOverlayWidget;
 class UWTRAnnouncementWidget;
+class UWTRElimAnnouncementWidget;
 class UUserWidget;
 
 UCLASS()
@@ -22,6 +23,7 @@ public:
 
     void AddCharacterOverlay();
     void AddAnnouncement();
+    void AddElimAnnouncement(const FString& AttackerName, const FString& VictimName);
 
     FORCEINLINE void SetCrosshairHUDPackage(const FCrosshairHUDPackage& Package) { CrosshairHUDPackage = Package; }
 
@@ -31,11 +33,17 @@ public:
     UPROPERTY(EditAnywhere, Category = "WTR | Widgets")
     TSubclassOf<UUserWidget> AnnouncementWidgetClass;
 
+    UPROPERTY(EditAnywhere, Category = "WTR | Widgets")
+    TSubclassOf<UUserWidget> ElimAnnouncementWidgetClass;
+
     UPROPERTY()
     UWTRCharacterOverlayWidget* CharacterOverlayWidget;
 
     UPROPERTY()
     UWTRAnnouncementWidget* AnnouncementWidget;
+
+    UPROPERTY()
+    UWTRElimAnnouncementWidget* ElimAnnouncementWidget;
 
 protected:
     virtual void BeginPlay() override;
@@ -43,6 +51,9 @@ protected:
 private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     float CrosshairSpreadMultiplier = 16.f;
+
+    UPROPERTY()
+    APlayerController* OwnerController;
 
     FCrosshairHUDPackage CrosshairHUDPackage;
 

@@ -3,6 +3,7 @@
 #include "HUD/WTR_HUD.h"
 #include "HUD/WTRCharacterOverlayWidget.h"
 #include "HUD/WTRAnnouncementWidget.h"
+#include "HUD/WTRElimAnnouncementWidget.h"
 #include "GameFramework/PlayerController.h"
 
 void AWTR_HUD::BeginPlay()
@@ -12,23 +13,34 @@ void AWTR_HUD::BeginPlay()
 
 void AWTR_HUD::AddCharacterOverlay()
 {
-    APlayerController* PlayerController = GetOwningPlayerController();
+    OwnerController = (OwnerController == nullptr) ? GetOwningPlayerController() : OwnerController;
 
-    if (PlayerController && CharacterOverlayWidgetClass)
+    if (OwnerController && CharacterOverlayWidgetClass)
     {
-        CharacterOverlayWidget = CreateWidget<UWTRCharacterOverlayWidget>(PlayerController, CharacterOverlayWidgetClass);
+        CharacterOverlayWidget = CreateWidget<UWTRCharacterOverlayWidget>(OwnerController, CharacterOverlayWidgetClass);
         CharacterOverlayWidget->AddToViewport();
     }
 }
 
 void AWTR_HUD::AddAnnouncement()
 {
-    APlayerController* PlayerController = GetOwningPlayerController();
+    OwnerController = (OwnerController == nullptr) ? GetOwningPlayerController() : OwnerController;
 
-    if (PlayerController && AnnouncementWidgetClass)
+    if (OwnerController && AnnouncementWidgetClass)
     {
-        AnnouncementWidget = CreateWidget<UWTRAnnouncementWidget>(PlayerController, AnnouncementWidgetClass);
+        AnnouncementWidget = CreateWidget<UWTRAnnouncementWidget>(OwnerController, AnnouncementWidgetClass);
         AnnouncementWidget->AddToViewport();
+    }
+}
+
+void AWTR_HUD::AddElimAnnouncement(const FString& AttackerName, const FString& VictimName) 
+{
+    OwnerController = (OwnerController == nullptr) ? GetOwningPlayerController() : OwnerController;
+    if (OwnerController && ElimAnnouncementWidgetClass)
+    {
+        ElimAnnouncementWidget = CreateWidget<UWTRElimAnnouncementWidget>(OwnerController, ElimAnnouncementWidgetClass);
+        ElimAnnouncementWidget->SetElimAnnouncementText(AttackerName, VictimName);
+        ElimAnnouncementWidget->AddToViewport();
     }
 }
 
