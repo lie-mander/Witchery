@@ -218,6 +218,12 @@ private:
     UFUNCTION(Client, Reliable)
     void Client_AddAmmo(int32 AmmoToAdd);
 
+    UFUNCTION(Client, Reliable)
+    void Client_SetAmmo(int32 NewAmmo);
+
+    UFUNCTION(Server, Reliable)
+    void Server_GetAmmo();
+
     /*
      * Zooming
      */

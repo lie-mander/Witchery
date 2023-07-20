@@ -129,7 +129,7 @@ void AWTRWeapon::DecreaseAmmo()
     {
         Client_UpdateAmmo(Ammo);
     }
-    else
+    else if (WTROwnerCharacter && WTROwnerCharacter->IsLocallyControlled())
     {
         ++SequenceAmmo;
     }
@@ -153,7 +153,11 @@ void AWTRWeapon::Client_UpdateAmmo_Implementation(int32 NewAmmo)
     Ammo = NewAmmo;
     --SequenceAmmo;
     Ammo -= SequenceAmmo;
-    SetHUDAmmo();
+
+    if (WeaponState == EWeaponState::EWS_Equipped)
+    {
+        SetHUDAmmo();
+    }
 }
 
 void AWTRWeapon::Client_AddAmmo_Implementation(int32 AmmoToAdd)
@@ -172,6 +176,16 @@ void AWTRWeapon::Client_AddAmmo_Implementation(int32 AmmoToAdd)
     {
         WTROwnerCharacter->GetCombatComponent()->JumpToShotgunEnd();
     }
+}
+
+void AWTRWeapon::Server_GetAmmo_Implementation()
+{
+    Client_SetAmmo(Ammo);
+}
+
+void AWTRWeapon::Client_SetAmmo_Implementation(int32 NewAmmo)
+{
+    Ammo = NewAmmo;
 }
 
 void AWTRWeapon::SetWeaponState(EWeaponState NewState)
@@ -228,6 +242,8 @@ void AWTRWeapon::HandleStateEquippedSecond()
 
 void AWTRWeapon::HandleEquipped()
 {
+    Server_GetAmmo();
+
     AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     WeaponMesh->SetSimulatePhysics(false);
