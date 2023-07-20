@@ -18,46 +18,70 @@ void AWTRShotgun::FireShotgun(const TArray<FVector_NetQuantize> HitTargets)
 
     // Map for characters and number of hits to every character in this map
     TMap<AWTRCharacter*, uint32> HitsMap;
+    TMap<AWTRCharacter*, uint32> HeadShotsHitsMap;
 
     for (const auto HitTarget : HitTargets)
     {
         FHitResult FireHit;
 
-        CalculateNumOfHits(TraceStart, HitTarget, HitsMap, FireHit);
+        CalculateNumOfHits(TraceStart, HitTarget, HitsMap, HeadShotsHitsMap, FireHit);
         HandleShotgunEffects(FireHit);
     }
 
     AController* InstigatorController = GetOwnerPlayerController();
     WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
     TArray<AWTRCharacter*> HitCharacters;
+    TMap<AWTRCharacter*, float> DamageMap;
 
+    // Body shots, calculate damage to DamageMap
     for (auto Pair : HitsMap)
     {
-        ApplyDamageWithoutSSR(Pair, InstigatorController);
-
         if (Pair.Key)
         {
-            HitCharacters.Add(Pair.Key);
+            DamageMap.Emplace(Pair.Key, Pair.Value * Damage);  // Num of body hits * default damage
+
+            HitCharacters.AddUnique(Pair.Key);
         }
     }
 
+    // Head shots, calculate damage to DamageMap
+    for (auto Pair : HeadShotsHitsMap)
+    {
+        if (Pair.Key)
+        {
+            if (DamageMap.Contains(Pair.Key))
+                DamageMap[Pair.Key] += Pair.Value * HeadShotDamage;  // num of head hits * headshot damage
+            else
+                DamageMap.Emplace(Pair.Key, Pair.Value * HeadShotDamage);
+
+            HitCharacters.AddUnique(Pair.Key);
+        }
+    }
+
+    ApplyDamageWithoutSSR(DamageMap, InstigatorController);
     ApplyDamageWithSSR(HitCharacters, TraceStart, HitTargets, InstigatorController);
 }
 
-void AWTRShotgun::ApplyDamageWithoutSSR(TPair<AWTRCharacter*, uint32>& Pair, AController* InstigatorController)
+void AWTRShotgun::ApplyDamageWithoutSSR(TMap<AWTRCharacter*, float>& DamageMap, AController* InstigatorController)
 {
     if ((!bUseServerSideRewind || WTROwnerCharacter->IsLocallyControlled()) &&  //
         HasAuthority() &&                                                       //
-        Pair.Key &&                                                             //
-        InstigatorController)
+        InstigatorController                                                    //
+    )
     {
-        UGameplayStatics::ApplyDamage(  //
-            Pair.Key,                   // For every character in this map ..
-            Damage * Pair.Value,        // Apply damage multiply by number of hits
-            InstigatorController,       //
-            this,                       //
-            UDamageType::StaticClass()  //
-        );
+        for (auto Pair : DamageMap)
+        {
+            if (Pair.Key)
+            {
+                UGameplayStatics::ApplyDamage(  //
+                    Pair.Key,                   // For every character in this map ..
+                    Pair.Value,                 // Apply damage calculated early in DamageMap
+                    InstigatorController,       //
+                    this,                       //
+                    UDamageType::StaticClass()  //
+                );
+            }
+        }
     }
 }
 
@@ -82,8 +106,8 @@ void AWTRShotgun::ApplyDamageWithSSR(const TArray<AWTRCharacter*>& HitCharacters
     }
 }
 
-void AWTRShotgun::CalculateNumOfHits(
-    const FVector& TraceStart, const FVector_NetQuantize& HitTarget, TMap<AWTRCharacter*, uint32>& HitsMap, FHitResult& FireHit)
+void AWTRShotgun::CalculateNumOfHits(const FVector& TraceStart, const FVector_NetQuantize& HitTarget, TMap<AWTRCharacter*, uint32>& HitsMap,
+    TMap<AWTRCharacter*, uint32>& HeadShotsHitsMap, FHitResult& FireHit)
 {
     // Do hit
     WeaponTraceHit(TraceStart, HitTarget, FireHit);
@@ -92,15 +116,24 @@ void AWTRShotgun::CalculateNumOfHits(
     AWTRCharacter* WTRCharacter = Cast<AWTRCharacter>(FireHit.GetActor());
     if (FireHit.bBlockingHit && WTRCharacter)
     {
-        // If we already have character in map - increment hits to him
-        if (HitsMap.Contains(WTRCharacter))
+        const bool bHeadShotHit = FireHit.BoneName.ToString() == FString("head");
+        if (bHeadShotHit)
         {
-            ++HitsMap[WTRCharacter];
+            // If we already have character in map - increment hits to him
+            // Or add him to map with 1 hit
+            if (HeadShotsHitsMap.Contains(WTRCharacter))
+                ++HeadShotsHitsMap[WTRCharacter];
+            else
+                HeadShotsHitsMap.Emplace(WTRCharacter, 1);
         }
-        // Or add him to map with 1 hit
         else
         {
-            HitsMap.Emplace(WTRCharacter, 1);
+            // If we already have character in map - increment hits to him
+            // Or add him to map with 1 hit
+            if (HitsMap.Contains(WTRCharacter))
+                ++HitsMap[WTRCharacter];
+            else
+                HitsMap.Emplace(WTRCharacter, 1);
         }
     }
 }

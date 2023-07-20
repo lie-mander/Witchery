@@ -83,9 +83,11 @@ void AWTRHitScanWeapon::ApplyDamageByRole(const FVector& TraceStart, const FHitR
         InstigatorController                                                    //
     )
     {
+        const float DamageToCause = HitResult.BoneName.ToString() == FString("head") ? HeadShotDamage : Damage;
+
         UGameplayStatics::ApplyDamage(  //
             HitResult.GetActor(),       //
-            Damage,                     //
+            DamageToCause,              //
             InstigatorController,       //
             this,                       //
             UDamageType::StaticClass()  //

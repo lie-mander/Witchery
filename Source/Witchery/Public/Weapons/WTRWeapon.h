@@ -48,6 +48,7 @@ public:
     FORCEINLINE float GetZoomInterpSpeed() const { return ZoomInterpSpeed; }
     FORCEINLINE float GetWeaponFiringDelay() const { return FireDelay; }
     FORCEINLINE float GetDamage() const { return Damage; }
+    FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }
     FORCEINLINE int32 GetAmmo() const { return Ammo; }
     FORCEINLINE int32 GetMagazineCapacity() const { return MagazineCapacity; }
 
@@ -138,6 +139,9 @@ protected:
      */
     UPROPERTY(EditAnywhere, Category = "WTR | Hit")
     float Damage = 20.f;
+
+    UPROPERTY(EditAnywhere, Category = "WTR | Hit")
+    float HeadShotDamage = 40.f;
 
     /*
      * Base variables
