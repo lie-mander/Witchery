@@ -432,20 +432,17 @@ void AWTRCharacter::DelayInitHUD()
     {
         WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
 
-        if (WTRPlayerController)
+        if (WTRPlayerController && WTRPlayerController->GetWTR_HUD())
         {
             WTRPlayerController->SetHUDHealth(Health, MaxHealth);
             WTRPlayerController->SetHUDShield(Shield, MaxShield);
 
             AWTRPlayerState* TempPlayerState = Cast<AWTRPlayerState>(WTRPlayerController->PlayerState);
-            if (TempPlayerState)
+            if (TempPlayerState && Combat)
             {
                 WTRPlayerController->SetHUDScore(TempPlayerState->GetScore());
                 WTRPlayerController->SetHUDDefeats(TempPlayerState->GetDefeats());
-            }
 
-            if (Combat)
-            {
                 WTRPlayerController->SetHUDCarriedAmmo(Combat->CarriedAmmo);
                 WTRPlayerController->SetHUDGrenades(Combat->GetCurrentGrenades());
 
@@ -454,9 +451,9 @@ void AWTRCharacter::DelayInitHUD()
                     WTRPlayerController->SetHUDWeaponAmmo(Combat->EquippedWeapon->GetAmmo());
                     WTRPlayerController->SetHUDWeaponType(Combat->EquippedWeapon->GetWeaponType());
                 }
-            }
 
-            bDelayInitHUD_Controller = false;
+                bDelayInitHUD_Controller = false;
+            }
         }
     }
 
@@ -464,17 +461,17 @@ void AWTRCharacter::DelayInitHUD()
     {
         WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
 
-        if (WTRPlayerController)
+        if (WTRPlayerController && WTRPlayerController->GetWTR_HUD())
         {
             AWTRPlayerState* TempPlayerState = Cast<AWTRPlayerState>(WTRPlayerController->PlayerState);
             if (TempPlayerState)
             {
                 WTRPlayerController->SetHUDScore(TempPlayerState->GetScore());
                 WTRPlayerController->SetHUDDefeats(TempPlayerState->GetDefeats());
+
+                bDelayInitHUD_PlayerState = false;
             }
         }
-
-        bDelayInitHUD_PlayerState = false;
     }
 }
 

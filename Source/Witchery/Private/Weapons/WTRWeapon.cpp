@@ -121,7 +121,6 @@ void AWTRWeapon::StopFire() {}
 void AWTRWeapon::DecreaseAmmo()
 {
     Ammo = FMath::Clamp(Ammo - 1, 0, MagazineCapacity);
-    ++SequenceAmmo;
 
     WTROwnerCharacter = (WTROwnerCharacter == nullptr) ? Cast<AWTRCharacter>(GetOwner()) : WTROwnerCharacter;
     SetHUDAmmo();
@@ -129,6 +128,10 @@ void AWTRWeapon::DecreaseAmmo()
     if (HasAuthority())
     {
         Client_UpdateAmmo(Ammo);
+    }
+    else
+    {
+        ++SequenceAmmo;
     }
 }
 
@@ -223,7 +226,7 @@ void AWTRWeapon::HandleStateEquippedSecond()
     }
 }
 
-void AWTRWeapon::HandleEquipped() 
+void AWTRWeapon::HandleEquipped()
 {
     AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 

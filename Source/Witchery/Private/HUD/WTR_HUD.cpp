@@ -5,6 +5,9 @@
 #include "HUD/WTRAnnouncementWidget.h"
 #include "HUD/WTRElimAnnouncementWidget.h"
 #include "GameFramework/PlayerController.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/HorizontalBox.h"
+#include "Components/CanvasPanelSlot.h"
 
 void AWTR_HUD::BeginPlay()
 {
@@ -33,7 +36,7 @@ void AWTR_HUD::AddAnnouncement()
     }
 }
 
-void AWTR_HUD::AddElimAnnouncement(const FString& AttackerName, const FString& VictimName) 
+void AWTR_HUD::AddElimAnnouncement(const FString& AttackerName, const FString& VictimName)
 {
     OwnerController = (OwnerController == nullptr) ? GetOwningPlayerController() : OwnerController;
     if (OwnerController && ElimAnnouncementWidgetClass)
@@ -41,6 +44,51 @@ void AWTR_HUD::AddElimAnnouncement(const FString& AttackerName, const FString& V
         ElimAnnouncementWidget = CreateWidget<UWTRElimAnnouncementWidget>(OwnerController, ElimAnnouncementWidgetClass);
         ElimAnnouncementWidget->SetElimAnnouncementText(AttackerName, VictimName);
         ElimAnnouncementWidget->AddToViewport();
+
+        if (!ElimMessages.IsEmpty())
+        {
+            for (UWTRElimAnnouncementWidget* ElimMessage : ElimMessages)
+            {
+                if (ElimMessage && ElimMessage->ElimHorizontalBox)
+                {
+                    UCanvasPanelSlot* CanvasPanelSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(ElimMessage->ElimHorizontalBox);
+                    if (CanvasPanelSlot)
+                    {
+                        const FVector2D Position = CanvasPanelSlot->GetPosition();
+                        const FVector2D NewPosition = FVector2D(                             //
+                            CanvasPanelSlot->GetPosition().X,                                //
+                            CanvasPanelSlot->GetPosition().Y + CanvasPanelSlot->GetSize().Y  //
+                        );
+                        CanvasPanelSlot->SetPosition(NewPosition);
+                    }
+                }
+            }
+        }
+
+        ElimMessages.Add(ElimAnnouncementWidget);
+
+        if (ElimAnnouncementWidget)
+        {
+            // Timer for remove from viewport
+            FTimerHandle ElimMessageHandle;
+            FTimerDelegate ElimMessageDelegate;
+            ElimMessageDelegate.BindUFunction(this, FName("OnElimMessageTimerFinished"), ElimAnnouncementWidget);
+            GetWorldTimerManager().SetTimer(  //
+                ElimMessageHandle,            //
+                ElimMessageDelegate,          //
+                ElimMessageTime,              //
+                false                         //
+            );
+        }
+    }
+}
+
+void AWTR_HUD::OnElimMessageTimerFinished(UWTRElimAnnouncementWidget* MessageToDelete)
+{
+    if (MessageToDelete)
+    {
+        ElimMessages.Remove(MessageToDelete);
+        MessageToDelete->RemoveFromParent();
     }
 }
 

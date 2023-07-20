@@ -51,11 +51,18 @@ protected:
 private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Crosshair")
     float CrosshairSpreadMultiplier = 16.f;
+    
+    UPROPERTY(EditAnywhere, Category = "WTR | ElimMessage")
+    float ElimMessageTime = 2.5f;
 
     UPROPERTY()
     APlayerController* OwnerController;
 
+    TArray<UWTRElimAnnouncementWidget*> ElimMessages;
     FCrosshairHUDPackage CrosshairHUDPackage;
 
     void DrawCrosshair(UTexture2D* Texture, const FVector2D& ViewportCenter, const FVector2D& Spread, const FLinearColor& CrosshairColor);
+
+    UFUNCTION()
+    void OnElimMessageTimerFinished(UWTRElimAnnouncementWidget* MessageToDelete);
 };

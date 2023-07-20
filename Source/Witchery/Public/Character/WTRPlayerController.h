@@ -50,6 +50,7 @@ public:
     void SetHUD_FPS();
     void SetHUDGrenades(int32 Grenades);
 
+    AWTR_HUD* GetWTR_HUD();
     FORCEINLINE FName GetMatchState() const { return MatchState; }
 
     FIsPingHigh IsPingHighDelegate;
@@ -228,7 +229,6 @@ private:
     UFUNCTION(Client, Reliable)
     void Client_ElimAnnouncement(const APlayerState* AttackerState, const APlayerState* VictimState);
 
-    AWTR_HUD* GetWTR_HUD();
     void SetHUDTime();
     void Debug_ShowHUDTime();
     void ShowFPS(float DeltaTime);
