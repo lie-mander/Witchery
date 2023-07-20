@@ -58,6 +58,16 @@ public:
 
     float SingleTripTime = 0.f;
 
+    /*
+     * Chat
+     */
+    bool bChatOpen = false;
+
+    void SendChatMessage(APlayerState* Sender, const FString& Message);
+
+    UFUNCTION(Server, Reliable)
+    void Server_SendChatMessage(APlayerState* Sender, const FString& Message);
+
 protected:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
@@ -200,10 +210,6 @@ private:
 
     float FPS = 0.f;
 
-    /*
-     * Ping
-     */
-
     /*We are showing ping every Frequency and after that waiting Duration*/
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Ping")
     float ShowPingFrequency = 5.f;
@@ -237,4 +243,5 @@ private:
     void HidePing();
     void DelayInitCharacterOverlay();
     void OnQuitButtonPressed();
+    void OnChatButtonPressed();
 };

@@ -1302,6 +1302,15 @@ void AWTRCharacter::Multicast_LostLead_Implementation()
     }
 }
 
+void AWTRCharacter::Multicast_SendChatMessage_Implementation(APlayerState* Sender, const FString& Message)
+{
+    WTRPlayerController = (WTRPlayerController == nullptr) ? Cast<AWTRPlayerController>(Controller) : WTRPlayerController;
+    if (WTRPlayerController)
+    {
+        WTRPlayerController->SendChatMessage(Sender, Message);
+    }
+}
+
 int32 AWTRCharacter::GetCarriedAmmo() const
 {
     if (!Combat) return 0;

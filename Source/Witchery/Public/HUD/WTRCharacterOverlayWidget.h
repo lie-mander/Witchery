@@ -10,6 +10,10 @@ class UProgressBar;
 class UTextBlock;
 class UWidgetAnimation;
 class UImage;
+class UWTRChat;
+class APlayerState;
+class UEditableTextBox;
+class AWTRPlayerController;
 
 UCLASS()
 class WITCHERY_API UWTRCharacterOverlayWidget : public UUserWidget
@@ -17,6 +21,17 @@ class WITCHERY_API UWTRCharacterOverlayWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+    void AddChatMessage(APlayerState* Sender, const FString& Message);
+    void ApplyChatMessage(APlayerState* Sender, const FString& Message);
+    void OpenChat();
+    void CloseChat();
+
+    UPROPERTY(meta = (BindWidget))
+    UWTRChat* Chat;
+
+    UPROPERTY(meta = (BindWidget))
+    UEditableTextBox* ChatWriteBox;
+
     UPROPERTY(meta = (BindWidget))
     UProgressBar* HealthBar;
 
@@ -67,4 +82,21 @@ public:
 
     UPROPERTY(Transient, meta = (BindWidgetAnim))
     UWidgetAnimation* Ping;
+
+    /*
+    * Base variables
+    */
+    UPROPERTY()
+    AWTRPlayerController* PlayerController;
+
+protected:
+    virtual bool Initialize() override;
+
+private:
+    FTimerHandle ChatCloseHandle;
+
+    void ChatCloseTimerFinished();
+
+    UFUNCTION()
+    void OnTextCommit(const FText& Text, ETextCommit::Type CommitMethod);
 };

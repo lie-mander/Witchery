@@ -102,6 +102,9 @@ public:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_LostLead();
 
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_SendChatMessage(APlayerState* Sender, const FString& Message);
+
     UFUNCTION(BlueprintImplementableEvent)
     void SetShowScopeAnimation(bool bShowScope);
 

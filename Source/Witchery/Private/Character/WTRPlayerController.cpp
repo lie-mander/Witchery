@@ -6,6 +6,7 @@
 #include "HUD/WTRCharacterOverlayWidget.h"
 #include "HUD/WTRAnnouncementWidget.h"
 #include "HUD/WTRReturnToMainMenu.h"
+#include "HUD/WTRChat.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/WTRCombatComponent.h"
@@ -45,6 +46,7 @@ void AWTRPlayerController::SetupInputComponent()
     InputComponent->BindAction("AudioUp", EInputEvent::IE_Pressed, this, &ThisClass::VolumeUp);
     InputComponent->BindAction("AudioDown", EInputEvent::IE_Pressed, this, &ThisClass::TurnDownTheVolume);
     InputComponent->BindAction("Quit", EInputEvent::IE_Pressed, this, &ThisClass::OnQuitButtonPressed);
+    InputComponent->BindAction("Chat", EInputEvent::IE_Pressed, this, &ThisClass::OnChatButtonPressed);
 }
 
 void AWTRPlayerController::Tick(float DeltaTime)
@@ -176,7 +178,7 @@ void AWTRPlayerController::OnRep_MatchState()
     }
 }
 
-void AWTRPlayerController::BroadcastElim(const APlayerState* AttackerState, const APlayerState* VictimState) 
+void AWTRPlayerController::BroadcastElim(const APlayerState* AttackerState, const APlayerState* VictimState)
 {
     if (!AttackerState || !VictimState) return;
 
@@ -315,6 +317,8 @@ void AWTRPlayerController::SetHUDHealth(float CurrentHealth, float MaxHealth)
 
     if (bHUDValid)
     {
+        CharacterOverlay->AddChatMessage(GetPlayerState<APlayerState>(), "my health updated");
+
         const float HealthPercent = CurrentHealth / MaxHealth;
         CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 
@@ -960,6 +964,40 @@ void AWTRPlayerController::OnQuitButtonPressed()
         {
             ReturnToMainMenuWidget->MenuTearDown();
         }
+    }
+}
+
+void AWTRPlayerController::OnChatButtonPressed()
+{
+    if (CharacterOverlay)
+    {
+        bChatOpen = !bChatOpen;
+        if (bChatOpen)
+        {
+            CharacterOverlay->OpenChat();
+        }
+        else
+        {
+            CharacterOverlay->CloseChat();
+        }
+    }
+}
+
+void AWTRPlayerController::Server_SendChatMessage_Implementation(APlayerState* Sender, const FString& Message)
+{
+    WTRCharacter = Cast<AWTRCharacter>(GetPawn());
+
+    if (WTRCharacter)
+    {
+        WTRCharacter->Multicast_SendChatMessage(Sender, Message);
+    }
+}
+
+void AWTRPlayerController::SendChatMessage(APlayerState* Sender, const FString& Message)
+{
+    if (CharacterOverlay)
+    {
+        CharacterOverlay->ApplyChatMessage(Sender, Message);
     }
 }
 
