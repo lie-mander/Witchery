@@ -37,6 +37,8 @@ void AWTRProjectileWeapon::Fire(const FVector& HitTarget)
                         GetWorld()->SpawnActor<AWTRProjectile>(ProjectileClass, TraceStart, ToTargetRotation, ProjSpawnParams);
                     SpawnedProjectile->bUseServerSideRewind = false;
                     SpawnedProjectile->SetDamage(Damage);
+                    SpawnedProjectile->SetHeadShotDamage(HeadShotDamage);
+
                 }
                 else  // server not locally controlled - SSR, not replicated
                 {
@@ -53,6 +55,7 @@ void AWTRProjectileWeapon::Fire(const FVector& HitTarget)
                         ServerSideRewindProjectileClass, TraceStart, ToTargetRotation, ProjSpawnParams);
                     SpawnedProjectile->bUseServerSideRewind = true;
                     SpawnedProjectile->SetDamage(Damage);
+                    SpawnedProjectile->SetHeadShotDamage(HeadShotDamage);
                     SpawnedProjectile->TraceStart = TraceStart;
                     SpawnedProjectile->LaunchVelocity = SpawnedProjectile->GetActorForwardVector() * SpawnedProjectile->GetInitialSpeed();
                 }
@@ -71,6 +74,7 @@ void AWTRProjectileWeapon::Fire(const FVector& HitTarget)
                 SpawnedProjectile = GetWorld()->SpawnActor<AWTRProjectile>(ProjectileClass, TraceStart, ToTargetRotation, ProjSpawnParams);
                 SpawnedProjectile->bUseServerSideRewind = false;
                 SpawnedProjectile->SetDamage(Damage);
+                SpawnedProjectile->SetHeadShotDamage(HeadShotDamage);
             }
         }
     }

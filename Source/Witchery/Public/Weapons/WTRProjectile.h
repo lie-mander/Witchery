@@ -26,6 +26,7 @@ public:
     virtual void LifeSpanExpired() override;
 
     FORCEINLINE void SetDamage(float NewDamage) { Damage = NewDamage; }
+    FORCEINLINE void SetHeadShotDamage(float NewDamage) { HeadShotDamage = NewDamage; }
     FORCEINLINE float GetInitialSpeed() const { return InitialSpeed; }
 
     /*
@@ -56,8 +57,13 @@ protected:
     UPROPERTY()
     UNiagaraComponent* TrailComponent;
 
+    // Must be use for Rockets and Grenades
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float Damage = 20.f;
+
+    // Doesn`t matter for Rockets and Grenades
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
+    float HeadShotDamage = 40.f;
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Hit")
     float DestroyDelay = 0.01f;
