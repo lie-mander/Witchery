@@ -101,12 +101,11 @@ void AWTRHitScanWeapon::ApplyDamageByRole(const FVector& TraceStart, const FHitR
         if (WTROwnerCharacter && WTROwnerCharacter->IsLocallyControlled() && WTROwnerPlayerController &&
             WTROwnerCharacter->GetLagCompensation())
         {
-            WTROwnerCharacter->GetLagCompensation()->Server_ScoreRequest(                              //
-                WTRCharacter,                                                                          //
-                TraceStart,                                                                            //
-                HitResult.ImpactPoint,                                                                 //
-                WTROwnerPlayerController->GetServerTime() - WTROwnerPlayerController->SingleTripTime,  //
-                this                                                                                   //
+            WTROwnerCharacter->GetLagCompensation()->Server_ScoreRequest(                             //
+                WTRCharacter,                                                                         //
+                TraceStart,                                                                           //
+                HitResult.ImpactPoint,                                                                //
+                WTROwnerPlayerController->GetServerTime() - WTROwnerPlayerController->SingleTripTime  //
             );
         }
     }

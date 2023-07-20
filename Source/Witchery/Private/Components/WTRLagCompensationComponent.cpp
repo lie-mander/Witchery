@@ -24,19 +24,22 @@ void UWTRLagCompensationComponent::TickComponent(float DeltaTime, ELevelTick Tic
     RecordFrameHistory();
 }
 
-void UWTRLagCompensationComponent::Server_ScoreRequest_Implementation(AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart,
-    const FVector_NetQuantize& HitLocation, float HitTime, AWTRWeapon* DamageCauser)
+void UWTRLagCompensationComponent::Server_ScoreRequest_Implementation(
+    AWTRCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
     FServerSideRewindResult Confrim = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);
 
-    if (Confrim.bConfrimHit && DamageCauser && Character)
+    if (Confrim.bConfrimHit && Character->GetEquippedWeapon() && Character)
     {
-        UGameplayStatics::ApplyDamage(  //
-            HitCharacter,               //
-            DamageCauser->GetDamage(),  //
-            Character->Controller,      //
-            DamageCauser,               //
-            UDamageType::StaticClass()  //
+        const float DamageToCause =
+            Confrim.bHeadshot ? Character->GetEquippedWeapon()->GetHeadShotDamage() : Character->GetEquippedWeapon()->GetDamage();
+
+        UGameplayStatics::ApplyDamage(       //
+            HitCharacter,                    //
+            DamageToCause,                   //
+            Character->Controller,           //
+            Character->GetEquippedWeapon(),  //
+            UDamageType::StaticClass()       //
         );
     }
 }
@@ -48,12 +51,15 @@ void UWTRLagCompensationComponent::Server_ProjectileScoreRequest_Implementation(
 
     if (Confrim.bConfrimHit && Character && Character->GetEquippedWeapon())
     {
-        UGameplayStatics::ApplyDamage(                    //
-            HitCharacter,                                 //
-            Character->GetEquippedWeapon()->GetDamage(),  //
-            Character->Controller,                        //
-            Character->GetEquippedWeapon(),               //
-            UDamageType::StaticClass()                    //
+        const float DamageToCause =
+            Confrim.bHeadshot ? Character->GetEquippedWeapon()->GetHeadShotDamage() : Character->GetEquippedWeapon()->GetDamage();
+
+        UGameplayStatics::ApplyDamage(       //
+            HitCharacter,                    //
+            DamageToCause,                   //
+            Character->Controller,           //
+            Character->GetEquippedWeapon(),  //
+            UDamageType::StaticClass()       //
         );
     }
 }
@@ -76,7 +82,7 @@ void UWTRLagCompensationComponent::Server_ShotgunScoreRequest_Implementation(con
         float TotalDamage = 0.f;
         if (Confrim.HeadShots.Contains(HitCharacter))
         {
-            const float HeadDamage = Confrim.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetDamage();
+            const float HeadDamage = Confrim.HeadShots[HitCharacter] * Character->GetEquippedWeapon()->GetHeadShotDamage();
             TotalDamage += HeadDamage;
         }
         if (Confrim.BodyShots.Contains(HitCharacter))
