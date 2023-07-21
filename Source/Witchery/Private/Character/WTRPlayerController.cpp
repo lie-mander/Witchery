@@ -317,8 +317,6 @@ void AWTRPlayerController::SetHUDHealth(float CurrentHealth, float MaxHealth)
 
     if (bHUDValid)
     {
-        CharacterOverlay->AddChatMessage(GetPlayerState<APlayerState>(), "my health updated");
-
         const float HealthPercent = CurrentHealth / MaxHealth;
         CharacterOverlay->HealthBar->SetPercent(HealthPercent);
 
@@ -985,15 +983,29 @@ void AWTRPlayerController::OnChatButtonPressed()
 
 void AWTRPlayerController::Server_SendChatMessage_Implementation(APlayerState* Sender, const FString& Message)
 {
-    WTRCharacter = Cast<AWTRCharacter>(GetPawn());
+    WTRGameMode = (WTRGameMode == nullptr) ? Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this)) : WTRGameMode;
 
-    if (WTRCharacter)
+    if (WTRGameMode)
     {
-        WTRCharacter->Multicast_SendChatMessage(Sender, Message);
+        WTRGameMode->SendChatMessagesToAllClients(Sender, Message);
     }
 }
 
-void AWTRPlayerController::SendChatMessage(APlayerState* Sender, const FString& Message)
+void AWTRPlayerController::ApplyChatMessage(APlayerState* Sender, const FString& Message)
+{
+    if (HasAuthority() && !IsLocalController())
+    {
+        Client_ApplyChatMessage(Sender, Message);
+        return;
+    }
+
+    if (CharacterOverlay)
+    {
+        CharacterOverlay->ApplyChatMessage(Sender, Message);
+    }
+}
+
+void AWTRPlayerController::Client_ApplyChatMessage_Implementation(APlayerState* Sender, const FString& Message)
 {
     if (CharacterOverlay)
     {

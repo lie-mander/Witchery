@@ -14,9 +14,14 @@ void UWTRCharacterOverlayWidget::AddChatMessage(APlayerState* Sender, const FStr
     Chat->AddChatMessage(Sender, Message);
 }
 
-void UWTRCharacterOverlayWidget::ApplyChatMessage(APlayerState* Sender, const FString& Message) 
+void UWTRCharacterOverlayWidget::ApplyChatMessage(APlayerState* Sender, const FString& Message)
 {
     if (!Chat || !Sender) return;
+
+    if (ChatHide && IsAnimationPlaying(ChatHide))
+    {
+        StopAnimation(ChatHide);
+    }
 
     Chat->ApplyChatMessage(Sender, Message);
 
@@ -124,10 +129,10 @@ void UWTRCharacterOverlayWidget::OnTextCommit(const FText& Text, ETextCommit::Ty
     }
 }
 
-void UWTRCharacterOverlayWidget::ChatCloseTimerFinished() 
+void UWTRCharacterOverlayWidget::ChatCloseTimerFinished()
 {
-    if (Chat)
+    if (ChatHide)
     {
-        Chat->CloseChat();
+        PlayAnimation(ChatHide);
     }
 }

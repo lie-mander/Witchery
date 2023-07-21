@@ -164,6 +164,20 @@ void AWTRGameMode::LeaveGame(AWTRPlayerState* LeavingPlayerState)
     }
 }
 
+void AWTRGameMode::SendChatMessagesToAllClients(APlayerState* Sender, const FString& Message)
+{
+    if (!Sender || !GetWorld()) return;
+
+    for (FConstControllerIterator It = GetWorld()->GetControllerIterator(); It; ++It)
+    {
+        AWTRPlayerController* WTRController = Cast<AWTRPlayerController>(*It);
+        if (WTRController)
+        {
+            WTRController->ApplyChatMessage(Sender, Message);
+        }
+    }
+}
+
 void AWTRGameMode::UpdateCrowns(TArray<AWTRPlayerState*>& PrewLeadPlayers, AWTRPlayerState* AttackerPlayerState)
 {
     AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));

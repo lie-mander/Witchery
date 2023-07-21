@@ -27,13 +27,13 @@ void UWTRChat::ApplyChatMessage(APlayerState* Sender, const FString& Message)
 {
     AddChatMessage(Sender, Message);
 
-    SetVisibility(ESlateVisibility::Visible);
+    SetRenderOpacity(1.f);
     ScrollDown();
 }
 
 void UWTRChat::OpenChat()
 {
-    SetVisibility(ESlateVisibility::Visible);
+    SetRenderOpacity(1.f);
     SetIsFocusable(true);
 
     ScrollDown();
@@ -41,7 +41,7 @@ void UWTRChat::OpenChat()
 
 void UWTRChat::CloseChat()
 {
-    SetVisibility(ESlateVisibility::Hidden);
+    SetRenderOpacity(0.f);
     SetIsFocusable(false);
 
     ScrollDown();

@@ -32,6 +32,9 @@ public:
     UPROPERTY(meta = (BindWidget))
     UEditableTextBox* ChatWriteBox;
 
+    UPROPERTY(Transient, meta = (BindWidgetAnim))
+    UWidgetAnimation* ChatHide;
+
     UPROPERTY(meta = (BindWidget))
     UProgressBar* HealthBar;
 

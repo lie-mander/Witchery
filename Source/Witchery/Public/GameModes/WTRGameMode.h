@@ -26,6 +26,7 @@ public:
         AWTRCharacter* EliminatedCharacter, AWTRPlayerController* VictimController, AWTRPlayerController* AttackerController);
     virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
     virtual void LeaveGame(AWTRPlayerState* LeavingPlayerState);
+    virtual void SendChatMessagesToAllClients(APlayerState* Sender, const FString& Message);
     virtual void Tick(float DeltaTime);
 
     FORCEINLINE float GetWarmupTime() const { return WarmupTime; }

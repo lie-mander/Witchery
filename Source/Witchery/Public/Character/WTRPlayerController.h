@@ -63,7 +63,10 @@ public:
      */
     bool bChatOpen = false;
 
-    void SendChatMessage(APlayerState* Sender, const FString& Message);
+    void ApplyChatMessage(APlayerState* Sender, const FString& Message);
+
+    UFUNCTION(Client, Reliable)
+    void Client_ApplyChatMessage(APlayerState* Sender, const FString& Message);
 
     UFUNCTION(Server, Reliable)
     void Server_SendChatMessage(APlayerState* Sender, const FString& Message);
