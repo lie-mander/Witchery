@@ -11,6 +11,7 @@ void AWTRPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(AWTRPlayerState, Defeats);
+    DOREPLIFETIME(AWTRPlayerState, Team);
 }
 
 void AWTRPlayerState::AddToScore(float ScoreToAdd)

@@ -23,9 +23,8 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChanged, const FName& State);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FIsPingHigh, bool, bHighPing);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeaveGame);
 
-
-    // Animation
-    UENUM(BlueprintType) enum class ETurningInPlace : uint8
+// Animation
+UENUM(BlueprintType) enum class ETurningInPlace : uint8
 {
     ETIP_Right UMETA(DisplayName = "Turn right"),
     ETIP_Left UMETA(DisplayName = "Turn left"),
@@ -162,4 +161,17 @@ struct FShotgunServerSideRewindResult
 
     UPROPERTY()
     TMap<AWTRCharacter*, uint32> BodyShots;
+};
+
+/*
+ * Teams
+ */
+UENUM(BlueprintType)
+enum class ETeam : uint8
+{
+    ET_RedTeam UMETA(DisplayName = "RedTeam"),
+    ET_BlueTeam UMETA(DisplayName = "BlueTeam"),
+    ET_NoTeam UMETA(DisplayName = "NoTeam"),
+
+    ET_MAX UMETA(DisplayName = "MAX")
 };

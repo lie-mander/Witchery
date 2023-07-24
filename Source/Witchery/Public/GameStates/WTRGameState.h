@@ -25,4 +25,22 @@ private:
     TArray<AWTRPlayerState*> TopPlayers;
 
     float TopScore = 0.f;
+
+    /*
+     * Teams
+     */
+    TArray<AWTRPlayerState*> RedTeam;
+    TArray<AWTRPlayerState*> BlueTeam;
+
+    UPROPERTY(ReplicatedUsing = OnRep_RedTeamScore)
+    float RedTeamScore = 0.f;
+
+    UPROPERTY(ReplicatedUsing = OnRep_BlueTeamScore)
+    float BlueTeamScore = 0.f;
+
+    UFUNCTION()
+    void OnRep_RedTeamScore();
+
+    UFUNCTION()
+    void OnRep_BlueTeamScore();
 };

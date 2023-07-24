@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "WTRTypes.h"
 #include "WTRPlayerState.generated.h"
 
 class AWTRCharacter;
@@ -35,6 +36,9 @@ private:
 
     UPROPERTY(ReplicatedUsing = OnRep_Defeats)
     int32 Defeats = 0;
+
+    UPROPERTY(Replicated)
+    ETeam Team = ETeam::ET_NoTeam;
 
     void UpdateHUDScore(float ScoreAmount);
     void UpdateHUDDefeats(int32 DefeatsAmount);
