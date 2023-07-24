@@ -18,10 +18,12 @@ void AWTRTeamGameMode::PostLogin(APlayerController* NewPlayer)
             if (WTRGameState->RedTeam.Num() >= WTRGameState->BlueTeam.Num())
             {
                 WTRGameState->BlueTeam.AddUnique(WTRPlayerState);
+                WTRPlayerState->SetTeam(ETeam::ET_BlueTeam);
             }
             else
             {
                 WTRGameState->RedTeam.AddUnique(WTRPlayerState);
+                WTRPlayerState->SetTeam(ETeam::ET_RedTeam);
             }
         }
     }
@@ -61,10 +63,12 @@ void AWTRTeamGameMode::HandleMatchHasStarted()
                 if (WTRGameState->RedTeam.Num() >= WTRGameState->BlueTeam.Num())
                 {
                     WTRGameState->BlueTeam.AddUnique(WTRPlayerState);
+                    WTRPlayerState->SetTeam(ETeam::ET_BlueTeam);
                 }
                 else
                 {
                     WTRGameState->RedTeam.AddUnique(WTRPlayerState);
+                    WTRPlayerState->SetTeam(ETeam::ET_RedTeam);
                 }
             }
         }

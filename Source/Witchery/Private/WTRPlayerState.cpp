@@ -44,6 +44,26 @@ void AWTRPlayerState::AddToDefeats(int32 DefeatsToAdd)
     UpdateHUDDefeats(Defeats);
 }
 
+void AWTRPlayerState::SetTeam(ETeam NewTeam) 
+{
+    Team = NewTeam;
+
+    WTRCharacter = (WTRCharacter == nullptr) ? Cast<AWTRCharacter>(GetPawn()) : WTRCharacter;
+    if (WTRCharacter)
+    {
+        WTRCharacter->SetTeamColor(Team);
+    }
+}
+
+void AWTRPlayerState::OnRep_Team() 
+{
+    WTRCharacter = (WTRCharacter == nullptr) ? Cast<AWTRCharacter>(GetPawn()) : WTRCharacter;
+    if (WTRCharacter)
+    {
+        WTRCharacter->SetTeamColor(Team);
+    }
+}
+
 void AWTRPlayerState::OnRep_Defeats()
 {
     UpdateHUDDefeats(Defeats);

@@ -56,6 +56,7 @@ public:
     void PlaySwapingWeaponsMontage();
     void PlayThrowGrenadeMontage();
     void StopThrowGrenadeMontage();
+    void SetTeamColor(ETeam Team);
 
     bool IsWeaponEquipped() const;
     bool IsAiming() const;
@@ -269,6 +270,22 @@ private:
     /*
      * Dissolve
      */
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Teams")
+    UMaterialInstance* OriginalMaterial;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Teams")
+    UMaterialInstance* RedTeamMaterial;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Teams")
+    UMaterialInstance* BlueTeamMaterial;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Teams")
+    UMaterialInstance* RedDissolveMaterialInst;
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Teams")
+    UMaterialInstance* BlueDissolveMaterialInst;
+
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Dissolve | Base")
     UCurveFloat* DissolveCurve;
 

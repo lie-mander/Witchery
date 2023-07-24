@@ -354,6 +354,8 @@ void AWTRCharacter::PullInit()
             WTRPlayerState->AddToScore(0.f);
             WTRPlayerState->AddToDefeats(0);
 
+            SetTeamColor(WTRPlayerState->GetTeam());
+
             // Set username
             if (HasAuthority() && OverheadText)
             {
@@ -802,6 +804,28 @@ void AWTRCharacter::StopThrowGrenadeMontage()
     if (!AnimInstance) return;
 
     AnimInstance->Montage_Stop(0.3f, ThrowGrenadeMontage);
+}
+
+void AWTRCharacter::SetTeamColor(ETeam Team)
+{
+    if (!GetMesh() || !OriginalMaterial) return;
+
+    switch (Team)
+    {
+        case ETeam::ET_NoTeam:
+            GetMesh()->SetMaterial(0, OriginalMaterial);
+            DissolveMaterialInst = BlueDissolveMaterialInst;
+            break;
+        case ETeam::ET_RedTeam:
+            GetMesh()->SetMaterial(0, RedTeamMaterial);
+            DissolveMaterialInst = RedDissolveMaterialInst;
+            break;
+        case ETeam::ET_BlueTeam:
+            GetMesh()->SetMaterial(0, BlueTeamMaterial);
+            DissolveMaterialInst = BlueDissolveMaterialInst;
+            break;
+        case ETeam::ET_MAX: break;
+    }
 }
 
 void AWTRCharacter::OnEquipButtonPressed()

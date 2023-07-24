@@ -28,7 +28,7 @@ public:
     FORCEINLINE int32 GetDefeats() const { return Defeats; }
     FORCEINLINE ETeam GetTeam() const { return Team; }
 
-    FORCEINLINE void SetTeam(ETeam NewTeam) { Team = NewTeam; }
+    FORCEINLINE void SetTeam(ETeam NewTeam);
 
 private:
     UPROPERTY()
@@ -40,8 +40,11 @@ private:
     UPROPERTY(ReplicatedUsing = OnRep_Defeats)
     int32 Defeats = 0;
 
-    UPROPERTY(Replicated)
+    UPROPERTY(ReplicatedUsing = OnRep_Team)
     ETeam Team = ETeam::ET_NoTeam;
+
+    UFUNCTION()
+    void OnRep_Team();
 
     void UpdateHUDScore(float ScoreAmount);
     void UpdateHUDDefeats(int32 DefeatsAmount);
