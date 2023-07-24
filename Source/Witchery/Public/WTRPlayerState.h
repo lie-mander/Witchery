@@ -26,6 +26,9 @@ public:
     void AddToDefeats(int32 DefeatsToAdd);
 
     FORCEINLINE int32 GetDefeats() const { return Defeats; }
+    FORCEINLINE ETeam GetTeam() const { return Team; }
+
+    FORCEINLINE void SetTeam(ETeam NewTeam) { Team = NewTeam; }
 
 private:
     UPROPERTY()
