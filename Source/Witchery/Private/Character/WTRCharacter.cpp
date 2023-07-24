@@ -1276,11 +1276,11 @@ void AWTRCharacter::Multicast_GetLead_Implementation()
 {
     if (!CrownSystem) return;
 
-    if (!CrownComponent && GetCapsuleComponent())
+    if (!CrownComponent && GetMesh())
     {
         CrownComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(  //
             CrownSystem,                                                //
-            GetCapsuleComponent(),                                      //
+            GetMesh(),                                                  //
             FName(),                                                    //
             GetActorLocation() + FVector(0.f, 0.f, 110.f),              //
             GetActorRotation(),                                         //
