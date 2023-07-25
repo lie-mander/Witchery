@@ -399,8 +399,14 @@ private:
     /*
      * Base variables
      */
+    UPROPERTY()
     AWTRPlayerController* WTRPlayerController;
+
+    UPROPERTY()
     AWTRPlayerState* WTRPlayerState;
+
+    UPROPERTY()
+    AWTRGameMode* WTRGameMode;
 
     /*
      * Other variables
@@ -453,7 +459,7 @@ private:
     void DropOrDestroyWeapons();
     void DelayInitHUD();
     float CalculateSpeed() const;
-    AWTRGameMode* GetWTRGameMode() const;
+    AWTRGameMode* GetWTRGameMode();
 
     /*
      * Callbacks

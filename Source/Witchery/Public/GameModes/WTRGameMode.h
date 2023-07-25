@@ -27,6 +27,7 @@ public:
     virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController);
     virtual void LeaveGame(AWTRPlayerState* LeavingPlayerState);
     virtual void SendChatMessagesToAllClients(APlayerState* Sender, const FString& Message);
+    virtual float CalculateDamageByTeams(AController* Attacker, AController* Victim, float BaseDamage);
     virtual void Tick(float DeltaTime);
 
     FORCEINLINE float GetWarmupTime() const { return WarmupTime; }

@@ -48,6 +48,22 @@ void AWTRTeamGameMode::Logout(AController* Exiting)
     }
 }
 
+float AWTRTeamGameMode::CalculateDamageByTeams(AController* Attacker, AController* Victim, float BaseDamage)
+{
+    if (!Attacker || !Victim) return BaseDamage;
+    if (Attacker == Victim) return BaseDamage;
+
+    // If players in the same team, return 0 damage
+    AWTRPlayerState* AttackerState = Attacker->GetPlayerState<AWTRPlayerState>();
+    AWTRPlayerState* VictimState = Victim->GetPlayerState<AWTRPlayerState>();
+    if (AttackerState && VictimState && AttackerState->GetTeam() == VictimState->GetTeam())
+    {
+        return 0.f;
+    }
+
+    return BaseDamage;
+}
+
 void AWTRTeamGameMode::HandleMatchHasStarted()
 {
     Super::HandleMatchHasStarted();

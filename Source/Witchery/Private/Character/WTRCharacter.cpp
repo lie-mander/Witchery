@@ -335,8 +335,7 @@ void AWTRCharacter::Destroyed()
 {
     Super::Destroyed();
 
-    const AWTRGameMode* WTRGameMode = GetWTRGameMode();
-    const bool bMatchIsNotInProgress = WTRGameMode && WTRGameMode->GetMatchState() != MatchState::InProgress;
+    const bool bMatchIsNotInProgress = GetWTRGameMode() && GetWTRGameMode()->GetMatchState() != MatchState::InProgress;
 
     if (Combat && Combat->EquippedWeapon && bMatchIsNotInProgress)
     {
@@ -1190,10 +1189,9 @@ void AWTRCharacter::UpdateHUDShield()
 void AWTRCharacter::OnTakeAnyDamageCallback(
     AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-    if (bElimmed) return;
+    if (bElimmed || !GetWTRGameMode()) return;
 
-    const AWTRGameMode* WTRGameMode = GetWTRGameMode();
-    if (WTRGameMode && WTRGameMode->GetMatchState() == MatchState::Cooldown) return;
+    if (GetWTRGameMode() && GetWTRGameMode()->GetMatchState() == MatchState::Cooldown) return;
 
     AWTRFlamethrower* WTRFlamethrower = Cast<AWTRFlamethrower>(DamageCauser);
     if (WTRFlamethrower)
@@ -1205,6 +1203,7 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
         bDamageFromFlamethrower = false;
     }
 
+    Damage = GetWTRGameMode()->CalculateDamageByTeams(InstigatedBy, Controller, Damage);
     float DamageThroughShield = Damage;
     if (Shield > 0.f)
     {
@@ -1225,7 +1224,7 @@ void AWTRCharacter::OnTakeAnyDamageCallback(
     UpdateHUDHealth();
     UpdateHUDShield();
 
-    if (!bDamageFromFlamethrower)
+    if (!bDamageFromFlamethrower && DamageThroughShield > 0.f)
     {
         PlayHitReactMontage();
     }
@@ -1410,8 +1409,8 @@ void AWTRCharacter::DropOrDestroyWeapons()
     }
 }
 
-AWTRGameMode* AWTRCharacter::GetWTRGameMode() const
+AWTRGameMode* AWTRCharacter::GetWTRGameMode()
 {
-    AWTRGameMode* WTRGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
+    WTRGameMode = (WTRGameMode == nullptr) ? Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this)) : WTRGameMode;
     return WTRGameMode;
 }

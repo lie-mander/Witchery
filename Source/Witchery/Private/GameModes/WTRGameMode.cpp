@@ -178,6 +178,11 @@ void AWTRGameMode::SendChatMessagesToAllClients(APlayerState* Sender, const FStr
     }
 }
 
+float AWTRGameMode::CalculateDamageByTeams(AController* Attacker, AController* Victim, float BaseDamage)
+{
+    return BaseDamage;
+}
+
 void AWTRGameMode::UpdateCrowns(TArray<AWTRPlayerState*>& PrewLeadPlayers, AWTRPlayerState* AttackerPlayerState)
 {
     AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
