@@ -175,3 +175,16 @@ enum class ETeam : uint8
 
     ET_MAX UMETA(DisplayName = "MAX")
 };
+
+/*
+ * GameMode types
+ */
+
+UENUM(BlueprintType)
+enum class EGameModeType : uint8
+{
+    EGMT_DeathMatch UMETA(DisplayName = "DeathMatch"),
+    EGMT_TeamsMatch UMETA(DisplayName = "TeamsMatch"),
+
+    EGMT_MAX UMETA(DisplayName = "MAX")
+};

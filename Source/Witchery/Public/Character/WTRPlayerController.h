@@ -49,6 +49,8 @@ public:
     void SetHUDWarmupTime(float Time);
     void SetHUD_FPS();
     void SetHUDGrenades(int32 Grenades);
+    void SetHUDRedScore(int32 Score);
+    void SetHUDBlueScore(int32 Score);
 
     AWTR_HUD* GetWTR_HUD();
     FORCEINLINE FName GetMatchState() const { return MatchState; }
@@ -75,6 +77,9 @@ protected:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
 
+    void ShowTeamsScore();
+    void HideTeamsScore();
+
 private:
     /*
      * Base variables
@@ -87,6 +92,8 @@ private:
 
     UPROPERTY()
     AWTRGameMode* WTRGameMode;
+
+    EGameModeType GameModeType = EGameModeType::EGMT_MAX;
 
     UPROPERTY()
     UWTRCharacterOverlayWidget* CharacterOverlay;
@@ -167,7 +174,7 @@ private:
     void Server_CheckMatchState();
 
     UFUNCTION(Client, Reliable)
-    void Client_ApplyMatchState(float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, const FName& State);
+    void Client_ApplyMatchState(float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, const FName& State, EGameModeType GameType);
 
     float WarmupTime = 0.f;
     float MatchTime = 0.f;
@@ -244,7 +251,6 @@ private:
     void PingTick(float DeltaTime);
     void ShowPing();
     void HidePing();
-    void DelayInitCharacterOverlay();
     void OnQuitButtonPressed();
     void OnChatButtonPressed();
 };

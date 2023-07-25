@@ -5,6 +5,11 @@
 #include "WTRPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
+AWTRTeamGameMode::AWTRTeamGameMode() 
+{
+    GameModeType = EGameModeType::EGMT_TeamsMatch;
+}
+
 void AWTRTeamGameMode::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);

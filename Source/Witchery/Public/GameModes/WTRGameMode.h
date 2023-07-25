@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "WTRTypes.h"
 #include "WTRGameMode.generated.h"
 
 class AWTRCharacter;
@@ -35,10 +36,13 @@ public:
     FORCEINLINE float GetCooldownTime() const { return CooldownTime; }
     FORCEINLINE float GetTimeOfMapCreation() const { return TimeOfMapCreation; }
     FORCEINLINE float GetCountdownTime() const { return CountdownTime; }
+    FORCEINLINE EGameModeType GetGameModeType() const { return GameModeType; }
 
 protected:
     virtual void BeginPlay() override;
     virtual void OnMatchStateSet() override;
+
+    EGameModeType GameModeType = EGameModeType::EGMT_DeathMatch;
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | GameTime")

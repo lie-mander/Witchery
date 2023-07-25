@@ -131,18 +131,27 @@ void AWTRPlayerController::Server_CheckMatchState_Implementation()
         MatchTime = WTRGameMode->GetMatchTime();
         CooldownTime = WTRGameMode->GetCooldownTime();
         MatchState = WTRGameMode->GetMatchState();
+        GameModeType = WTRGameMode->GetGameModeType();
 
-        Client_ApplyMatchState(WarmupTime, MatchTime, CooldownTime, MatchState);
+        if (IsLocalController())
+        {
+            if (GameModeType == EGameModeType::EGMT_TeamsMatch)
+                ShowTeamsScore();
+            else
+                HideTeamsScore();
+        }
+
+        Client_ApplyMatchState(WarmupTime, MatchTime, CooldownTime, MatchState, GameModeType);
     }
 }
 
 void AWTRPlayerController::Client_ApplyMatchState_Implementation(
-    float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, const FName& State)
+    float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, const FName& State, EGameModeType GameType)
 {
     WarmupTime = TimeofWarmup;
     MatchTime = TimeOfMatch;
     CooldownTime = TimeOfCooldown;
-    // MatchState = State;
+    GameModeType = GameType;
 }
 
 void AWTRPlayerController::SetMatchState(const FName& State)
@@ -587,6 +596,72 @@ void AWTRPlayerController::SetHUDGrenades(int32 Grenades)
     }
 }
 
+void AWTRPlayerController::SetHUDRedScore(int32 Score)
+{
+    WTR_HUD = GetWTR_HUD();
+
+    const bool bHUDValid = WTR_HUD &&                       //
+                           CharacterOverlay &&              //
+                           CharacterOverlay->RedTeamScore;  // RedTeamScore
+
+    if (bHUDValid)
+    {
+        const FString ScoreString = FString::Printf(TEXT("%d"), Score);
+        CharacterOverlay->RedTeamScore->SetText(FText::FromString(ScoreString));
+    }
+}
+
+void AWTRPlayerController::SetHUDBlueScore(int32 Score)
+{
+    WTR_HUD = GetWTR_HUD();
+
+    const bool bHUDValid = WTR_HUD &&                        //
+                           CharacterOverlay &&               //
+                           CharacterOverlay->BlueTeamScore;  // BlueTeamScore
+
+    if (bHUDValid)
+    {
+        const FString ScoreString = FString::Printf(TEXT("%d"), Score);
+        CharacterOverlay->BlueTeamScore->SetText(FText::FromString(ScoreString));
+    }
+}
+
+void AWTRPlayerController::ShowTeamsScore()
+{
+    WTR_HUD = GetWTR_HUD();
+
+    const bool bHUDValid = WTR_HUD &&                          //
+                           CharacterOverlay &&                 //
+                           CharacterOverlay->RedTeamScore &&   // RedTeamScore
+                           CharacterOverlay->BlueTeamScore &&  // BlueTeamScore
+                           CharacterOverlay->SpacerTeamScore;  // SpacerTeamScore
+
+    if (bHUDValid)
+    {
+        CharacterOverlay->RedTeamScore->SetText(FText::FromString("0"));
+        CharacterOverlay->BlueTeamScore->SetText(FText::FromString("0"));
+        CharacterOverlay->SpacerTeamScore->SetText(FText::FromString("|"));
+    }
+}
+
+void AWTRPlayerController::HideTeamsScore()
+{
+    WTR_HUD = GetWTR_HUD();
+
+    const bool bHUDValid = WTR_HUD &&                          //
+                           CharacterOverlay &&                 //
+                           CharacterOverlay->RedTeamScore &&   // RedTeamScore
+                           CharacterOverlay->BlueTeamScore &&  // BlueTeamScore
+                           CharacterOverlay->SpacerTeamScore;  // SpacerTeamScore
+
+    if (bHUDValid)
+    {
+        CharacterOverlay->RedTeamScore->SetText(FText());
+        CharacterOverlay->BlueTeamScore->SetText(FText());
+        CharacterOverlay->SpacerTeamScore->SetText(FText());
+    }
+}
+
 AWTR_HUD* AWTRPlayerController::GetWTR_HUD()
 {
     return (WTR_HUD == nullptr) ? Cast<AWTR_HUD>(GetHUD()) : WTR_HUD;
@@ -801,10 +876,18 @@ void AWTRPlayerController::HandleMatchStateInProgress()
             WTR_HUD->AddCharacterOverlay();
             CharacterOverlay = Cast<UWTRCharacterOverlayWidget>(WTR_HUD->CharacterOverlayWidget);
 
-            if (bShowDelayInit && GEngine)
+            if (CharacterOverlay)
             {
-                GEngine->AddOnScreenDebugMessage(
-                    -1, 5.f, FColor::Green, FString::Printf(TEXT("CharacterOverlayWidget created [HandleMatchStateInProgress]")), false);
+                if (GameModeType == EGameModeType::EGMT_TeamsMatch)
+                    ShowTeamsScore();
+                else
+                    HideTeamsScore();
+
+                if (bShowDelayInit && GEngine)
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+                        FString::Printf(TEXT("CharacterOverlayWidget created [HandleMatchStateInProgress]")), false);
+                }
             }
         }
     }
@@ -899,46 +982,6 @@ void AWTRPlayerController::HandleMatchCooldown()
     if (IsLocalController())
     {
         OnMatchStateChanged.Broadcast(MatchState::Cooldown);
-    }
-}
-
-void AWTRPlayerController::DelayInitCharacterOverlay()
-{
-    if (bShowDelayInit && GEngine)
-    {
-        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald,
-            FString::Printf(TEXT("DelayInit_CurrentHealth = %.2f, DelayInit_MaxHealth = %.2f\n"
-                                 "DelayInit_CurrentShield = %.2f, DelayInit_MaxShield = %.2f\n"
-                                 "DelayInit_ScoreAmount = %.1f, DelayInit_DefeatsAmount = %d\n"
-                                 "DelayInit_WeaponAmmo = %d, DelayInit_CarriedAmmo = %d\n"
-                                 "DelayInit_WeaponType = %d\n"),
-                DelayInit_CurrentHealth, DelayInit_MaxHealth, DelayInit_CurrentShield, DelayInit_MaxShield, DelayInit_ScoreAmount,
-                DelayInit_DefeatsAmount, DelayInit_WeaponAmmo, DelayInit_CarriedAmmo, DelayInit_WeaponType),
-            false);
-    }
-
-    SetHUDHealth(DelayInit_CurrentHealth, DelayInit_MaxHealth);
-    SetHUDShield(DelayInit_CurrentShield, DelayInit_MaxShield);
-    SetHUDScore(DelayInit_ScoreAmount);
-    SetHUDDefeats(DelayInit_DefeatsAmount);
-    SetHUDWeaponAmmo(DelayInit_WeaponAmmo);
-    SetHUDCarriedAmmo(DelayInit_CarriedAmmo);
-    SetHUDWeaponType(DelayInit_WeaponType);
-
-    WTRCharacter = Cast<AWTRCharacter>(GetPawn());
-    if (WTRCharacter && WTRCharacter->GetCombatComponent())
-    {
-        SetHUDGrenades(WTRCharacter->GetCombatComponent()->GetCurrentGrenades());
-    }
-
-    if (!bShowFPS)
-    {
-        CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Hidden);
-    }
-    else
-    {
-        TimeToFPSUpdate = TimeFPSUpdateFrequency;
-        CharacterOverlay->FPS_String->SetVisibility(ESlateVisibility::Visible);
     }
 }
 

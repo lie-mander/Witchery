@@ -86,6 +86,15 @@ public:
     UPROPERTY(Transient, meta = (BindWidgetAnim))
     UWidgetAnimation* Ping;
 
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* RedTeamScore;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* BlueTeamScore;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* SpacerTeamScore;
+
     /*
     * Base variables
     */
