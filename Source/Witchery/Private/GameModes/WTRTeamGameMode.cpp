@@ -21,7 +21,11 @@ void AWTRTeamGameMode::PlayerEliminated(
     if (AttackerController && WTRGameState)
     {
         AWTRPlayerState* WTRPlayerState = AttackerController->GetPlayerState<AWTRPlayerState>();
-        if (WTRPlayerState->GetTeam() == ETeam::ET_RedTeam)
+        if (VictimController == AttackerController)
+        {
+            return;
+        }
+        else if (WTRPlayerState->GetTeam() == ETeam::ET_RedTeam)
         {
             WTRGameState->RedTeamScores();
         }
