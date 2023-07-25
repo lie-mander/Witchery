@@ -928,39 +928,19 @@ void AWTRPlayerController::HandleMatchCooldown()
 
         if (bWTR_HUD)
         {
-            AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
-            const AWTRPlayerState* WTRPlayerState = GetPlayerState<AWTRPlayerState>();
-
-            FString TopPlayersText = "";
-
-            if (WTRGameState && WTRPlayerState)
+            FString BottomText = "";
+            if (GameModeType == EGameModeType::EGMT_DeathMatch)
             {
-                if (WTRGameState->GetTopPlayers().IsEmpty())
-                {
-                    AnnounInfoText = AnnounInfoText;
-                }
-                else if (WTRGameState->GetTopPlayers().Num() == 1 && WTRGameState->GetTopPlayers()[0] == WTRPlayerState)
-                {
-                    AnnounInfoText = TextYouWinner;
-                }
-                else if (WTRGameState->GetTopPlayers().Num() == 1)
-                {
-                    AnnounInfoText = FString(TEXT("WINNER:\n"));
-                    TopPlayersText = FString::Printf(TEXT("%s"), *WTRGameState->GetTopPlayers()[0]->GetPlayerName());
-                }
-                else if (WTRGameState->GetTopPlayers().Num() > 1)
-                {
-                    AnnounInfoText = FString(TEXT("THEY FOUGHT FOR WIN:\n"));
-                    for (auto TopPlayer : WTRGameState->GetTopPlayers())
-                    {
-                        TopPlayersText.Append(FString::Printf(TEXT("%s\n"), *TopPlayer->GetPlayerName()));
-                    }
-                }
+                BottomText = GetCooldownDeathMatchText();
+            }
+            else if (GameModeType == EGameModeType::EGMT_TeamsMatch)
+            {
+                BottomText = GetCooldownTeamsMatchText();
             }
 
             AnnouncementWidget->AnnouncementText->SetText(FText::FromString(AnnounCooldownText));
             AnnouncementWidget->InfoText->SetText(FText::FromString(AnnounInfoText));
-            AnnouncementWidget->TopPlayersText->SetText(FText::FromString(TopPlayersText));
+            AnnouncementWidget->TopPlayersText->SetText(FText::FromString(BottomText));
 
             AnnouncementWidget->SetVisibility(ESlateVisibility::Visible);
         }
@@ -982,6 +962,68 @@ void AWTRPlayerController::HandleMatchCooldown()
     {
         OnMatchStateChanged.Broadcast(MatchState::Cooldown);
     }
+}
+
+FString AWTRPlayerController::GetCooldownTeamsMatchText()
+{
+    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+
+    if (WTRGameState)
+    {
+        if (WTRGameState->RedTeamScore == 0 && WTRGameState->BlueTeamScore == 0)
+        {
+            AnnounInfoText = AnnounInfoText;
+        }
+        else if (WTRGameState->RedTeamScore == WTRGameState->BlueTeamScore)
+        {
+            AnnounInfoText = TextTeamFoughtForWin;
+        }
+        else if (WTRGameState->RedTeamScore > WTRGameState->BlueTeamScore)
+        {
+            AnnounInfoText = FString(TEXT("THE RED TEAM WON!"));
+        }
+        else if (WTRGameState->RedTeamScore < WTRGameState->BlueTeamScore)
+        {
+            AnnounInfoText = FString(TEXT("THE BLUE TEAM WON!"));
+        }
+    }
+
+    return FString();
+}
+
+FString AWTRPlayerController::GetCooldownDeathMatchText()
+{
+    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+    const AWTRPlayerState* WTRPlayerState = GetPlayerState<AWTRPlayerState>();
+
+    FString TopPlayersText = "";
+
+    if (WTRGameState && WTRPlayerState)
+    {
+        if (WTRGameState->GetTopPlayers().IsEmpty())
+        {
+            AnnounInfoText = AnnounInfoText;
+        }
+        else if (WTRGameState->GetTopPlayers().Num() == 1 && WTRGameState->GetTopPlayers()[0] == WTRPlayerState)
+        {
+            AnnounInfoText = TextYouWinner;
+        }
+        else if (WTRGameState->GetTopPlayers().Num() == 1)
+        {
+            AnnounInfoText = FString(TEXT("WINNER:\n"));
+            TopPlayersText = FString::Printf(TEXT("%s"), *WTRGameState->GetTopPlayers()[0]->GetPlayerName());
+        }
+        else if (WTRGameState->GetTopPlayers().Num() > 1)
+        {
+            AnnounInfoText = FString(TEXT("THEY FOUGHT FOR WIN:\n"));
+            for (auto TopPlayer : WTRGameState->GetTopPlayers())
+            {
+                TopPlayersText.Append(FString::Printf(TEXT("%s\n"), *TopPlayer->GetPlayerName()));
+            }
+        }
+    }
+
+    return TopPlayersText;
 }
 
 void AWTRPlayerController::OnQuitButtonPressed()

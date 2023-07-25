@@ -27,6 +27,12 @@ public:
     TArray<AWTRPlayerState*> RedTeam;
     TArray<AWTRPlayerState*> BlueTeam;
 
+    UPROPERTY(ReplicatedUsing = OnRep_RedTeamScore)
+    float RedTeamScore = 0.f;
+
+    UPROPERTY(ReplicatedUsing = OnRep_BlueTeamScore)
+    float BlueTeamScore = 0.f;
+
 private:
     UPROPERTY(Replicated)
     TArray<AWTRPlayerState*> TopPlayers;
@@ -36,12 +42,6 @@ private:
     /*
      * Teams
      */
-    UPROPERTY(ReplicatedUsing = OnRep_RedTeamScore)
-    float RedTeamScore = 0.f;
-
-    UPROPERTY(ReplicatedUsing = OnRep_BlueTeamScore)
-    float BlueTeamScore = 0.f;
-
     UFUNCTION()
     void OnRep_RedTeamScore();
 

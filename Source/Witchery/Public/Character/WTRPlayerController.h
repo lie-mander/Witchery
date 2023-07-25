@@ -190,13 +190,16 @@ private:
      * UI
      */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
-    FString AnnounCooldownText = "NEW GAME STARTS IN:";
-
-    UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
     FString AnnounInfoText = "NO WINNER.";
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
+    FString AnnounCooldownText = "NEW GAME STARTS IN:";
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | UI | DeathMatch")
     FString TextYouWinner = "YOU`RE A WINNER!";
+
+    UPROPERTY(EditDefaultsOnly, Category = "WTR | UI | TeamsMatch")
+    FString TextTeamFoughtForWin = "TEAMS FOUGHT FOR WIN!";
 
     UPROPERTY(EditDefaultsOnly, Category = "WTR | UI")
     float BlinkStartTime = 30.f;
@@ -252,4 +255,6 @@ private:
     void HidePing();
     void OnQuitButtonPressed();
     void OnChatButtonPressed();
+    FString GetCooldownDeathMatchText();
+    FString GetCooldownTeamsMatchText();
 };
