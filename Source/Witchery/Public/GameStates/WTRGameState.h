@@ -16,6 +16,8 @@ class WITCHERY_API AWTRGameState : public AGameState
 public:
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     void UpdateTopPlayers(AWTRPlayerState* PlayerState);
+    void RedTeamScores();
+    void BlueTeamScores();
 
     FORCEINLINE TArray<AWTRPlayerState*> GetTopPlayers() { return TopPlayers; }
 

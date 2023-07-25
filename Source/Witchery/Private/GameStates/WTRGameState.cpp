@@ -3,6 +3,7 @@
 #include "GameStates/WTRGameState.h"
 #include "Net/UnrealNetwork.h"
 #include "WTRPlayerState.h"
+#include "Character/WTRPlayerController.h"
 
 void AWTRGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const 
 {
@@ -34,12 +35,54 @@ void AWTRGameState::UpdateTopPlayers(AWTRPlayerState* PlayerState)
     }
 }
 
+void AWTRGameState::RedTeamScores() 
+{
+    ++RedTeamScore;
+
+    if (GetWorld() && GetWorld()->GetFirstPlayerController())
+    {
+        AWTRPlayerController* PlayerController = Cast<AWTRPlayerController>(GetWorld()->GetFirstPlayerController());
+        if (PlayerController)
+        {
+            PlayerController->SetHUDRedScore(RedTeamScore);
+        }
+    }
+}
+
+void AWTRGameState::BlueTeamScores() 
+{
+    ++BlueTeamScore;
+
+    if (GetWorld() && GetWorld()->GetFirstPlayerController())
+    {
+        AWTRPlayerController* PlayerController = Cast<AWTRPlayerController>(GetWorld()->GetFirstPlayerController());
+        if (PlayerController)
+        {
+            PlayerController->SetHUDBlueScore(BlueTeamScore);
+        }
+    }
+}
+
 void AWTRGameState::OnRep_RedTeamScore() 
 {
-
+    if (GetWorld() && GetWorld()->GetFirstPlayerController())
+    {
+        AWTRPlayerController* PlayerController = Cast<AWTRPlayerController>(GetWorld()->GetFirstPlayerController());
+        if (PlayerController)
+        {
+            PlayerController->SetHUDRedScore(RedTeamScore);
+        }
+    }
 }
 
 void AWTRGameState::OnRep_BlueTeamScore() 
 {
-
+    if (GetWorld() && GetWorld()->GetFirstPlayerController())
+    {
+        AWTRPlayerController* PlayerController = Cast<AWTRPlayerController>(GetWorld()->GetFirstPlayerController());
+        if (PlayerController)
+        {
+            PlayerController->SetHUDBlueScore(BlueTeamScore);
+        }
+    }
 }

@@ -4,17 +4,39 @@
 #include "GameStates/WTRGameState.h"
 #include "WTRPlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/WTRPlayerController.h"
+#include "WTRPlayerState.h"
 
 AWTRTeamGameMode::AWTRTeamGameMode() 
 {
     GameModeType = EGameModeType::EGMT_TeamsMatch;
 }
 
+void AWTRTeamGameMode::PlayerEliminated(
+    AWTRCharacter* EliminatedCharacter, AWTRPlayerController* VictimController, AWTRPlayerController* AttackerController)
+{
+    Super::PlayerEliminated(EliminatedCharacter, VictimController, AttackerController);
+
+    WTRGameState = (WTRGameState == nullptr) ? Cast<AWTRGameState>(UGameplayStatics::GetGameState(this)) : WTRGameState;
+    if (AttackerController && WTRGameState)
+    {
+        AWTRPlayerState* WTRPlayerState = AttackerController->GetPlayerState<AWTRPlayerState>();
+        if (WTRPlayerState->GetTeam() == ETeam::ET_RedTeam)
+        {
+            WTRGameState->RedTeamScores();
+        }
+        else if (WTRPlayerState->GetTeam() == ETeam::ET_BlueTeam)
+        {
+            WTRGameState->BlueTeamScores();
+        }
+    }
+}
+
 void AWTRTeamGameMode::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);
 
-    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+    WTRGameState = (WTRGameState == nullptr) ? Cast<AWTRGameState>(UGameplayStatics::GetGameState(this)) : WTRGameState;
     AWTRPlayerState* WTRPlayerState = NewPlayer->GetPlayerState<AWTRPlayerState>();
     if (WTRGameState && WTRPlayerState)
     {
@@ -38,7 +60,7 @@ void AWTRTeamGameMode::Logout(AController* Exiting)
 {
     Super::Logout(Exiting);
 
-    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+    WTRGameState = (WTRGameState == nullptr) ? Cast<AWTRGameState>(UGameplayStatics::GetGameState(this)) : WTRGameState;
     AWTRPlayerState* WTRPlayerState = Exiting->GetPlayerState<AWTRPlayerState>();
     if (WTRGameState && WTRPlayerState)
     {
@@ -73,7 +95,7 @@ void AWTRTeamGameMode::HandleMatchHasStarted()
 {
     Super::HandleMatchHasStarted();
 
-    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+    WTRGameState = (WTRGameState == nullptr) ? Cast<AWTRGameState>(UGameplayStatics::GetGameState(this)) : WTRGameState;
     if (WTRGameState)
     {
         for (auto State : WTRGameState->PlayerArray)

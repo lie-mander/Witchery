@@ -13,6 +13,8 @@ class WITCHERY_API AWTRTeamGameMode : public AWTRGameMode
 
 public:
     AWTRTeamGameMode();
+    virtual void PlayerEliminated(
+        AWTRCharacter* EliminatedCharacter, AWTRPlayerController* VictimController, AWTRPlayerController* AttackerController) override;
     virtual void PostLogin(APlayerController* NewPlayer) override;
     virtual void Logout(AController* Exiting) override;
     virtual float CalculateDamageByTeams(AController* Attacker, AController* Victim, float BaseDamage) override;

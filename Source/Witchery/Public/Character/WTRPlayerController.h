@@ -36,6 +36,8 @@ public:
 
     void TurnDownTheVolume();
     void VolumeUp();
+    void ShowTeamsScore();
+    void HideTeamsScore();
 
     void SetHUDHealth(float CurrentHealth, float MaxHealth);
     void SetHUDShield(float CurrentShield, float MaxShield);
@@ -76,9 +78,6 @@ public:
 protected:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
-
-    void ShowTeamsScore();
-    void HideTeamsScore();
 
 private:
     /*

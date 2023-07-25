@@ -10,6 +10,7 @@
 class AWTRCharacter;
 class AWTRPlayerController;
 class AWTRPlayerState;
+class AWTRGameState;
 
 namespace MatchState
 {
@@ -43,6 +44,9 @@ protected:
     virtual void OnMatchStateSet() override;
 
     EGameModeType GameModeType = EGameModeType::EGMT_DeathMatch;
+
+    UPROPERTY()
+    AWTRGameState* WTRGameState;
 
 private:
     UPROPERTY(EditDefaultsOnly, Category = "WTR | GameTime")

@@ -87,7 +87,7 @@ void AWTRGameMode::PlayerEliminated(
     AWTRPlayerState* AttackerPlayerState = AttackerController ? Cast<AWTRPlayerState>(AttackerController->PlayerState) : nullptr;
     AWTRPlayerState* VictimPlayerState = VictimController ? Cast<AWTRPlayerState>(VictimController->PlayerState) : nullptr;
 
-    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+    WTRGameState = (WTRGameState == nullptr) ? Cast<AWTRGameState>(UGameplayStatics::GetGameState(this)) : WTRGameState;
 
     if (AttackerPlayerState && AttackerPlayerState != VictimPlayerState && WTRGameState)
     {
@@ -148,7 +148,7 @@ void AWTRGameMode::LeaveGame(AWTRPlayerState* LeavingPlayerState)
 {
     if (!LeavingPlayerState) return;
 
-    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+    WTRGameState = (WTRGameState == nullptr) ? Cast<AWTRGameState>(UGameplayStatics::GetGameState(this)) : WTRGameState;
     if (WTRGameState)
     {
         if (WTRGameState->GetTopPlayers().Contains(LeavingPlayerState))
@@ -185,7 +185,7 @@ float AWTRGameMode::CalculateDamageByTeams(AController* Attacker, AController* V
 
 void AWTRGameMode::UpdateCrowns(TArray<AWTRPlayerState*>& PrewLeadPlayers, AWTRPlayerState* AttackerPlayerState)
 {
-    AWTRGameState* WTRGameState = Cast<AWTRGameState>(UGameplayStatics::GetGameState(this));
+    WTRGameState = (WTRGameState == nullptr) ? Cast<AWTRGameState>(UGameplayStatics::GetGameState(this)) : WTRGameState;
     if (!WTRGameState) return;
 
     if (WTRGameState->GetTopPlayers().Contains(AttackerPlayerState))

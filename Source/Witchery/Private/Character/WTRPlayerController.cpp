@@ -97,11 +97,10 @@ void AWTRPlayerController::DelayInit()
                     -1, 5.f, FColor::Green, FString::Printf(TEXT("CharacterOverlayWidget created [DelayInit]")), false);
             }
 
-            if (bShowDelayInit && GEngine)
-            {
-                GEngine->AddOnScreenDebugMessage(
-                    -1, 5.f, FColor::Yellow, FString::Printf(TEXT("CharacterOverlayWidget delay init variables [DelayInit]")), false);
-            }
+            if (GameModeType == EGameModeType::EGMT_TeamsMatch)
+                ShowTeamsScore();
+            else
+                HideTeamsScore();
 
             bDelayInit_CharacterOverlayDelayInit = false;
         }
