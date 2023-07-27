@@ -26,6 +26,8 @@ class AWTR_HUD;
 class AWTRGameMode;
 class UNiagaraSystem;
 class UNiagaraComponent;
+class UMaterialInstance;
+class AWTRFlag;
 
 UCLASS()
 class WITCHERY_API AWTRCharacter : public ACharacter, public IInteractWithCrosshairInterface
@@ -72,6 +74,7 @@ public:
     FORCEINLINE void SetDisableGameplay(bool bDisable) { bDisableGameplay = bDisable; }
     void SetOverlappingWeapon(AWTRWeapon* Weapon);
     void OnPossessHandle(AWTRPlayerController* NewController, AWTR_HUD* NewHUD);
+    void PickupFlag(AWTRFlag* Flag);
 
     FORCEINLINE int32 GetCarriedAmmo() const;
     FORCEINLINE float GetHealth() const { return Health; }
@@ -321,8 +324,8 @@ private:
     UParticleSystemComponent* ElimBotParticleSysComponent;
 
     /*
-    * Lead crown
-    */
+     * Lead crown
+     */
     UPROPERTY(EditDefaultsOnly, Category = "WTR | Lead crown")
     UNiagaraSystem* CrownSystem;
 

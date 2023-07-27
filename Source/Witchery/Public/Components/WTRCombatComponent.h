@@ -13,6 +13,7 @@ class AWTRPlayerController;
 class AWTR_HUD;
 class AWTRProjectile;
 class USoundCue;
+class AWTRFlag;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class WITCHERY_API UWTRCombatComponent : public UActorComponent
@@ -32,6 +33,7 @@ public:
     void FinishReloading();
     void JumpToShotgunEnd();
     void AddPickupAmmo(EWeaponType Type, int32 Ammo);
+    void PickupFlag(AWTRFlag* Flag);
 
     FORCEINLINE int32 GetCurrentGrenades() const { return Grenades; }
     FORCEINLINE int32 GetCarriedAmmo() const { return CarriedAmmo; }
@@ -73,6 +75,9 @@ protected:
 
     UFUNCTION()
     void OnRep_SecondWeapon();
+
+    UFUNCTION()
+    void OnRep_EquippedFlag();
 
     UFUNCTION(Server, Reliable)
     void Server_SetAiming(bool bAiming);
@@ -318,6 +323,9 @@ private:
     UPROPERTY(ReplicatedUsing = OnRep_SecondWeapon)
     AWTRWeapon* SecondWeapon;
 
+    UPROPERTY(ReplicatedUsing = OnRep_EquippedFlag)
+    AWTRFlag* EquippedFlag;
+
     UPROPERTY()
     AWTRWeapon* LastEquippedWeapon;
 
@@ -341,6 +349,7 @@ private:
     void StopReloadWhileEquip();
     void ThrowGrenade();
     void DroppedWeapon(AWTRWeapon* Weapon);
+    void DroppedFlag();
     void UpdateCarriedAmmoAndHUD();
     void PlayPickupSound(AWTRWeapon* WeaponToPickup);
     void ReloadEmptyWeapon();

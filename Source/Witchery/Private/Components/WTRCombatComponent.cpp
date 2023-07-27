@@ -18,6 +18,7 @@
 #include "TimerManager.h"
 #include "Sound/SoundCue.h"
 #include "GameModes/WTRGameMode.h"
+#include "Flag/WTRFlag.h"
 
 UWTRCombatComponent::UWTRCombatComponent()
 {
@@ -261,6 +262,34 @@ void UWTRCombatComponent::OnRep_SecondWeapon()
     AttachActorToBackpack(SecondWeapon);
 }
 
+void UWTRCombatComponent::PickupFlag(AWTRFlag* Flag)
+{
+    if (!Flag || !Character || !Character->GetMesh()) return;
+
+    EquippedFlag = Flag;
+    EquippedFlag->SetFlagState(EFlagState::EFS_Picked);
+    EquippedFlag->SetOwner(Character);
+
+    const USkeletalMeshSocket* FlagSocket = Character->GetMesh()->GetSocketByName(FName("FlagSocket"));
+    if (FlagSocket)
+    {
+        FlagSocket->AttachActor(EquippedFlag, Character->GetMesh());
+    }
+}
+
+void UWTRCombatComponent::OnRep_EquippedFlag()
+{
+    if (!EquippedFlag || !Character || !Character->GetMesh()) return;
+
+    EquippedFlag->SetFlagState(EFlagState::EFS_Picked);
+
+    const USkeletalMeshSocket* FlagSocket = Character->GetMesh()->GetSocketByName(FName("FlagSocket"));
+    if (FlagSocket)
+    {
+        FlagSocket->AttachActor(EquippedFlag, Character->GetMesh());
+    }
+}
+
 void UWTRCombatComponent::DroppedWeapon(AWTRWeapon* Weapon)
 {
     if (Weapon)
@@ -271,6 +300,16 @@ void UWTRCombatComponent::DroppedWeapon(AWTRWeapon* Weapon)
         {
             EquippedWeapon = nullptr;
         }
+    }
+}
+
+void UWTRCombatComponent::DroppedFlag() 
+{
+    if (EquippedFlag)
+    {
+        EquippedFlag->Dropped();
+
+        EquippedFlag = nullptr;
     }
 }
 

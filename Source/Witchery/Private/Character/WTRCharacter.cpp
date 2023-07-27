@@ -1023,6 +1023,11 @@ void AWTRCharacter::Elim(bool bIsLeave)
         Combat->SetHUDCarriedAmmo();
 
         WTRPlayerController->SetHUDWeaponType(EWeaponType::EWT_MAX);
+
+        if (Combat->EquippedFlag)
+        {
+            Combat->DroppedFlag();
+        }
     }
 
     Multicast_Elim(bIsLeave);
@@ -1413,4 +1418,12 @@ AWTRGameMode* AWTRCharacter::GetWTRGameMode()
 {
     WTRGameMode = (WTRGameMode == nullptr) ? Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this)) : WTRGameMode;
     return WTRGameMode;
+}
+
+void AWTRCharacter::PickupFlag(AWTRFlag* Flag)
+{
+    if (Combat)
+    {
+        Combat->PickupFlag(Flag);
+    }
 }

@@ -176,6 +176,15 @@ enum class ETeam : uint8
     ET_MAX UMETA(DisplayName = "MAX")
 };
 
+UENUM(BlueprintType)
+enum class EFlagState : uint8
+{
+    EFS_Picked UMETA(DisplayName = "Picked"),
+    EFS_Dropped UMETA(DisplayName = "Dropped"),
+
+    ET_MAX UMETA(DisplayName = "MAX")
+};
+
 /*
  * GameMode types
  */
