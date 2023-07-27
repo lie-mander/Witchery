@@ -5,9 +5,9 @@
 #include "WTRPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/WTRPlayerController.h"
-#include "WTRPlayerState.h"
+#include "PlayerStarts/WTRTeamPlayerStart.h"
 
-AWTRTeamGameMode::AWTRTeamGameMode() 
+AWTRTeamGameMode::AWTRTeamGameMode()
 {
     GameModeType = EGameModeType::EGMT_TeamsMatch;
 }
@@ -50,11 +50,23 @@ void AWTRTeamGameMode::PostLogin(APlayerController* NewPlayer)
             {
                 WTRGameState->BlueTeam.AddUnique(WTRPlayerState);
                 WTRPlayerState->SetTeam(ETeam::ET_BlueTeam);
+                APlayerStart* PlayerStart = Cast<APlayerStart>(FindPlayerStart(NewPlayer, FString("BlueTeam")));
+                if (NewPlayer->GetPawn() && PlayerStart)
+                {
+                    NewPlayer->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
+                    PlayerStart->PlayerStartTag = "";
+                }
             }
             else
             {
                 WTRGameState->RedTeam.AddUnique(WTRPlayerState);
                 WTRPlayerState->SetTeam(ETeam::ET_RedTeam);
+                APlayerStart* PlayerStart = Cast<APlayerStart>(FindPlayerStart(NewPlayer, FString("RedTeam")));
+                if (NewPlayer->GetPawn() && PlayerStart)
+                {
+                    NewPlayer->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
+                    PlayerStart->PlayerStartTag = "";
+                }
             }
         }
     }
@@ -79,6 +91,23 @@ void AWTRTeamGameMode::Logout(AController* Exiting)
     }
 }
 
+void AWTRTeamGameMode::PlayerStartByTeam(APlayerController* Player)
+{
+    if (!Player || !Player->GetPawn()) return;
+
+    AWTRPlayerState* WTRPlayerState = Player->GetPlayerState<AWTRPlayerState>();
+    if (!WTRPlayerState) return;
+
+    APlayerStart* PlayerStart = (WTRPlayerState->GetTeam() == ETeam::ET_RedTeam)
+                                    ? Cast<APlayerStart>(FindPlayerStart(Player, FString("RedTeam")))
+                                    : Cast<APlayerStart>(FindPlayerStart(Player, FString("BlueTeam")));
+    if (PlayerStart)
+    {
+        Player->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
+        PlayerStart->PlayerStartTag = "";
+    }
+}
+
 float AWTRTeamGameMode::CalculateDamageByTeams(AController* Attacker, AController* Victim, float BaseDamage)
 {
     if (!Attacker || !Victim) return BaseDamage;
@@ -99,6 +128,11 @@ void AWTRTeamGameMode::HandleMatchHasStarted()
 {
     Super::HandleMatchHasStarted();
 
+    SetTeamToAllPlayers();
+}
+
+void AWTRTeamGameMode::SetTeamToAllPlayers()
+{
     WTRGameState = (WTRGameState == nullptr) ? Cast<AWTRGameState>(UGameplayStatics::GetGameState(this)) : WTRGameState;
     if (WTRGameState)
     {

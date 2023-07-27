@@ -28,7 +28,7 @@ public:
     FORCEINLINE int32 GetDefeats() const { return Defeats; }
     FORCEINLINE ETeam GetTeam() const { return Team; }
 
-    FORCEINLINE void SetTeam(ETeam NewTeam);
+    void SetTeam(ETeam NewTeam);
 
 private:
     UPROPERTY()

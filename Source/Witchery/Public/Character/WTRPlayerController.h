@@ -54,6 +54,9 @@ public:
     void SetHUDRedScore(int32 Score);
     void SetHUDBlueScore(int32 Score);
 
+    UFUNCTION(Server, Reliable)
+    void Server_CheckMatchState();
+
     AWTR_HUD* GetWTR_HUD();
     FORCEINLINE FName GetMatchState() const { return MatchState; }
 
@@ -169,9 +172,6 @@ private:
     /*
      * MatchType timers
      */
-    UFUNCTION(Server, Reliable)
-    void Server_CheckMatchState();
-
     UFUNCTION(Client, Reliable)
     void Client_ApplyMatchState(float TimeofWarmup, float TimeOfMatch, float TimeOfCooldown, const FName& State, EGameModeType GameType);
 
