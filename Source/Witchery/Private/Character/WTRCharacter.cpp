@@ -372,6 +372,13 @@ void AWTRCharacter::PullInit()
                     Multicast_GetLead();
                 }
             }
+
+            // Spawn at correct team player start if needed
+            AWTRPlayerController* TempController = Cast<AWTRPlayerController>(Controller);
+            if (TempController && TempController->bNeedToSpawnByTeam && GetWTRGameMode())
+            {
+                GetWTRGameMode()->PlayerStartByTeam(TempController);
+            }
         }
     }
 
@@ -1015,6 +1022,14 @@ void AWTRCharacter::Server_LeaveGame_Implementation()
 
 void AWTRCharacter::Elim(bool bIsLeave)
 {
+    const bool bHideScope = Combat && IsLocallyControlled() && Combat->bIsAiming && Combat->EquippedWeapon &&
+                            Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+    if (bHideScope)
+    {
+        Combat->SetAiming(false);
+        SetShowScopeAnimation(false);
+    }
+
     DropOrDestroyWeapons();
 
     if (Combat && WTRPlayerController)

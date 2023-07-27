@@ -19,6 +19,7 @@
 #include "TimerManager.h"
 #include "WTRPlayerState.h"
 #include "Sound/SoundClass.h"
+#include "Framework/Application/NavigationConfig.h"
 
 DECLARE_LOG_CATEGORY_CLASS(WTR_PlayerController, All, All);
 
@@ -35,6 +36,15 @@ void AWTRPlayerController::BeginPlay()
     Super::BeginPlay();
 
     WTR_HUD = Cast<AWTR_HUD>(GetHUD());
+
+    if (IsLocalPlayerController())
+    {
+        TSharedRef<FNavigationConfig> Navigation = MakeShared<FNavigationConfig>();
+        Navigation->bKeyNavigation = false;
+        Navigation->bTabNavigation = false;
+        Navigation->bAnalogNavigation = false;
+        FSlateApplication::Get().SetNavigationConfig(Navigation);
+    }
 }
 
 void AWTRPlayerController::SetupInputComponent()

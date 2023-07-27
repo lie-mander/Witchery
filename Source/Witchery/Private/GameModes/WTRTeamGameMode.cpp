@@ -70,6 +70,14 @@ void AWTRTeamGameMode::PostLogin(APlayerController* NewPlayer)
             }
         }
     }
+    else
+    {
+        AWTRPlayerController* WTRPlayerController = Cast<AWTRPlayerController>(NewPlayer);
+        if (WTRPlayerController)
+        {
+            WTRPlayerController->bNeedToSpawnByTeam = true;
+        }
+    }
 }
 
 void AWTRTeamGameMode::Logout(AController* Exiting)

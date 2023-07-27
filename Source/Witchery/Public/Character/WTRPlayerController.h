@@ -64,6 +64,7 @@ public:
     FOnMatchStateChanged OnMatchStateChanged;
 
     float SingleTripTime = 0.f;
+    bool bNeedToSpawnByTeam = false;
 
     /*
      * Chat
