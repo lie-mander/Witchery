@@ -5,6 +5,7 @@
 #include "WTRPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/WTRPlayerController.h"
+#include "Character/WTRCharacter.h"
 #include "PlayerStarts/WTRTeamPlayerStart.h"
 
 AWTRTeamGameMode::AWTRTeamGameMode()
@@ -50,27 +51,17 @@ void AWTRTeamGameMode::PostLogin(APlayerController* NewPlayer)
             {
                 WTRGameState->BlueTeam.AddUnique(WTRPlayerState);
                 WTRPlayerState->SetTeam(ETeam::ET_BlueTeam);
-                APlayerStart* PlayerStart = Cast<APlayerStart>(FindPlayerStart(NewPlayer, FString("BlueTeam")));
-                if (NewPlayer->GetPawn() && PlayerStart)
-                {
-                    NewPlayer->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
-                    PlayerStart->PlayerStartTag = "";
-                }
+                SpawnNewPlayerInCorrectSpot(NewPlayer);
             }
             else
             {
                 WTRGameState->RedTeam.AddUnique(WTRPlayerState);
                 WTRPlayerState->SetTeam(ETeam::ET_RedTeam);
-                APlayerStart* PlayerStart = Cast<APlayerStart>(FindPlayerStart(NewPlayer, FString("RedTeam")));
-                if (NewPlayer->GetPawn() && PlayerStart)
-                {
-                    NewPlayer->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
-                    PlayerStart->PlayerStartTag = "";
-                }
+                SpawnNewPlayerInCorrectSpot(NewPlayer);
             }
         }
     }
-    else
+    else if (MatchState == MatchState::InProgress)
     {
         AWTRPlayerController* WTRPlayerController = Cast<AWTRPlayerController>(NewPlayer);
         if (WTRPlayerController)
@@ -106,13 +97,53 @@ void AWTRTeamGameMode::PlayerStartByTeam(APlayerController* Player)
     AWTRPlayerState* WTRPlayerState = Player->GetPlayerState<AWTRPlayerState>();
     if (!WTRPlayerState) return;
 
-    APlayerStart* PlayerStart = (WTRPlayerState->GetTeam() == ETeam::ET_RedTeam)
-                                    ? Cast<APlayerStart>(FindPlayerStart(Player, FString("RedTeam")))
-                                    : Cast<APlayerStart>(FindPlayerStart(Player, FString("BlueTeam")));
+    APlayerStart* PlayerStart = nullptr;
+    if (WTRPlayerState->GetTeam() == ETeam::ET_RedTeam)
+    {
+        PlayerStart = Cast<APlayerStart>(FindPlayerStart(Player, FString("RedTeam")));
+        if (!PlayerStart)
+        {
+            PlayerStart = Cast<APlayerStart>(FindPlayerStart(Player, FString("RedTeamNext")));
+        }
+    }
+    else if (WTRPlayerState->GetTeam() == ETeam::ET_BlueTeam)
+    {
+        PlayerStart = Cast<APlayerStart>(FindPlayerStart(Player, FString("BlueTeam")));
+        if (!PlayerStart)
+        {
+            PlayerStart = Cast<APlayerStart>(FindPlayerStart(Player, FString("BlueTeamNext")));
+        }
+    }
+
     if (PlayerStart)
     {
         Player->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
-        PlayerStart->PlayerStartTag = "";
+
+        if (WTRPlayerState->GetTeam() == ETeam::ET_RedTeam)
+            PlayerStart->PlayerStartTag = "RedTeamNext";
+        else if (WTRPlayerState->GetTeam() == ETeam::ET_BlueTeam)
+            PlayerStart->PlayerStartTag = "BlueTeamNext";
+    }
+}
+
+void AWTRTeamGameMode::RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController)
+{
+    if (EliminatedCharacter)
+    {
+        EliminatedCharacter->Reset();
+        EliminatedCharacter->Destroy();
+    }
+
+    if (EliminatedController)
+    {
+        AWTRPlayerState* WTRPlayerState = EliminatedController->GetPlayerState<AWTRPlayerState>();
+        if (!WTRPlayerState) return;
+
+        APlayerStart* PlayerStart = (WTRPlayerState->GetTeam() == ETeam::ET_RedTeam)
+                                        ? Cast<APlayerStart>(FindPlayerStart(EliminatedController, FString("RedTeamNext")))
+                                        : Cast<APlayerStart>(FindPlayerStart(EliminatedController, FString("BlueTeamNext")));
+
+        RestartPlayerAtPlayerStart(EliminatedController, PlayerStart);
     }
 }
 
@@ -158,6 +189,52 @@ void AWTRTeamGameMode::SetTeamToAllPlayers()
                 {
                     WTRGameState->RedTeam.AddUnique(WTRPlayerState);
                     WTRPlayerState->SetTeam(ETeam::ET_RedTeam);
+                }
+            }
+        }
+    }
+}
+
+void AWTRTeamGameMode::SpawnNewPlayerInCorrectSpot(APlayerController* NewPlayer)
+{
+    if (!NewPlayer) return;
+    
+    if (MatchState == MatchState::InProgress)
+    {
+        AWTRPlayerState* WTRPlayerState = NewPlayer->GetPlayerState<AWTRPlayerState>();
+        if (!WTRPlayerState) return;
+
+        if (WTRPlayerState->GetTeam() == ETeam::ET_BlueTeam)
+        {
+            APlayerStart* PlayerStart = Cast<APlayerStart>(FindPlayerStart(NewPlayer, FString("BlueTeam")));
+            if (NewPlayer->GetPawn() && PlayerStart)
+            {
+                NewPlayer->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
+                PlayerStart->PlayerStartTag = "BlueTeamNext";
+            }
+            else if (NewPlayer->GetPawn() && !PlayerStart)
+            {
+                PlayerStart = Cast<APlayerStart>(FindPlayerStart(NewPlayer, FString("BlueTeamNext")));
+                if (PlayerStart)
+                {
+                    NewPlayer->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
+                }
+            }
+        }
+        else if (WTRPlayerState->GetTeam() == ETeam::ET_RedTeam)
+        {
+            APlayerStart* PlayerStart = Cast<APlayerStart>(FindPlayerStart(NewPlayer, FString("RedTeam")));
+            if (NewPlayer->GetPawn() && PlayerStart)
+            {
+                NewPlayer->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
+                PlayerStart->PlayerStartTag = "RedTeamNext";
+            }
+            else if (NewPlayer->GetPawn() && !PlayerStart)
+            {
+                PlayerStart = Cast<APlayerStart>(FindPlayerStart(NewPlayer, FString("RedTeamNext")));
+                if (PlayerStart)
+                {
+                    NewPlayer->GetPawn()->SetActorTransform(PlayerStart->GetActorTransform());
                 }
             }
         }

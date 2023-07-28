@@ -19,6 +19,7 @@ public:
     virtual void PostLogin(APlayerController* NewPlayer) override;
     virtual void Logout(AController* Exiting) override;
     virtual void PlayerStartByTeam(APlayerController* Player) override;
+    virtual void RequestRespawn(ACharacter* EliminatedCharacter, AController* EliminatedController) override;
     virtual float CalculateDamageByTeams(AController* Attacker, AController* Victim, float BaseDamage) override;
 
 protected:
@@ -26,4 +27,5 @@ protected:
 
 private:
     void SetTeamToAllPlayers();
+    void SpawnNewPlayerInCorrectSpot(APlayerController* NewPlayer);
 };

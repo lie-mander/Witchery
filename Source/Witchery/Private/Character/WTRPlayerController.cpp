@@ -290,12 +290,6 @@ void AWTRPlayerController::OnPossess(APawn* InPawn)
 {
     Super::OnPossess(InPawn);
 
-    AWTRGameMode* TempGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
-    if (TempGameMode && TempGameMode->GetGameModeType() == EGameModeType::EGMT_TeamsMatch && IsLocalController())
-    {
-        TempGameMode->PlayerStartByTeam(this);
-    }
-
     // Hidden DeathMessage (OnPossess called only on the server, need to call rpc to client)
     if (IsLocalController())
     {
@@ -915,6 +909,12 @@ void AWTRPlayerController::HandleMatchStateInProgress()
             GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
                 FString::Printf(TEXT("CharacterOverlayWidget can`t created! WTR_HUD is NULL [HandleMatchStateInProgress]")), false);
         }
+    }
+
+    AWTRGameMode* TempGameMode = Cast<AWTRGameMode>(UGameplayStatics::GetGameMode(this));
+    if (TempGameMode && TempGameMode->GetGameModeType() == EGameModeType::EGMT_TeamsMatch)
+    {
+        TempGameMode->PlayerStartByTeam(this);
     }
 
     if (IsLocalController())
